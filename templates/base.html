@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>
+        {% block title %}
+        CESFAM San Pedro
+        {% endblock %}
+    </title>
+
+    <style>
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background: #f4f6f8;
+        }
+
+        header {
+            background: #ffffff;
+            padding: 15px 30px;
+            border-bottom: 1px solid #ddd;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        main {
+            max-width: 1200px;
+            margin: 30px auto;
+            padding: 0 20px;
+        }
+
+        .card {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+
+        .btn {
+            display: inline-block;
+            padding: 10px 15px;
+            background: #333;
+            color: white;
+            text-decoration: none;
+            border-radius: 5px;
+            border: none;
+            cursor: pointer;
+        }
+    </style>
+</head>
+
+<body>
+
+    {% if user.is_authenticated %}
+    <header>
+
+        <strong>
+            Sistema CESFAM San Pedro
+        </strong>
+
+        <div>
+            {{ user.email }}
+
+            <form method="post" action="{% url 'logout' %}" style="display:inline;">
+                {% csrf_token %}
+
+                <button type="submit" class="btn">
+                    Cerrar sesión
+                </button>
+            </form>
+        </div>
+
+    </header>
+    {% endif %}
+
+    <main>
+
+        {% block content %}
+        {% endblock %}
+
+    </main>
+
+    {% if messages %}
+
+    {% for message in messages %}
+
+    <div class="card">
+        {{ message }}
+    </div>
+
+    {% endfor %}
+
+    {% endif %}
+
+</body>
+
+</html>

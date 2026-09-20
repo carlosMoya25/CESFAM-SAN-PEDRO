@@ -1,0 +1,246 @@
+{% extends "base.html" %}
+
+{% block title %}
+Panel Técnico TI
+{% endblock %}
+
+{% block content %}
+
+<h1>Panel Técnico TI</h1>
+
+{% if messages %}
+{% for message in messages %}
+<div class="card">
+    {{ message }}
+</div>
+{% endfor %}
+{% endif %}
+
+
+<div class="card">
+
+    <h2>Requerimientos pendientes</h2>
+
+    <table width="100%" cellpadding="10">
+
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Solicitud</th>
+                <th>Solicitante</th>
+                <th>Anexo</th>
+                <th>Prioridad</th>
+                <th>Fecha</th>
+                <th>Acciones</th>
+            </tr>
+        </thead>
+
+        <tbody>
+
+            {% for requerimiento in pendientes %}
+
+            <tr>
+
+                <td>
+                    #{{ requerimiento.id }}
+                </td>
+
+                <td>
+                    {{ requerimiento.titulo }}
+                </td>
+
+                <td>
+                    {{ requerimiento.solicitante.nombres }}
+                    {{ requerimiento.solicitante.apellido_paterno }}
+                </td>
+
+                <td>
+                    {{ requerimiento.anexo }}
+                </td>
+
+                <td>
+                    {{ requerimiento.prioridad }}
+                </td>
+
+                <td>
+                    {{ requerimiento.fecha_solicitud|date:"d/m/Y H:i" }}
+                </td>
+
+                <td>
+
+                    <a href="{% url 'detalle_tecnico' requerimiento.id %}" class="btn">
+                        Ver
+                    </a>
+
+                    <form method="post" action="{% url 'asignarme_requerimiento' requerimiento.id %}"
+                        style="display:inline;">
+
+                        {% csrf_token %}
+
+                        <button type="submit" class="btn">
+                            Asignarme
+                        </button>
+
+                    </form>
+
+                </td>
+
+            </tr>
+
+            {% empty %}
+
+            <tr>
+                <td colspan="7">
+                    No existen requerimientos pendientes.
+                </td>
+            </tr>
+
+            {% endfor %}
+
+        </tbody>
+
+    </table>
+
+</div>
+
+
+<div class="card">
+
+    <h2>Mis requerimientos asignados</h2>
+
+    <table width="100%" cellpadding="10">
+
+        <thead>
+
+            <tr>
+                <th>ID</th>
+                <th>Solicitud</th>
+                <th>Prioridad</th>
+                <th>Estado</th>
+                <th>Fecha</th>
+                <th></th>
+            </tr>
+
+        </thead>
+
+        <tbody>
+
+            {% for requerimiento in mis_asignados %}
+
+            <tr>
+
+                <td>
+                    #{{ requerimiento.id }}
+                </td>
+
+                <td>
+                    {{ requerimiento.titulo }}
+                </td>
+
+                <td>
+                    {{ requerimiento.prioridad }}
+                </td>
+
+                <td>
+                    {{ requerimiento.estado }}
+                </td>
+
+                <td>
+                    {{ requerimiento.fecha_solicitud|date:"d/m/Y H:i" }}
+                </td>
+
+                <td>
+                    <a href="{% url 'detalle_tecnico' requerimiento.id %}" class="btn">
+                        Gestionar
+                    </a>
+                </td>
+
+            </tr>
+
+            {% empty %}
+
+            <tr>
+                <td colspan="6">
+                    No tienes requerimientos asignados.
+                </td>
+            </tr>
+
+            {% endfor %}
+
+        </tbody>
+
+    </table>
+
+</div>
+
+
+<div class="card">
+
+    <h2>Todos los requerimientos</h2>
+
+    <table width="100%" cellpadding="10">
+
+        <thead>
+
+            <tr>
+                <th>ID</th>
+                <th>Solicitud</th>
+                <th>Estado</th>
+                <th>Responsable</th>
+                <th></th>
+            </tr>
+
+        </thead>
+
+        <tbody>
+
+            {% for requerimiento in requerimientos %}
+
+            <tr>
+
+                <td>
+                    #{{ requerimiento.id }}
+                </td>
+
+                <td>
+                    {{ requerimiento.titulo }}
+                </td>
+
+                <td>
+                    {{ requerimiento.estado }}
+                </td>
+
+                <td>
+
+                    {% if requerimiento.responsable %}
+
+                    {{ requerimiento.responsable.nombres }}
+                    {{ requerimiento.responsable.apellido_paterno }}
+
+                    {% else %}
+
+                    Sin asignar
+
+                    {% endif %}
+
+                </td>
+
+                <td>
+
+                    <a href="{% url 'detalle_tecnico' requerimiento.id %}" class="btn">
+                        Ver
+                    </a>
+
+                </td>
+
+            </tr>
+
+            {% endfor %}
+
+        </tbody>
+
+    </table>
+
+</div>
+
+{% endblock %}

@@ -1,0 +1,144 @@
+{% extends "base.html" %}
+
+{% block title %}
+Requerimiento #{{ requerimiento.id }}
+{% endblock %}
+
+{% block content %}
+
+<h1>
+    Requerimiento #{{ requerimiento.id }}
+</h1>
+
+<div class="card">
+
+    <h2>
+        {{ requerimiento.titulo }}
+    </h2>
+
+    <p>
+        <strong>Estado:</strong>
+        {{ requerimiento.estado }}
+    </p>
+
+    <p>
+        <strong>Prioridad:</strong>
+        {{ requerimiento.prioridad }}
+    </p>
+
+    <p>
+        <strong>Tipo:</strong>
+        {{ requerimiento.tipo_requerimiento }}
+    </p>
+
+    <p>
+        <strong>Anexo:</strong>
+        {{ requerimiento.anexo }}
+    </p>
+
+    <p>
+        <strong>Departamento:</strong>
+        {{ requerimiento.departamento|default:"No especificado" }}
+    </p>
+
+    <p>
+        <strong>Descripción:</strong>
+    </p>
+
+    <p>
+        {{ requerimiento.descripcion|linebreaksbr }}
+    </p>
+
+    <p>
+        <strong>Responsable:</strong>
+
+        {% if requerimiento.responsable %}
+        {{ requerimiento.responsable.nombres }}
+        {{ requerimiento.responsable.apellido_paterno }}
+        {% else %}
+        Sin asignar
+        {% endif %}
+    </p>
+
+    <p>
+        <strong>Fecha:</strong>
+        {{ requerimiento.fecha_solicitud|date:"d/m/Y H:i" }}
+    </p>
+
+</div>
+<div class="card">
+
+    <h2>Seguimiento del requerimiento</h2>
+
+    {% for registro in historial %}
+
+    <div style="margin-bottom: 20px;">
+
+        <strong>
+            {{ registro.fecha|date:"d/m/Y H:i" }}
+        </strong>
+
+        <br>
+
+        <strong>
+            {{ registro.accion }}
+        </strong>
+
+        {% if registro.estado_anterior and registro.estado_nuevo %}
+
+        <p>
+            Estado:
+            {{ registro.estado_anterior }}
+            →
+            {{ registro.estado_nuevo }}
+        </p>
+
+        {% elif registro.estado_nuevo %}
+
+        <p>
+            Estado:
+            {{ registro.estado_nuevo }}
+        </p>
+
+        {% endif %}
+
+
+        {% if registro.usuario %}
+
+        <p>
+            Realizado por:
+            {{ registro.usuario.nombres }}
+            {{ registro.usuario.apellido_paterno }}
+        </p>
+
+        {% endif %}
+
+
+        {% if registro.observacion %}
+
+        <p>
+            {{ registro.observacion|linebreaksbr }}
+        </p>
+
+        {% endif %}
+
+    </div>
+
+    {% if not forloop.last %}
+    <hr>
+    {% endif %}
+
+    {% empty %}
+
+    <p>
+        Aún no existen actualizaciones para este requerimiento.
+    </p>
+
+    {% endfor %}
+
+</div>
+<a href="{% url 'mis_requerimientos' %}" class="btn">
+    Volver
+</a>
+
+{% endblock %}

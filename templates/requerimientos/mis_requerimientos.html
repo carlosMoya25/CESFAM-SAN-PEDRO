@@ -1,0 +1,92 @@
+{% extends "base.html" %}
+
+{% block title %}
+Mis solicitudes
+{% endblock %}
+
+{% block content %}
+
+<h1>Mis solicitudes</h1>
+
+<p>
+    <a href="{% url 'crear_requerimiento' %}" class="btn">
+        Nueva solicitud
+    </a>
+</p>
+
+<div class="card">
+
+    <table width="100%" cellpadding="10">
+
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Solicitud</th>
+                <th>Prioridad</th>
+                <th>Estado</th>
+                <th>Responsable</th>
+                <th>Fecha</th>
+                <th></th>
+            </tr>
+        </thead>
+
+        <tbody>
+
+            {% for requerimiento in requerimientos %}
+
+            <tr>
+
+                <td>
+                    #{{ requerimiento.id }}
+                </td>
+
+                <td>
+                    {{ requerimiento.titulo }}
+                </td>
+
+                <td>
+                    {{ requerimiento.prioridad }}
+                </td>
+
+                <td>
+                    {{ requerimiento.estado }}
+                </td>
+
+                <td>
+                    {% if requerimiento.responsable %}
+                    {{ requerimiento.responsable.nombres }}
+                    {{ requerimiento.responsable.apellido_paterno }}
+                    {% else %}
+                    Sin asignar
+                    {% endif %}
+                </td>
+
+                <td>
+                    {{ requerimiento.fecha_solicitud|date:"d/m/Y H:i" }}
+                </td>
+
+                <td>
+                    <a href="{% url 'detalle_requerimiento' requerimiento.id %}" class="btn">
+                        Ver
+                    </a>
+                </td>
+
+            </tr>
+
+            {% empty %}
+
+            <tr>
+                <td colspan="7">
+                    No tienes solicitudes registradas.
+                </td>
+            </tr>
+
+            {% endfor %}
+
+        </tbody>
+
+    </table>
+
+</div>
+
+{% endblock %}

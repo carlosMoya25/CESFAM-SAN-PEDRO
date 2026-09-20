@@ -1,0 +1,254 @@
+{% extends "base.html" %}
+
+{% block title %}
+Ticket #{{ requerimiento.id }}
+{% endblock %}
+
+
+{% block content %}
+
+<h1>
+    Ticket #{{ requerimiento.id }}
+</h1>
+
+
+<div class="card">
+
+    <h2>
+        {{ requerimiento.titulo }}
+    </h2>
+
+    <p>
+        <strong>Solicitante:</strong>
+
+        {{ requerimiento.solicitante.nombres }}
+        {{ requerimiento.solicitante.apellido_paterno }}
+    </p>
+
+    <p>
+        <strong>Estado:</strong>
+        {{ requerimiento.estado }}
+    </p>
+
+    <p>
+        <strong>Prioridad:</strong>
+        {{ requerimiento.prioridad }}
+    </p>
+
+    <p>
+        <strong>Tipo:</strong>
+        {{ requerimiento.tipo_requerimiento }}
+    </p>
+
+    <p>
+        <strong>Anexo:</strong>
+        {{ requerimiento.anexo }}
+    </p>
+
+    <p>
+        <strong>Departamento:</strong>
+        {{ requerimiento.departamento|default:"No especificado" }}
+    </p>
+
+    <p>
+        <strong>Descripción:</strong>
+    </p>
+
+    <p>
+        {{ requerimiento.descripcion|linebreaksbr }}
+    </p>
+
+    <p>
+        <strong>Responsable:</strong>
+
+        {% if requerimiento.responsable %}
+
+        {{ requerimiento.responsable.nombres }}
+        {{ requerimiento.responsable.apellido_paterno }}
+
+        {% else %}
+
+        Sin asignar
+
+        {% endif %}
+
+    </p>
+
+
+    {% if not requerimiento.responsable %}
+
+    <form method="post" action="{% url 'asignarme_requerimiento' requerimiento.id %}">
+
+        {% csrf_token %}
+
+        <button type="submit" class="btn">
+            Asignarme este ticket
+        </button>
+
+    </form>
+
+    {% endif %}
+
+</div>
+
+
+<div class="card">
+
+    <h2>Historial</h2>
+
+    {% for registro in historial %}
+
+    <p>
+
+        <strong>
+            {{ registro.fecha|date:"d/m/Y H:i" }}
+        </strong>
+
+        —
+
+        {{ registro.accion }}
+
+        {% if registro.usuario %}
+
+        por
+        {{ registro.usuario.nombres }}
+        {{ registro.usuario.apellido_paterno }}
+
+        {% endif %}
+
+    </p>
+
+    {% if registro.observacion %}
+
+    <p>
+        {{ registro.observacion }}
+    </p>
+
+    {% endif %}
+
+    <hr>
+
+    {% empty %}
+
+    <p>
+        No existen registros en el historial.
+    </p>
+
+    {% endfor %}
+
+</div>
+
+
+{% if puede_modificar %}
+
+
+
+<div class="card">
+
+    <h2>Gestión del requerimiento</h2>
+
+    {% if requerimiento.estado.nombre == "Asignado" %}
+
+    <form method="post" action="{% url 'iniciar_atencion' requerimiento.id %}">
+        {% csrf_token %}
+
+        <button type="submit" class="btn">
+            Iniciar atención
+        </button>
+    </form>
+
+    {% endif %}
+
+
+    {% if requerimiento.estado.nombre == "Asignado" or requerimiento.estado.nombre == "En proceso" %}
+
+    <hr>
+
+    <h3>Agregar observación</h3>
+
+    <form method="post" action="{% url 'agregar_observacion' requerimiento.id %}">
+        {% csrf_token %}
+
+        <textarea name="observacion" rows="4" required style="width:100%;"
+            placeholder="Describe una acción realizada..."></textarea>
+
+        <br><br>
+
+        <button type="submit" class="btn">
+            Registrar observación
+        </button>
+
+    </form>
+
+    {% endif %}
+
+
+    {% if requerimiento.estado.nombre == "En proceso" %}
+
+    <hr>
+
+    <h3>Resolver requerimiento</h3>
+
+    <form method="post" action="{% url 'resolver_requerimiento' requerimiento.id %}">
+        {% csrf_token %}
+
+        <textarea name="solucion" rows="5" required style="width:100%;"
+            placeholder="Describe la solución aplicada..."></textarea>
+
+        <br><br>
+
+        <button type="submit" class="btn">
+            Marcar como resuelto
+        </button>
+
+    </form>
+
+    {% endif %}
+
+
+    {% if requerimiento.estado.nombre == "Resuelto" %}
+
+    <h3>Solución aplicada</h3>
+
+    <p>
+        {{ requerimiento.solucion|linebreaksbr }}
+    </p>
+
+    <form method="post" action="{% url 'cerrar_requerimiento' requerimiento.id %}">
+        {% csrf_token %}
+
+        <button type="submit" class="btn">
+            Cerrar requerimiento
+        </button>
+
+    </form>
+
+    {% endif %}
+
+
+    {% if requerimiento.estado.nombre == "Cerrado" %}
+
+    <p>
+        Este requerimiento se encuentra cerrado.
+    </p>
+
+    <h3>Solución aplicada</h3>
+
+    <p>
+        {{ requerimiento.solucion|linebreaksbr }}
+    </p>
+
+    {% endif %}
+
+</div>
+
+
+
+{% endif %}
+
+
+<a href="{% url 'panel_tecnico' %}" class="btn">
+    Volver al panel
+</a>
+
+{% endblock %}

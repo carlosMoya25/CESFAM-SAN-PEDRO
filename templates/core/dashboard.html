@@ -1,0 +1,134 @@
+{% extends "base.html" %}
+
+{% block title %}
+Dashboard
+{% endblock %}
+
+
+{% block content %}
+
+<h1>
+    Bienvenido, {{ usuario.nombres }}
+</h1>
+
+<p>
+    {{ usuario.email }}
+</p>
+
+
+<div class="card">
+
+    <h2>
+        Tus roles
+    </h2>
+
+    {% for rol in roles %}
+
+    <span>
+        {{ rol }}
+    </span>
+
+    {% empty %}
+
+    <p>
+        No tienes un rol asignado.
+    </p>
+
+    {% endfor %}
+
+</div>
+
+
+<div class="card">
+
+    <h2>
+        Requerimientos TI
+    </h2>
+
+    <p>
+        Gestiona las solicitudes de soporte informático.
+    </p>
+
+    <a href="{% url 'crear_requerimiento' %}" class="btn">
+        Nueva solicitud
+    </a>
+
+    <a href="{% url 'mis_requerimientos' %}" class="btn">
+        Mis solicitudes
+    </a>
+
+</div>
+
+
+{% if "Técnico TI" in roles %}
+
+<div class="card">
+
+    <h2>
+        Panel Técnico TI
+    </h2>
+
+    <p>
+        Consulta y administra los requerimientos informáticos.
+    </p>
+
+    <a href="{% url 'panel_tecnico' %}" class="btn">
+        Ver todos los tickets
+    </a>
+
+</div>
+
+{% endif %}
+
+
+{% if "Encargado de Inventario" in roles %}
+
+<div class="card">
+
+    <h2>
+        Inventario
+    </h2>
+
+    <a href="#" class="btn">
+        Administrar inventario
+    </a>
+
+</div>
+
+{% endif %}
+
+
+{% if "Encargado de Farmacia" in roles %}
+
+<div class="card">
+
+    <h2>
+        Farmacia
+    </h2>
+
+    <a href="#" class="btn">
+        Administrar farmacia
+    </a>
+
+</div>
+
+{% endif %}
+
+
+{% if "Administrador" in roles %}
+
+<div class="card">
+
+    <h2>
+        Administración
+    </h2>
+
+    <p>
+        Administración general del sistema.
+    </p>
+
+</div>
+
+{% endif %}
+
+{% endblock %}

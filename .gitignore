@@ -1,0 +1,33 @@
+# Entorno virtual
+venv/
+.venv/
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Django
+*.log
+local_settings.py
+
+# Variables de entorno / secretos
+.env
+.env.*
+!.env.example
+
+# Base de datos local
+db.sqlite3
+
+# macOS
+.DS_Store
+
+# VS Code
+.vscode/
+
+# PyCharm
+.idea/
+
+# Archivos temporales
+*.tmp
+*.bak
