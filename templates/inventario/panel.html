@@ -1,0 +1,155 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<h1>Inventario General</h1>
+
+<div class="card">
+    <a class="btn" href="{% url 'inventario:entrada' %}">
+        Registrar entrada
+    </a>
+
+    <a class="btn" href="{% url 'inventario:salida' %}">
+        Registrar salida
+    </a>
+
+    <a class="btn" href="{% url 'inventario:transferencia' %}">
+        Transferir
+    </a>
+
+    <a class="btn" href="{% url 'inventario:historial' %}">
+        Historial
+    </a>
+
+    <a class="btn" href="{% url 'inventario:ajuste' %}">
+        Ajustar stock
+    </a>
+
+</div>
+
+
+<div class="card">
+    <h2>Stock actual</h2>
+
+    <table>
+        <thead>
+            <tr>
+                <th>Artículo</th>
+                <th>Categoría</th>
+                <th>Anexo</th>
+                <th>Stock</th>
+                <th>Mínimo</th>
+                <th>Estado</th>
+            </tr>
+        </thead>
+
+        <tbody>
+            {% for stock in stocks %}
+            <tr>
+                <td>{{ stock.articulo.nombre }}</td>
+
+                <td>
+                    {{ stock.articulo.categoria.nombre }}
+                </td>
+
+                <td>
+                    {{ stock.anexo.nombre }}
+                </td>
+
+                <td>
+                    {{ stock.cantidad }}
+                </td>
+
+                <td>
+                    {{ stock.articulo.stock_minimo }}
+                </td>
+
+                <td>
+                    {% if stock.stock_bajo %}
+                    stock bajo {%else%} disponible {%endif%}</td>
+            </tr>
+
+            {% empty %}
+
+            <tr>
+                <td colspan="6">
+                    Todavía no existe stock registrado.
+                </td>
+            </tr>
+
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+
+<div class="card">
+    <h2>Últimos movimientos</h2>
+
+    {% for movimiento in movimientos %}
+
+    <div style="margin-bottom: 20px;">
+
+        <strong>
+            {{ movimiento.tipo_movimiento.nombre }}
+        </strong>
+
+        — {{ movimiento.fecha|date:"d/m/Y H:i" }}
+
+        <br>
+
+        {% if movimiento.anexo_origen %}
+        Origen: {{ movimiento.anexo_origen.nombre }}
+        {% endif %}
+
+        {% if movimiento.anexo_destino %}
+        Destino: {{ movimiento.anexo_destino.nombre }}
+        {% endif %}
+
+        <br>
+
+        {% for detalle in movimiento.detalles.all %}
+        {{ detalle.articulo.nombre }}
+        — {{ detalle.cantidad }} unidad(es)
+        <br>
+        {% endfor %}
+
+        <small>
+            Registrado por: {{ movimiento.usuario.email }}
+        </small>
+
+    </div>
+
+    {% empty %}
+
+    <p>No existen movimientos registrados.</p>
+
+    {% endfor %}
+</div>
+
+<div class="card">
+    <h3>Categorías</h3>
+
+    <p>
+        Crear y administrar las categorías de los artículos.
+    </p>
+
+    <a href="{% url 'inventario:categorias' %}" class="btn">
+        Administrar categorías
+    </a>
+</div>
+
+
+<div class="card">
+    <h3>Artículos</h3>
+
+    <p>
+        Crear y administrar los artículos disponibles en inventario.
+    </p>
+
+    <a href="{% url 'inventario:articulos' %}" class="btn">
+        Administrar artículos
+    </a>
+</div>
+
+{% endblock %}

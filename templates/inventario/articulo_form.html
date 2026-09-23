@@ -1,0 +1,35 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<div class="card">
+
+    <h2>{{ titulo }}</h2>
+
+    <p>
+        Complete la información del artículo.
+    </p>
+
+    <form method="post">
+
+        {% csrf_token %}
+
+        {{ form.as_p }}
+
+        <div style="margin-top:20px;">
+
+            <button type="submit" class="btn">
+                Guardar
+            </button>
+
+            <a href="{% url 'inventario:articulos' %}" class="btn">
+                Cancelar
+            </a>
+
+        </div>
+
+    </form>
+
+</div>
+
+{% endblock %}

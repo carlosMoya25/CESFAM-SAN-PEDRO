@@ -11,3 +11,10 @@ def es_tecnico(usuario):
 
 def es_administrador(usuario):
     return tiene_rol(usuario, "Administrador") or usuario.is_superuser
+
+def es_encargado_inventario(usuario):
+    return tiene_rol(usuario, "Encargado de Inventario")
+
+
+def puede_gestionar_inventario(usuario):
+    return es_encargado_inventario(usuario) or es_administrador(usuario)

@@ -1,0 +1,133 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<div class="card">
+
+    <div style="display:flex; justify-content:space-between; align-items:center; gap:15px;">
+        <div>
+            <h2>Artículos</h2>
+
+            <p>
+                Catálogo de artículos disponibles para el control de inventario.
+            </p>
+        </div>
+
+        <a href="{% url 'inventario:crear_articulo' %}" class="btn">
+            Nuevo artículo
+        </a>
+    </div>
+
+</div>
+
+
+<div class="card">
+
+    {% if articulos %}
+
+    <table style="width:100%; border-collapse:collapse;">
+
+        <thead>
+            <tr>
+                <th style="text-align:left; padding:10px;">
+                    Código
+                </th>
+
+                <th style="text-align:left; padding:10px;">
+                    Artículo
+                </th>
+
+                <th style="text-align:left; padding:10px;">
+                    Categoría
+                </th>
+
+                <th style="text-align:center; padding:10px;">
+                    Stock mínimo
+                </th>
+
+                <th style="text-align:center; padding:10px;">
+                    Estado
+                </th>
+
+                <th style="text-align:center; padding:10px;">
+                    Acciones
+                </th>
+            </tr>
+        </thead>
+
+
+        <tbody>
+
+            {% for articulo in articulos %}
+
+            <tr>
+
+                <td style="padding:10px;">
+                    {{ articulo.codigo|default:"-" }}
+                </td>
+
+                <td style="padding:10px;">
+                    <strong>
+                        {{ articulo.nombre }}
+                    </strong>
+
+                    {% if articulo.descripcion %}
+                    <br>
+                    <small>
+                        {{ articulo.descripcion }}
+                    </small>
+                    {% endif %}
+                </td>
+
+                <td style="padding:10px;">
+                    {{ articulo.categoria.nombre }}
+                </td>
+
+                <td style="padding:10px; text-align:center;">
+                    {{ articulo.stock_minimo }}
+                </td>
+
+                <td style="padding:10px; text-align:center;">
+                    {% if articulo.activo %}
+                    Activo
+                    {% else %}
+                    Inactivo
+                    {% endif %}
+                </td>
+
+                <td style="padding:10px; text-align:center;">
+
+                    <a href="{% url 'inventario:editar_articulo' articulo.id %}" class="btn">
+                        Editar
+                    </a>
+
+                </td>
+
+            </tr>
+
+            {% endfor %}
+
+        </tbody>
+
+    </table>
+
+    {% else %}
+
+    <p>
+        No existen artículos registrados.
+    </p>
+
+    {% endif %}
+
+</div>
+
+
+<div class="card">
+
+    <a href="{% url 'inventario:panel' %}" class="btn">
+        Volver al inventario
+    </a>
+
+</div>
+
+{% endblock %}

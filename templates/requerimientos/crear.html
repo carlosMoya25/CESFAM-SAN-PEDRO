@@ -1,30 +1,313 @@
 {% extends "base.html" %}
 
 {% block title %}
-Nueva solicitud
+Nueva solicitud | CESFAM San Pedro
 {% endblock %}
 
 {% block content %}
 
-<h1>Nueva solicitud TI</h1>
+<!-- ENCABEZADO -->
 
-<div class="card">
+<div class="page-header">
 
-    <form method="post">
+    <p style="
+        margin:0 0 6px;
+        color:#087ea4;
+        font-size:12px;
+        font-weight:700;
+        text-transform:uppercase;
+        letter-spacing:1px;
+    ">
+        Requerimientos TI
+    </p>
 
-        {% csrf_token %}
+    <h1>
+        Nueva solicitud
+    </h1>
 
-        {{ form.as_p }}
+    <p>
+        Registra un nuevo requerimiento de soporte informático.
+    </p>
 
-        <button type="submit" class="btn">
-            Enviar solicitud
-        </button>
+</div>
 
-        <a href="{% url 'dashboard' %}" class="btn">
-            Cancelar
-        </a>
 
-    </form>
+<div class="form-page-grid">
+
+    <!-- ==================================================
+         FORMULARIO
+         ================================================== -->
+
+    <div class="card">
+
+        <div class="form-card-header">
+
+            <div class="form-header-icon">
+                +
+            </div>
+
+            <div>
+
+                <h2>
+                    Información del requerimiento
+                </h2>
+
+                <p>
+                    Completa los datos para registrar tu solicitud.
+                </p>
+
+            </div>
+
+        </div>
+
+
+        <form method="post" class="modern-form">
+
+            {% csrf_token %}
+
+
+            <!-- ERRORES GENERALES -->
+
+            {% if form.non_field_errors %}
+
+            <div class="form-error-box">
+
+                {% for error in form.non_field_errors %}
+                {{ error }}
+                {% endfor %}
+
+            </div>
+
+            {% endif %}
+
+
+            <!-- CAMPOS -->
+
+            {% for field in form %}
+
+            <div class="form-group">
+
+                <label for="{{ field.id_for_label }}">
+
+                    {{ field.label }}
+
+                    {% if field.field.required %}
+                    <span class="required">*</span>
+                    {% endif %}
+
+                </label>
+
+
+                {{ field }}
+
+
+                {% if field.help_text %}
+
+                <div class="form-help">
+                    {{ field.help_text }}
+                </div>
+
+                {% endif %}
+
+
+                {% if field.errors %}
+
+                <div class="form-errors">
+
+                    {% for error in field.errors %}
+
+                    <div>
+                        {{ error }}
+                    </div>
+
+                    {% endfor %}
+
+                </div>
+
+                {% endif %}
+
+            </div>
+
+            {% endfor %}
+
+
+            <!-- BOTONES -->
+
+            <div class="form-actions">
+
+                <a href="{% url 'dashboard' %}" class="btn btn-secondary">
+                    ← Cancelar
+                </a>
+
+
+                <button type="submit" class="btn">
+                    Enviar solicitud
+                </button>
+
+            </div>
+
+        </form>
+
+    </div>
+
+
+    <!-- ==================================================
+         PANEL DERECHO
+         ================================================== -->
+
+    <div>
+
+        <div class="card help-card">
+
+            <div class="help-icon">
+                i
+            </div>
+
+            <h3>
+                Antes de enviar
+            </h3>
+
+            <p>
+                Entrega la mayor cantidad de información posible
+                para facilitar la atención del requerimiento.
+            </p>
+
+
+            <div class="help-list">
+
+                <div class="help-list-item">
+
+                    <span class="help-check">
+                        ✓
+                    </span>
+
+                    <div>
+                        Selecciona correctamente el tipo de problema.
+                    </div>
+
+                </div>
+
+
+                <div class="help-list-item">
+
+                    <span class="help-check">
+                        ✓
+                    </span>
+
+                    <div>
+                        Indica el anexo donde ocurre el inconveniente.
+                    </div>
+
+                </div>
+
+
+                <div class="help-list-item">
+
+                    <span class="help-check">
+                        ✓
+                    </span>
+
+                    <div>
+                        Describe claramente el problema presentado.
+                    </div>
+
+                </div>
+
+
+                <div class="help-list-item">
+
+                    <span class="help-check">
+                        ✓
+                    </span>
+
+                    <div>
+                        Incluye mensajes de error u otros antecedentes
+                        relevantes en la descripción.
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <div class="card">
+
+            <div class="detail-section-title">
+                ¿Qué ocurre después?
+            </div>
+
+
+            <div class="mini-process">
+
+                <div class="mini-process-item">
+
+                    <div class="mini-process-number">
+                        1
+                    </div>
+
+                    <div>
+
+                        <strong>
+                            Solicitud registrada
+                        </strong>
+
+                        <p>
+                            El requerimiento quedará en estado Pendiente.
+                        </p>
+
+                    </div>
+
+                </div>
+
+
+                <div class="mini-process-item">
+
+                    <div class="mini-process-number">
+                        2
+                    </div>
+
+                    <div>
+
+                        <strong>
+                            Asignación
+                        </strong>
+
+                        <p>
+                            Un técnico TI podrá tomar la solicitud.
+                        </p>
+
+                    </div>
+
+                </div>
+
+
+                <div class="mini-process-item">
+
+                    <div class="mini-process-number">
+                        3
+                    </div>
+
+                    <div>
+
+                        <strong>
+                            Atención
+                        </strong>
+
+                        <p>
+                            Podrás revisar el avance desde Mis requerimientos.
+                        </p>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
 
 </div>
 

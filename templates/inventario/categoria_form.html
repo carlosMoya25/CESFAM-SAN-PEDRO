@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<div class="card">
+
+    <h2>{{ titulo }}</h2>
+
+    <p>
+        Complete los datos de la categoría de inventario.
+    </p>
+
+    <form method="post">
+        {% csrf_token %}
+
+        {{ form.as_p }}
+
+        <div style="margin-top:20px;">
+            <button type="submit" class="btn">
+                Guardar
+            </button>
+
+            <a href="{% url 'inventario:categorias' %}" class="btn">
+                Cancelar
+            </a>
+        </div>
+    </form>
+
+</div>
+
+{% endblock %}

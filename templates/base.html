@@ -1,8 +1,12 @@
+{% load static %}
+
 <!DOCTYPE html>
 <html lang="es">
 
 <head>
+
     <meta charset="UTF-8">
+
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
     <title>
@@ -11,90 +15,233 @@
         {% endblock %}
     </title>
 
-    <style>
-        body {
-            margin: 0;
-            font-family: Arial, sans-serif;
-            background: #f4f6f8;
-        }
+    <link rel="stylesheet" href="{% static 'css/styles.css' %}">
 
-        header {
-            background: #ffffff;
-            padding: 15px 30px;
-            border-bottom: 1px solid #ddd;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        main {
-            max-width: 1200px;
-            margin: 30px auto;
-            padding: 0 20px;
-        }
-
-        .card {
-            background: white;
-            padding: 20px;
-            border-radius: 8px;
-            margin-bottom: 20px;
-        }
-
-        .btn {
-            display: inline-block;
-            padding: 10px 15px;
-            background: #333;
-            color: white;
-            text-decoration: none;
-            border-radius: 5px;
-            border: none;
-            cursor: pointer;
-        }
-    </style>
 </head>
+
 
 <body>
 
-    {% if user.is_authenticated %}
-    <header>
+    <div class="app-layout">
 
-        <strong>
-            Sistema CESFAM San Pedro
-        </strong>
+        <!-- SIDEBAR -->
 
-        <div>
-            {{ user.email }}
+        <aside class="sidebar">
 
-            <form method="post" action="{% url 'logout' %}" style="display:inline;">
-                {% csrf_token %}
+            <div class="sidebar-brand">
 
-                <button type="submit" class="btn">
-                    Cerrar sesión
-                </button>
-            </form>
+                <h2>
+                    CESFAM
+                    <br>
+                    San Pedro
+                </h2>
+
+                <span>
+                    Sistema de Gestión
+                </span>
+
+            </div>
+
+
+            <nav class="sidebar-menu">
+
+                <!-- DASHBOARD -->
+
+                <a href="{% url 'dashboard' %}" class="sidebar-link">
+                    <span class="sidebar-icon">⌂</span>
+                    <span>Dashboard</span>
+                </a>
+
+
+                <!-- REQUERIMIENTOS -->
+
+                <a href="{% url 'mis_requerimientos' %}" class="sidebar-link">
+                    <span class="sidebar-icon">☷</span>
+                    <span>Requerimientos</span>
+                </a>
+
+
+                <!-- PANEL TÉCNICO -->
+
+                {% for grupo in user.groups.all %}
+
+                {% if grupo.name == "Técnico TI" %}
+
+                <a href="{% url 'panel_tecnico' %}" class="sidebar-link">
+                    <span class="sidebar-icon">⚙</span>
+                    <span>Panel Técnico</span>
+                </a>
+
+                {% endif %}
+
+                {% endfor %}
+
+
+                <!-- INVENTARIO -->
+
+                {% for grupo in user.groups.all %}
+
+                {% if grupo.name == "Encargado de Inventario" %}
+
+                <a href="{% url 'inventario:panel' %}" class="sidebar-link">
+                    <span class="sidebar-icon">□</span>
+                    <span>Inventario</span>
+                </a>
+
+                {% endif %}
+
+                {% endfor %}
+
+
+                <!-- FARMACIA - PRÓXIMO MÓDULO -->
+
+                {% for grupo in user.groups.all %}
+
+                {% if grupo.name == "Encargado de Farmacia" %}
+
+                <a href="#" class="sidebar-link">
+                    <span class="sidebar-icon">✚</span>
+                    <span>Farmacia</span>
+                </a>
+
+                {% endif %}
+
+                {% endfor %}
+
+
+                <!-- ADMINISTRADOR -->
+
+                {% for grupo in user.groups.all %}
+
+                {% if grupo.name == "Administrador" %}
+
+                <a href="{% url 'panel_tecnico' %}" class="sidebar-link">
+                    <span class="sidebar-icon">⚙</span>
+                    <span>Panel Técnico</span>
+                </a>
+
+                <a href="{% url 'inventario:panel' %}" class="sidebar-link">
+                    <span class="sidebar-icon">□</span>
+                    <span>Inventario</span>
+                </a>
+
+                <a href="#" class="sidebar-link">
+                    <span class="sidebar-icon">✚</span>
+                    <span>Farmacia</span>
+                </a>
+
+                <a href="/admin/" class="sidebar-link">
+                    <span class="sidebar-icon">♙</span>
+                    <span>Administración</span>
+                </a>
+
+                {% endif %}
+
+                {% endfor %}
+
+            </nav>
+
+        </aside>
+
+
+        <!-- CONTENIDO -->
+
+        <div class="main-wrapper">
+
+
+            <!-- TOPBAR -->
+
+            <header class="topbar">
+
+                <div class="topbar-title">
+                    Sistema de Gestión de Requerimientos e Inventarios
+                </div>
+
+
+                {% if user.is_authenticated %}
+
+                <div class="user-info">
+
+                    <div class="user-avatar">
+                        {{ user.nombres|slice:":1" }}{{ user.apellido_paterno|slice:":1" }}
+                    </div>
+
+
+                    <div>
+
+                        <strong>
+                            {{ user.nombres }}
+                            {{ user.apellido_paterno }}
+                        </strong>
+
+                        <div style="
+                        font-size:12px;
+                        color:#64748b;
+                    ">
+                            {{ user.email }}
+                        </div>
+
+                    </div>
+
+
+                    <form method="post" action="{% url 'logout' %}" style="margin:0;">
+
+                        {% csrf_token %}
+
+                        <button type="submit" class="btn btn-secondary">
+                            Salir
+                        </button>
+
+                    </form>
+
+                </div>
+
+                {% endif %}
+
+            </header>
+
+
+            <!-- MAIN -->
+
+            <main class="content">
+
+
+                {% if messages %}
+
+                <div class="messages">
+
+                    {% for message in messages %}
+
+                    <div class="
+                            alert
+                            {% if message.tags == 'success' %}
+                                alert-success
+                            {% else %}
+                                alert-error
+                            {% endif %}
+                        ">
+
+                        {{ message }}
+
+                    </div>
+
+                    {% endfor %}
+
+                </div>
+
+                {% endif %}
+
+
+                {% block content %}
+                {% endblock %}
+
+
+            </main>
+
+
         </div>
 
-    </header>
-    {% endif %}
-
-    <main>
-
-        {% block content %}
-        {% endblock %}
-
-    </main>
-
-    {% if messages %}
-
-    {% for message in messages %}
-
-    <div class="card">
-        {{ message }}
     </div>
-
-    {% endfor %}
-
-    {% endif %}
 
 </body>
 

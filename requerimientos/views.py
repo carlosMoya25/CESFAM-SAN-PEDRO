@@ -1,8 +1,14 @@
+from django.core.exceptions import ValidationError
+import requerimientos
+import requerimientos
+import requerimientos
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import get_object_or_404, redirect, render
 
 from .forms import RequerimientoForm, ObservacionRequerimientoForm, RequerimientoForm, ResolverRequerimientoForm
 from .models import EstadoRequerimiento, HistorialRequerimiento, Requerimiento
+from inventario.forms import RecursoRequerimientoForm
+from inventario.services import registrar_recurso_requerimiento
 
 from django.contrib import messages
 from django.db import transaction
@@ -269,17 +275,23 @@ def detalle_tecnico(request, pk):
         requerimiento.responsable_id == request.user.id
         or es_administrador(request.user)
     )
-
-    contexto = {
-        "requerimiento": requerimiento,
-        "historial": historial,
-        "puede_modificar": puede_modificar,
-    }
+    recursos = (  
+        requerimiento.recursos_utilizados 
+        .select_related("articulo", "usuario","movimiento",).all()
+    )
+    
+    recurso_form = RecursoRequerimientoForm()
 
     return render(
         request,
         "requerimientos/detalle_tecnico.html",
-        contexto,
+        {
+            "requerimiento": requerimiento,
+            "historial": historial,
+            "puede_modificar": puede_modificar,
+            "recursos": recursos,
+            "recurso_form": recurso_form,
+        }
     )
 
 @login_required
@@ -514,3 +526,63 @@ def cerrar_requerimiento(request, pk):
     )
 
     return redirect("detalle_tecnico", pk=pk)
+
+@login_required
+@transaction.atomic
+def agregar_recurso(request, pk):
+    if request.method != "POST":
+        return HttpResponseForbidden(
+            "Método no permitido."
+        )
+
+    if not es_tecnico(request.user):
+        return HttpResponseForbidden(
+            "Solo un Técnico TI puede registrar recursos."
+        )
+
+    requerimiento = get_object_or_404(
+        Requerimiento.objects.select_for_update().select_related(
+            "anexo",
+            "estado",
+            "responsable",
+        ),
+        pk=pk,
+    )
+
+    if requerimiento.responsable_id != request.user.id:
+        return HttpResponseForbidden(
+            "Solo el técnico responsable puede registrar recursos."
+        )
+
+    form = RecursoRequerimientoForm(request.POST)
+
+    if form.is_valid():
+        try:
+            registrar_recurso_requerimiento(
+                requerimiento=requerimiento,
+                articulo=form.cleaned_data["articulo"],
+                cantidad=form.cleaned_data["cantidad"],
+                usuario=request.user,
+            )
+
+            messages.success(
+                request,
+                "Recurso utilizado registrado correctamente.",
+            )
+
+        except ValidationError as error:
+            messages.error(
+                request,
+                "; ".join(error.messages),
+            )
+
+    else:
+        messages.error(
+            request,
+            "Revisa los datos ingresados.",
+        )
+
+    return redirect(
+        "detalle_tecnico",
+        pk=requerimiento.pk,
+    )

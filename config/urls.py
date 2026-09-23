@@ -26,4 +26,11 @@ urlpatterns = [
     "requerimientos/",
     include("requerimientos.urls"),
 ),
+
+path(
+"inventario/",
+include("inventario.urls"),
+),
+
+
 ]

@@ -1,134 +1,369 @@
 {% extends "base.html" %}
 
 {% block title %}
-Dashboard
+Dashboard | CESFAM San Pedro
 {% endblock %}
 
 
 {% block content %}
 
-<h1>
-    Bienvenido, {{ usuario.nombres }}
-</h1>
+<!-- ENCABEZADO -->
 
-<p>
-    {{ usuario.email }}
-</p>
+<div class="page-header">
+
+    <p style="
+        text-transform:uppercase;
+        letter-spacing:3px;
+        font-size:12px;
+        color:#087ea4;
+        font-weight:bold;
+        margin-bottom:8px;
+    ">
+        Bienvenido
+    </p>
+
+    <h1>
+        CESFAM San Pedro
+    </h1>
+
+    <p>
+        Sistema de Gestión de Requerimientos e Inventarios
+    </p>
+
+</div>
 
 
-<div class="card">
+<!--REQUERIMIENTOS-->
 
-    <h2>
-        Tus roles
-    </h2>
+<div style="
+    display:flex;
+    align-items:center;
+    gap:10px;
+    margin-bottom:15px;
+">
 
-    {% for rol in roles %}
-
-    <span>
-        {{ rol }}
+    <span style="font-size:22px;">
+        ☷
     </span>
 
-    {% empty %}
-
-    <p>
-        No tienes un rol asignado.
-    </p>
-
-    {% endfor %}
-
-</div>
-
-
-<div class="card">
-
-    <h2>
-        Requerimientos TI
+    <h2 style="margin:0;">
+        Resumen de Requerimientos
     </h2>
 
-    <p>
-        Gestiona las solicitudes de soporte informático.
-    </p>
+</div>
 
-    <a href="{% url 'crear_requerimiento' %}" class="btn">
-        Nueva solicitud
-    </a>
 
-    <a href="{% url 'mis_requerimientos' %}" class="btn">
-        Mis solicitudes
-    </a>
+<div class="dashboard-grid">
+
+
+    <!-- PENDIENTES -->
+
+    <div class="stat-card stat-danger">
+
+        <div class="stat-icon">
+            ◷
+        </div>
+
+        <div>
+
+            <div class="stat-label">
+                Pendientes
+            </div>
+
+            <div class="stat-number">
+                {{ pendientes }}
+            </div>
+
+            <div class="stat-label">
+                Solicitudes sin asignar
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- EN PROCESO -->
+
+    <div class="stat-card stat-warning">
+
+        <div class="stat-icon">
+            ⚙
+        </div>
+
+        <div>
+
+            <div class="stat-label">
+                En proceso
+            </div>
+
+            <div class="stat-number">
+                {{ en_proceso }}
+            </div>
+
+            <div class="stat-label">
+                En atención
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- RESUELTOS -->
+
+    <div class="stat-card stat-success">
+
+        <div class="stat-icon">
+            ✓
+        </div>
+
+        <div>
+
+            <div class="stat-label">
+                Resueltos
+            </div>
+
+            <div class="stat-number">
+                {{ resueltos }}
+            </div>
+
+            <div class="stat-label">
+                Requerimientos resueltos
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- TOTAL -->
+
+    <div class="stat-card stat-info">
+
+        <div class="stat-icon">
+            ▤
+        </div>
+
+        <div>
+
+            <div class="stat-label">
+                Total
+            </div>
+
+            <div class="stat-number">
+                {{ total_requerimientos }}
+            </div>
+
+            <div class="stat-label">
+                Requerimientos registrados
+            </div>
+
+        </div>
+
+    </div>
+
 
 </div>
 
 
-{% if "Técnico TI" in roles %}
+<!-- INVENTARIO -->
 
-<div class="card">
+<div style="
+    display:flex;
+    align-items:center;
+    gap:10px;
+    margin-bottom:15px;
+    ">
 
-    <h2>
-        Panel Técnico TI
-    </h2>
+    <span style="font-size:22px;">
+        □
+    </span>
 
-    <p>
-        Consulta y administra los requerimientos informáticos.
-    </p>
-
-    <a href="{% url 'panel_tecnico' %}" class="btn">
-        Ver todos los tickets
-    </a>
-
-</div>
-
-{% endif %}
-
-
-{% if "Encargado de Inventario" in roles %}
-
-<div class="card">
-
-    <h2>
+    <h2 style="margin:0;">
         Inventario
     </h2>
+</div>
 
-    <a href="#" class="btn">
-        Administrar inventario
-    </a>
+
+<div class="dashboard-grid">
+
+
+    <!-- ARTÍCULOS -->
+
+    <div class="stat-card stat-info">
+
+        <div class="stat-icon">
+            ▣
+        </div>
+
+        <div>
+
+            <div class="stat-label">
+                Artículos registrados
+            </div>
+
+            <div class="stat-number">
+                {{ total_articulos }}
+            </div>
+
+            <div class="stat-label">
+                Insumos y equipamiento
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- STOCK BAJO -->
+
+    <div class="stat-card stat-danger">
+
+        <div class="stat-icon">
+            ⚠
+        </div>
+
+        <div>
+
+            <div class="stat-label">
+                Stock bajo
+            </div>
+
+            <div class="stat-number">
+                {{ stock_bajo }}
+            </div>
+
+            <div class="stat-label">
+                Requieren reposición
+            </div>
+
+        </div>
+
+    </div>
+
 
 </div>
 
-{% endif %}
 
-
-{% if "Encargado de Farmacia" in roles %}
+<!--ACCESOS RÁPIDOS-->
 
 <div class="card">
 
     <h2>
-        Farmacia
+        Accesos rápidos
     </h2>
 
-    <a href="#" class="btn">
-        Administrar farmacia
-    </a>
-
-</div>
-
-{% endif %}
-
-
-{% if "Administrador" in roles %}
-
-<div class="card">
-
-    <h2>
-        Administración
-    </h2>
-
-    <p>
-        Administración general del sistema.
+    <p style="color:#64748b;">
+        Accede rápidamente a las funciones principales del sistema.
     </p>
 
-</div>
 
-{% endif %}
+    <div class="dashboard-grid">
+
+
+        <!-- NUEVO REQUERIMIENTO -->
+
+        <a href="{% url 'crear_requerimiento' %}" class="stat-card stat-info">
+
+            <div class="stat-icon">
+                +
+            </div>
+
+            <div>
+
+                <strong>
+                    Nuevo requerimiento
+                </strong>
+
+                <div class="stat-label">
+                    Registrar solicitud TI
+                </div>
+
+            </div>
+
+        </a>
+
+
+        <!-- MIS REQUERIMIENTOS -->
+
+        <a href="{% url 'mis_requerimientos' %}" class="stat-card stat-info">
+
+            <div class="stat-icon">
+                ☷
+            </div>
+
+            <div>
+
+                <strong>
+                    Mis requerimientos
+                </strong>
+
+                <div class="stat-label">
+                    Consultar solicitudes
+                </div>
+
+            </div>
+
+        </a>
+
+
+        <!-- PANEL TÉCNICO -->
+
+        {% if "Técnico TI" in grupos or "Administrador" in grupos %}
+
+        <a href="{% url 'panel_tecnico' %}" class="stat-card stat-warning">
+
+            <div class="stat-icon">
+                ⚙
+            </div>
+
+            <div>
+
+                <strong>
+                    Panel Técnico
+                </strong>
+
+                <div class="stat-label">
+                    Gestionar requerimientos
+                </div>
+
+            </div>
+
+        </a>
+
+        {% endif %}
+
+
+        <!-- INVENTARIO -->
+
+        {% if "Encargado de Inventario" in grupos or "Administrador" in grupos %}
+
+        <a href="{% url 'inventario:panel' %}" class="stat-card stat-success">
+
+            <div class="stat-icon">
+                ▣
+            </div>
+
+            <div>
+
+                <strong>
+                    Inventario
+                </strong>
+
+                <div class="stat-label">
+                    Gestionar existencias
+                </div>
+
+            </div>
+
+        </a>
+
+        {% endif %}
+
+
+    </div>
+
+</div>
 
 {% endblock %}

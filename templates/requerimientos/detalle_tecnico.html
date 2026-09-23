@@ -1,254 +1,618 @@
 {% extends "base.html" %}
 
 {% block title %}
-Ticket #{{ requerimiento.id }}
+Requerimiento #{{ requerimiento.id }} | CESFAM San Pedro
 {% endblock %}
 
 
 {% block content %}
 
-<h1>
-    Ticket #{{ requerimiento.id }}
-</h1>
+<!-- ======================================================
+     ENCABEZADO
+     ====================================================== -->
+
+<div class="page-header">
+
+    <div style="
+        display:flex;
+        justify-content:space-between;
+        align-items:flex-start;
+        gap:20px;
+    ">
+
+        <div>
+
+            <p style="
+                margin:0 0 6px;
+                color:#087ea4;
+                font-size:12px;
+                font-weight:700;
+                text-transform:uppercase;
+                letter-spacing:1px;
+            ">
+                Gestión de requerimientos
+            </p>
+
+            <h1 style="margin-bottom:6px;">
+                Requerimiento #{{ requerimiento.id }}
+            </h1>
+
+            <p>
+                {{ requerimiento.titulo }}
+            </p>
+
+        </div>
 
 
-<div class="card">
+        <!-- PRIORIDAD -->
 
-    <h2>
-        {{ requerimiento.titulo }}
-    </h2>
+        <div>
 
-    <p>
-        <strong>Solicitante:</strong>
+            {% if requerimiento.prioridad.nombre == "Crítica" %}
 
-        {{ requerimiento.solicitante.nombres }}
-        {{ requerimiento.solicitante.apellido_paterno }}
-    </p>
+            <span class="priority priority-critica">
+                ● Crítica
+            </span>
 
-    <p>
-        <strong>Estado:</strong>
-        {{ requerimiento.estado }}
-    </p>
+            {% elif requerimiento.prioridad.nombre == "Alta" %}
 
-    <p>
-        <strong>Prioridad:</strong>
-        {{ requerimiento.prioridad }}
-    </p>
+            <span class="priority priority-alta">
+                ● Alta
+            </span>
 
-    <p>
-        <strong>Tipo:</strong>
-        {{ requerimiento.tipo_requerimiento }}
-    </p>
+            {% elif requerimiento.prioridad.nombre == "Media" %}
 
-    <p>
-        <strong>Anexo:</strong>
-        {{ requerimiento.anexo }}
-    </p>
+            <span class="priority priority-media">
+                ● Media
+            </span>
 
-    <p>
-        <strong>Departamento:</strong>
-        {{ requerimiento.departamento|default:"No especificado" }}
-    </p>
+            {% else %}
 
-    <p>
-        <strong>Descripción:</strong>
-    </p>
+            <span class="priority priority-baja">
+                ● {{ requerimiento.prioridad.nombre }}
+            </span>
 
-    <p>
-        {{ requerimiento.descripcion|linebreaksbr }}
-    </p>
+            {% endif %}
 
-    <p>
-        <strong>Responsable:</strong>
+        </div>
 
-        {% if requerimiento.responsable %}
+    </div>
 
-        {{ requerimiento.responsable.nombres }}
-        {{ requerimiento.responsable.apellido_paterno }}
+</div>
 
-        {% else %}
 
-        Sin asignar
+<div class="detail-grid">
+
+    <!-- ==================================================
+         COLUMNA PRINCIPAL
+         ================================================== -->
+
+    <div>
+
+        <!-- INFORMACIÓN DEL REQUERIMIENTO -->
+
+        <div class="card">
+
+            <div style="
+                display:flex;
+                justify-content:space-between;
+                align-items:center;
+                gap:15px;
+                margin-bottom:20px;
+            ">
+
+                <h2 style="margin:0;">
+                    Información del requerimiento
+                </h2>
+
+
+                <!-- ESTADO -->
+
+                {% if requerimiento.estado.nombre == "Pendiente" %}
+
+                <span class="badge badge-warning">
+                    ● Pendiente
+                </span>
+
+                {% elif requerimiento.estado.nombre == "Asignado" %}
+
+                <span class="badge badge-info">
+                    ● Asignado
+                </span>
+
+                {% elif requerimiento.estado.nombre == "En proceso" %}
+
+                <span class="badge badge-warning">
+                    ● En proceso
+                </span>
+
+                {% elif requerimiento.estado.nombre == "Resuelto" %}
+
+                <span class="badge badge-success">
+                    ● Resuelto
+                </span>
+
+                {% elif requerimiento.estado.nombre == "Cerrado" %}
+
+                <span class="badge">
+                    ● Cerrado
+                </span>
+
+                {% else %}
+
+                <span class="badge">
+                    {{ requerimiento.estado }}
+                </span>
+
+                {% endif %}
+
+            </div>
+
+
+            <!-- DATOS -->
+
+            <div class="requirement-meta">
+
+                <div>
+                    <span class="meta-label">
+                        Solicitante
+                    </span>
+
+                    <span class="meta-value">
+                        {{ requerimiento.solicitante.nombres }}
+                        {{ requerimiento.solicitante.apellido_paterno }}
+                    </span>
+                </div>
+
+
+                <div>
+                    <span class="meta-label">
+                        Fecha solicitud
+                    </span>
+
+                    <span class="meta-value">
+                        {{ requerimiento.fecha_solicitud|date:"d/m/Y H:i" }}
+                    </span>
+                </div>
+
+
+                <div>
+                    <span class="meta-label">
+                        Tipo
+                    </span>
+
+                    <span class="meta-value">
+                        {{ requerimiento.tipo_requerimiento }}
+                    </span>
+                </div>
+
+
+                <div>
+                    <span class="meta-label">
+                        Anexo
+                    </span>
+
+                    <span class="meta-value">
+                        {{ requerimiento.anexo }}
+                    </span>
+                </div>
+
+
+                <div>
+                    <span class="meta-label">
+                        Departamento
+                    </span>
+
+                    <span class="meta-value">
+                        {{ requerimiento.departamento|default:"No especificado" }}
+                    </span>
+                </div>
+
+
+                <div>
+                    <span class="meta-label">
+                        Responsable
+                    </span>
+
+                    <span class="meta-value">
+
+                        {% if requerimiento.responsable %}
+
+                        {{ requerimiento.responsable.nombres }}
+                        {{ requerimiento.responsable.apellido_paterno }}
+
+                        {% else %}
+
+                        Sin asignar
+
+                        {% endif %}
+
+                    </span>
+                </div>
+
+            </div>
+
+
+            <!-- DESCRIPCIÓN -->
+
+            <div class="detail-section" style="margin-top:25px;">
+
+                <div class="detail-section-title">
+                    Problema informado
+                </div>
+
+                <div class="problem-box">
+                    {{ requerimiento.descripcion|linebreaksbr }}
+                </div>
+
+            </div>
+
+
+            <!-- ASIGNAR -->
+
+            {% if not requerimiento.responsable %}
+
+            <form method="post" action="{% url 'asignarme_requerimiento' requerimiento.id %}">
+
+                {% csrf_token %}
+
+                <button type="submit" class="btn">
+                    Asignarme este requerimiento
+                </button>
+
+            </form>
+
+            {% endif %}
+
+        </div>
+
+
+        <!-- ==================================================
+             GESTIÓN
+             ================================================== -->
+
+        {% if puede_modificar %}
+
+        <div class="card">
+
+            <h2>
+                Gestión del requerimiento
+            </h2>
+
+            <p style="color:#64748b;">
+                Registra las acciones realizadas durante la atención.
+            </p>
+
+
+            <!-- INICIAR -->
+
+            {% if requerimiento.estado.nombre == "Asignado" %}
+
+            <div class="detail-section">
+
+                <div class="detail-section-title">
+                    Atención
+                </div>
+
+                <form method="post" action="{% url 'iniciar_atencion' requerimiento.id %}">
+
+                    {% csrf_token %}
+
+                    <button type="submit" class="btn">
+                        ▶ Iniciar atención
+                    </button>
+
+                </form>
+
+            </div>
+
+            {% endif %}
+
+
+            <!-- OBSERVACIÓN -->
+
+            {% if requerimiento.estado.nombre == "Asignado" or requerimiento.estado.nombre == "En proceso" %}
+
+            <div class="detail-section">
+
+                <div class="detail-section-title">
+                    Agregar observación
+                </div>
+
+                <form method="post" action="{% url 'agregar_observacion' requerimiento.id %}">
+
+                    {% csrf_token %}
+
+                    <textarea name="observacion" rows="4" required
+                        placeholder="Describe una acción realizada durante la atención..."></textarea>
+
+                    <div style="margin-top:12px;">
+
+                        <button type="submit" class="btn">
+                            Registrar observación
+                        </button>
+
+                    </div>
+
+                </form>
+
+            </div>
+
+            {% endif %}
+
+
+            <!-- RESOLVER -->
+
+            {% if requerimiento.estado.nombre == "En proceso" %}
+
+            <div class="detail-section">
+
+                <div class="detail-section-title">
+                    Resolver requerimiento
+                </div>
+
+                <form method="post" action="{% url 'resolver_requerimiento' requerimiento.id %}">
+
+                    {% csrf_token %}
+
+                    <textarea name="solucion" rows="5" required
+                        placeholder="Describe detalladamente la solución aplicada..."></textarea>
+
+                    <div style="margin-top:12px;">
+
+                        <button type="submit" class="btn btn-success">
+                            ✓ Marcar como resuelto
+                        </button>
+
+                    </div>
+
+                </form>
+
+            </div>
+
+            {% endif %}
+
+
+            <!-- CERRAR -->
+
+            {% if requerimiento.estado.nombre == "Resuelto" %}
+
+            <div class="detail-section">
+
+                <div class="detail-section-title">
+                    Solución aplicada
+                </div>
+
+                <div class="problem-box">
+                    {{ requerimiento.solucion|linebreaksbr }}
+                </div>
+
+            </div>
+
+
+            <form method="post" action="{% url 'cerrar_requerimiento' requerimiento.id %}">
+
+                {% csrf_token %}
+
+                <button type="submit" class="btn btn-secondary">
+                    Cerrar requerimiento
+                </button>
+
+            </form>
+
+            {% endif %}
+
+
+            <!-- CERRADO -->
+
+            {% if requerimiento.estado.nombre == "Cerrado" %}
+
+            <div class="detail-section">
+
+                <div class="detail-section-title">
+                    Solución aplicada
+                </div>
+
+                <div class="problem-box">
+                    {{ requerimiento.solucion|linebreaksbr }}
+                </div>
+
+            </div>
+
+            <span class="badge badge-success">
+                ✓ Requerimiento finalizado
+            </span>
+
+            {% endif %}
+
+        </div>
 
         {% endif %}
 
-    </p>
+    </div>
 
 
-    {% if not requerimiento.responsable %}
+    <!-- ==================================================
+         COLUMNA DERECHA
+         ================================================== -->
 
-    <form method="post" action="{% url 'asignarme_requerimiento' requerimiento.id %}">
+    <div>
 
-        {% csrf_token %}
+        <!-- RECURSOS -->
 
-        <button type="submit" class="btn">
-            Asignarme este ticket
-        </button>
+        <div class="card">
 
-    </form>
+            <h2>
+                Recursos utilizados
+            </h2>
 
-    {% endif %}
+            <p style="
+                color:#64748b;
+                font-size:13px;
+            ">
+                Insumos descontados del inventario durante la atención.
+            </p>
+
+
+            {% for recurso in recursos %}
+
+            <div class="resource-item">
+
+                <div>
+
+                    <div class="resource-name">
+                        {{ recurso.articulo.nombre }}
+                    </div>
+
+                    <div style="
+                            color:#64748b;
+                            font-size:11px;
+                            margin-top:4px;
+                        ">
+                        {{ recurso.fecha|date:"d/m/Y H:i" }}
+
+                        {% if recurso.usuario %}
+                        · {{ recurso.usuario.nombres }}
+                        {{ recurso.usuario.apellido_paterno }}
+                        {% endif %}
+                    </div>
+
+                </div>
+
+
+                <div class="resource-quantity">
+                    × {{ recurso.cantidad }}
+                </div>
+
+            </div>
+
+            {% empty %}
+
+            <div style="
+                    padding:20px;
+                    text-align:center;
+                    color:#94a3b8;
+                    background:#f8fafc;
+                    border-radius:8px;
+                ">
+                No se han utilizado recursos.
+            </div>
+
+            {% endfor %}
+
+
+            <!-- AGREGAR RECURSO -->
+
+            {% if requerimiento.responsable_id == request.user.id %}
+
+            {% if requerimiento.estado.nombre == "Asignado" or requerimiento.estado.nombre == "En proceso" %}
+
+            <div style="
+                        border-top:1px solid #e2e8f0;
+                        margin-top:20px;
+                        padding-top:20px;
+                    ">
+
+                <h3>
+                    Agregar recurso
+                </h3>
+
+                <form method="post" action="{% url 'agregar_recurso' requerimiento.id %}">
+
+                    {% csrf_token %}
+
+                    {{ recurso_form.as_p }}
+
+                    <button class="btn" type="submit">
+                        + Registrar recurso
+                    </button>
+
+                </form>
+
+            </div>
+
+            {% endif %}
+
+            {% endif %}
+
+        </div>
+
+
+        <!-- ==================================================
+             HISTORIAL
+             ================================================== -->
+
+        <div class="card">
+
+            <h2>
+                Historial
+            </h2>
+
+            <div class="timeline">
+
+                {% for registro in historial %}
+
+                <div class="timeline-item">
+
+                    <span class="timeline-dot"></span>
+
+                    <div class="timeline-date">
+                        {{ registro.fecha|date:"d/m/Y H:i" }}
+                    </div>
+
+                    <div class="timeline-title">
+                        {{ registro.accion }}
+                    </div>
+
+
+                    {% if registro.usuario %}
+
+                    <div class="timeline-description">
+
+                        Por
+                        {{ registro.usuario.nombres }}
+                        {{ registro.usuario.apellido_paterno }}
+
+                    </div>
+
+                    {% endif %}
+
+
+                    {% if registro.observacion %}
+
+                    <div class="timeline-description">
+                        {{ registro.observacion }}
+                    </div>
+
+                    {% endif %}
+
+                </div>
+
+                {% empty %}
+
+                <p style="color:#64748b;">
+                    No existen registros en el historial.
+                </p>
+
+                {% endfor %}
+
+            </div>
+
+        </div>
+
+    </div>
 
 </div>
 
 
-<div class="card">
+<!-- VOLVER -->
 
-    <h2>Historial</h2>
+<div style="margin-top:10px;">
 
-    {% for registro in historial %}
-
-    <p>
-
-        <strong>
-            {{ registro.fecha|date:"d/m/Y H:i" }}
-        </strong>
-
-        —
-
-        {{ registro.accion }}
-
-        {% if registro.usuario %}
-
-        por
-        {{ registro.usuario.nombres }}
-        {{ registro.usuario.apellido_paterno }}
-
-        {% endif %}
-
-    </p>
-
-    {% if registro.observacion %}
-
-    <p>
-        {{ registro.observacion }}
-    </p>
-
-    {% endif %}
-
-    <hr>
-
-    {% empty %}
-
-    <p>
-        No existen registros en el historial.
-    </p>
-
-    {% endfor %}
+    <a href="{% url 'panel_tecnico' %}" class="btn btn-secondary">
+        ← Volver al panel técnico
+    </a>
 
 </div>
-
-
-{% if puede_modificar %}
-
-
-
-<div class="card">
-
-    <h2>Gestión del requerimiento</h2>
-
-    {% if requerimiento.estado.nombre == "Asignado" %}
-
-    <form method="post" action="{% url 'iniciar_atencion' requerimiento.id %}">
-        {% csrf_token %}
-
-        <button type="submit" class="btn">
-            Iniciar atención
-        </button>
-    </form>
-
-    {% endif %}
-
-
-    {% if requerimiento.estado.nombre == "Asignado" or requerimiento.estado.nombre == "En proceso" %}
-
-    <hr>
-
-    <h3>Agregar observación</h3>
-
-    <form method="post" action="{% url 'agregar_observacion' requerimiento.id %}">
-        {% csrf_token %}
-
-        <textarea name="observacion" rows="4" required style="width:100%;"
-            placeholder="Describe una acción realizada..."></textarea>
-
-        <br><br>
-
-        <button type="submit" class="btn">
-            Registrar observación
-        </button>
-
-    </form>
-
-    {% endif %}
-
-
-    {% if requerimiento.estado.nombre == "En proceso" %}
-
-    <hr>
-
-    <h3>Resolver requerimiento</h3>
-
-    <form method="post" action="{% url 'resolver_requerimiento' requerimiento.id %}">
-        {% csrf_token %}
-
-        <textarea name="solucion" rows="5" required style="width:100%;"
-            placeholder="Describe la solución aplicada..."></textarea>
-
-        <br><br>
-
-        <button type="submit" class="btn">
-            Marcar como resuelto
-        </button>
-
-    </form>
-
-    {% endif %}
-
-
-    {% if requerimiento.estado.nombre == "Resuelto" %}
-
-    <h3>Solución aplicada</h3>
-
-    <p>
-        {{ requerimiento.solucion|linebreaksbr }}
-    </p>
-
-    <form method="post" action="{% url 'cerrar_requerimiento' requerimiento.id %}">
-        {% csrf_token %}
-
-        <button type="submit" class="btn">
-            Cerrar requerimiento
-        </button>
-
-    </form>
-
-    {% endif %}
-
-
-    {% if requerimiento.estado.nombre == "Cerrado" %}
-
-    <p>
-        Este requerimiento se encuentra cerrado.
-    </p>
-
-    <h3>Solución aplicada</h3>
-
-    <p>
-        {{ requerimiento.solucion|linebreaksbr }}
-    </p>
-
-    {% endif %}
-
-</div>
-
-
-
-{% endif %}
-
-
-<a href="{% url 'panel_tecnico' %}" class="btn">
-    Volver al panel
-</a>
 
 {% endblock %}

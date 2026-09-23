@@ -1,55 +1,274 @@
-{% extends "base.html" %}
+{% extends "base_login.html" %}
 
 {% block title %}
-Iniciar sesión
+Iniciar sesión | CESFAM San Pedro
 {% endblock %}
 
 
 {% block content %}
 
-<div class="card" style="max-width:400px; margin:80px auto;">
+<div class="login-page">
 
-    <h1>
-        CESFAM San Pedro
-    </h1>
+    <!--PANEL INSTITUCIONAL -->
 
-    <p>
-        Sistema de Gestión de Requerimientos e Inventarios
-    </p>
+    <div class="login-brand-panel">
 
-    {% if form.errors %}
+        <div class="login-brand-content">
 
-    <p>
-        Correo electrónico o contraseña incorrectos.
-    </p>
+            <div class="login-logo">
+                +
+            </div>
 
-    {% endif %}
+            <p class="login-brand-label">
+                Sistema Institucional
+            </p>
 
-    <form method="post">
+            <h1>
+                CESFAM
+                <span>San Pedro</span>
+            </h1>
 
-        {% csrf_token %}
+            <p class="login-brand-description">
+                Plataforma de gestión de requerimientos,
+                inventarios y procesos internos.
+            </p>
 
-        <p>
-            <label>
-                Correo electrónico
-            </label>
 
-            {{ form.username }}
-        </p>
+            <div class="login-features">
 
-        <p>
-            <label>
-                Contraseña
-            </label>
+                <div class="login-feature">
 
-            {{ form.password }}
-        </p>
+                    <div class="login-feature-icon">
+                        ✓
+                    </div>
 
-        <button type="submit" class="btn">
-            Iniciar sesión
-        </button>
+                    <div>
+                        <strong>
+                            Gestión centralizada
+                        </strong>
 
-    </form>
+                        <span>
+                            Requerimientos e inventario en un solo sistema.
+                        </span>
+                    </div>
+
+                </div>
+
+
+                <div class="login-feature">
+
+                    <div class="login-feature-icon">
+                        ✓
+                    </div>
+
+                    <div>
+                        <strong>
+                            Seguimiento
+                        </strong>
+
+                        <span>
+                            Consulta el estado de las solicitudes registradas.
+                        </span>
+                    </div>
+
+                </div>
+
+
+                <div class="login-feature">
+
+                    <div class="login-feature-icon">
+                        ✓
+                    </div>
+
+                    <div>
+                        <strong>
+                            Trazabilidad
+                        </strong>
+
+                        <span>
+                            Historial de acciones y movimientos del sistema.
+                        </span>
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <div class="login-brand-footer">
+            CESFAM San Pedro · 2026
+        </div>
+
+    </div>
+
+
+    <!-- LOGIN -->
+
+    <div class="login-form-panel">
+
+
+        <div class="login-box">
+
+
+            <!-- LOGO MOBILE -->
+
+            <div class="login-heading">
+
+                <p>
+                    Bienvenido
+                </p>
+
+                <h2>
+                    Iniciar sesión
+                </h2>
+
+                <span>
+                    Ingresa tus credenciales para acceder
+                    al sistema.
+                </span>
+
+            </div>
+
+
+            <!-- ERROR LOGIN -->
+
+            {% if form.errors %}
+
+            <div class="login-error">
+
+                <div class="login-error-icon">
+                    !
+                </div>
+
+                <div>
+
+                    <strong>
+                        No fue posible iniciar sesión
+                    </strong>
+
+                    <span>
+                        Verifica tu correo electrónico y contraseña.
+                    </span>
+
+                </div>
+
+            </div>
+
+            {% endif %}
+
+
+            <!-- FORMULARIO -->
+
+            <form method="post" class="login-form">
+
+                {% csrf_token %}
+
+
+                <!-- EMAIL -->
+
+                <div class="login-form-group">
+
+                    <label for="{{ form.username.id_for_label }}">
+                        Correo electrónico
+                    </label>
+
+
+                    <div class="login-input-wrapper">
+
+                        <span class="login-input-icon">
+                            @
+                        </span>
+
+                        {{ form.username }}
+
+                    </div>
+
+                </div>
+
+
+                <!-- PASSWORD -->
+
+                <div class="login-form-group">
+
+                    <label for="{{ form.password.id_for_label }}">
+                        Contraseña
+                    </label>
+
+
+                    <div class="login-input-wrapper">
+
+                        <span class="login-input-icon">
+                            ●
+                        </span>
+
+                        {{ form.password }}
+
+                    </div>
+
+                </div>
+
+
+                <!-- NEXT -->
+
+                {% if next %}
+
+                <input type="hidden" name="next" value="{{ next }}">
+
+                {% endif %}
+
+
+                <!-- BOTÓN -->
+
+                <button type="submit" class="btn login-submit">
+                    Iniciar sesión
+                    <span>→</span>
+                </button>
+
+            </form>
+
+
+            <!-- GOOGLE FUTURO -->
+
+            <div class="login-divider">
+
+                <span>
+                    o
+                </span>
+
+            </div>
+
+
+            <button type="button" class="google-login-button" disabled title="Disponible próximamente">
+
+                <span class="google-symbol">
+                    G
+                </span>
+
+                Continuar con Google
+
+            </button>
+
+
+            <p class="login-coming-soon">
+                Inicio de sesión institucional con Google próximamente.
+            </p>
+
+
+            <div class="login-security">
+
+                <span>
+                    🔒
+                </span>
+
+                Acceso exclusivo para usuarios autorizados.
+
+            </div>
+
+        </div>
+
+    </div>
 
 </div>
 

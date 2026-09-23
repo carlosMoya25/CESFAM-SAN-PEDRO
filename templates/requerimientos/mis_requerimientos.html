@@ -1,92 +1,368 @@
 {% extends "base.html" %}
 
 {% block title %}
-Mis solicitudes
+Mis requerimientos | CESFAM San Pedro
 {% endblock %}
+
 
 {% block content %}
 
-<h1>Mis solicitudes</h1>
+<!-- ======================================================
+     ENCABEZADO
+     ====================================================== -->
 
-<p>
-    <a href="{% url 'crear_requerimiento' %}" class="btn">
-        Nueva solicitud
-    </a>
-</p>
+<div class="page-header page-header-actions">
+
+    <div>
+
+        <p class="page-eyebrow">
+            Requerimientos TI
+        </p>
+
+        <h1>
+            Mis requerimientos
+        </h1>
+
+        <p>
+            Consulta el estado y seguimiento de las solicitudes
+            que has registrado.
+        </p>
+
+    </div>
+
+
+    <div>
+
+        <a href="{% url 'crear_requerimiento' %}" class="btn">
+            + Nueva solicitud
+        </a>
+
+    </div>
+
+</div>
+
+
+<!-- ======================================================
+     RESUMEN
+     ====================================================== -->
+
+<div class="request-summary">
+
+    <div class="request-summary-icon">
+        ☷
+    </div>
+
+    <div>
+
+        <span class="request-summary-number">
+            {{ requerimientos|length }}
+        </span>
+
+        <span class="request-summary-label">
+            Solicitudes registradas
+        </span>
+
+    </div>
+
+</div>
+
+
+<!-- ======================================================
+     LISTADO
+     ====================================================== -->
 
 <div class="card">
 
-    <table width="100%" cellpadding="10">
+    <div class="section-header">
 
-        <thead>
-            <tr>
-                <th>ID</th>
-                <th>Solicitud</th>
-                <th>Prioridad</th>
-                <th>Estado</th>
-                <th>Responsable</th>
-                <th>Fecha</th>
-                <th></th>
-            </tr>
-        </thead>
+        <div>
 
-        <tbody>
+            <h2>
+                Historial de solicitudes
+            </h2>
 
-            {% for requerimiento in requerimientos %}
+            <p>
+                Selecciona un requerimiento para revisar su detalle
+                y seguimiento.
+            </p>
 
-            <tr>
+        </div>
 
-                <td>
-                    #{{ requerimiento.id }}
-                </td>
+        <span class="section-counter">
+            {{ requerimientos|length }}
+        </span>
 
-                <td>
-                    {{ requerimiento.titulo }}
-                </td>
+    </div>
 
-                <td>
-                    {{ requerimiento.prioridad }}
-                </td>
 
-                <td>
-                    {{ requerimiento.estado }}
-                </td>
+    {% if requerimientos %}
 
-                <td>
-                    {% if requerimiento.responsable %}
-                    {{ requerimiento.responsable.nombres }}
-                    {{ requerimiento.responsable.apellido_paterno }}
-                    {% else %}
-                    Sin asignar
-                    {% endif %}
-                </td>
+    <div class="table-container">
 
-                <td>
-                    {{ requerimiento.fecha_solicitud|date:"d/m/Y H:i" }}
-                </td>
+        <table class="requests-table">
 
-                <td>
-                    <a href="{% url 'detalle_requerimiento' requerimiento.id %}" class="btn">
-                        Ver
-                    </a>
-                </td>
+            <thead>
 
-            </tr>
+                <tr>
 
-            {% empty %}
+                    <th>
+                        ID
+                    </th>
 
-            <tr>
-                <td colspan="7">
-                    No tienes solicitudes registradas.
-                </td>
-            </tr>
+                    <th>
+                        Solicitud
+                    </th>
 
-            {% endfor %}
+                    <th>
+                        Prioridad
+                    </th>
 
-        </tbody>
+                    <th>
+                        Estado
+                    </th>
 
-    </table>
+                    <th>
+                        Responsable
+                    </th>
+
+                    <th>
+                        Fecha
+                    </th>
+
+                    <th class="table-actions-column">
+                        Acción
+                    </th>
+
+                </tr>
+
+            </thead>
+
+
+            <tbody>
+
+                {% for requerimiento in requerimientos %}
+
+                <tr>
+
+                    <!-- ID -->
+
+                    <td>
+
+                        <span class="request-table-id">
+                            #{{ requerimiento.id }}
+                        </span>
+
+                    </td>
+
+
+                    <!-- SOLICITUD -->
+
+                    <td>
+
+                        <div class="request-table-title">
+                            {{ requerimiento.titulo }}
+                        </div>
+
+                        <div class="table-secondary">
+                            {{ requerimiento.tipo_requerimiento }}
+                        </div>
+
+                    </td>
+
+
+                    <!-- PRIORIDAD -->
+
+                    <td>
+
+                        {% if requerimiento.prioridad.nombre == "Crítica" %}
+
+                        <span class="priority priority-critica">
+                            ● Crítica
+                        </span>
+
+                        {% elif requerimiento.prioridad.nombre == "Alta" %}
+
+                        <span class="priority priority-alta">
+                            ● Alta
+                        </span>
+
+                        {% elif requerimiento.prioridad.nombre == "Media" %}
+
+                        <span class="priority priority-media">
+                            ● Media
+                        </span>
+
+                        {% else %}
+
+                        <span class="priority priority-baja">
+                            ● {{ requerimiento.prioridad.nombre }}
+                        </span>
+
+                        {% endif %}
+
+                    </td>
+
+
+                    <!-- ESTADO -->
+
+                    <td>
+
+                        {% if requerimiento.estado.nombre == "Pendiente" %}
+
+                        <span class="badge badge-warning">
+                            ● Pendiente
+                        </span>
+
+                        {% elif requerimiento.estado.nombre == "Asignado" %}
+
+                        <span class="badge badge-info">
+                            ● Asignado
+                        </span>
+
+                        {% elif requerimiento.estado.nombre == "En proceso" %}
+
+                        <span class="badge badge-warning">
+                            ● En proceso
+                        </span>
+
+                        {% elif requerimiento.estado.nombre == "Resuelto" %}
+
+                        <span class="badge badge-success">
+                            ● Resuelto
+                        </span>
+
+                        {% elif requerimiento.estado.nombre == "Cerrado" %}
+
+                        <span class="badge">
+                            ● Cerrado
+                        </span>
+
+                        {% elif requerimiento.estado.nombre == "Cancelado" %}
+
+                        <span class="badge badge-danger">
+                            ● Cancelado
+                        </span>
+
+                        {% else %}
+
+                        <span class="badge">
+                            {{ requerimiento.estado.nombre }}
+                        </span>
+
+                        {% endif %}
+
+                    </td>
+
+
+                    <!-- RESPONSABLE -->
+
+                    <td>
+
+                        {% if requerimiento.responsable %}
+
+                        <div class="responsible-user">
+
+                            <div class="responsible-avatar">
+
+                                {{ requerimiento.responsable.nombres|slice:":1" }}
+                                {{ requerimiento.responsable.apellido_paterno|slice:":1" }}
+
+                            </div>
+
+
+                            <div>
+
+                                <strong>
+
+                                    {{ requerimiento.responsable.nombres }}
+                                    {{ requerimiento.responsable.apellido_paterno }}
+
+                                </strong>
+
+                                <div class="table-secondary">
+                                    Técnico responsable
+                                </div>
+
+                            </div>
+
+                        </div>
+
+                        {% else %}
+
+                        <span class="unassigned">
+                            Sin asignar
+                        </span>
+
+                        {% endif %}
+
+                    </td>
+
+
+                    <!-- FECHA -->
+
+                    <td>
+
+                        <div>
+                            {{ requerimiento.fecha_solicitud|date:"d/m/Y" }}
+                        </div>
+
+                        <div class="table-secondary">
+                            {{ requerimiento.fecha_solicitud|date:"H:i" }}
+                        </div>
+
+                    </td>
+
+
+                    <!-- ACCIÓN -->
+
+                    <td class="table-actions-column">
+
+                        <a href="{% url 'detalle_requerimiento' requerimiento.id %}" class="btn btn-small">
+                            Ver detalle →
+                        </a>
+
+                    </td>
+
+                </tr>
+
+                {% endfor %}
+
+            </tbody>
+
+        </table>
+
+    </div>
+
+
+    {% else %}
+
+    <!-- SIN SOLICITUDES -->
+
+    <div class="empty-state request-empty-state">
+
+        <div class="empty-icon">
+            ☷
+        </div>
+
+        <strong>
+            Aún no tienes requerimientos
+        </strong>
+
+        <p>
+            Cuando registres una solicitud podrás consultar
+            aquí su estado y seguimiento.
+        </p>
+
+
+        <a href="{% url 'crear_requerimiento' %}" class="btn" style="margin-top:15px;">
+            + Crear mi primera solicitud
+        </a>
+
+    </div>
+
+    {% endif %}
 
 </div>
+
 
 {% endblock %}

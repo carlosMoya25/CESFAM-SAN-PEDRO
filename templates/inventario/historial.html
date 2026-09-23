@@ -1,0 +1,77 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<h1>Historial de movimientos</h1>
+
+<div class="card">
+
+    <a class="btn" href="{% url 'inventario:panel' %}">
+        Volver al inventario
+    </a>
+
+</div>
+
+
+{% for movimiento in movimientos %}
+
+<div class="card">
+
+    <h3>
+        Movimiento #{{ movimiento.id }}
+        — {{ movimiento.tipo_movimiento.nombre }}
+    </h3>
+
+    <p>
+        <strong>Fecha:</strong>
+        {{ movimiento.fecha|date:"d/m/Y H:i" }}
+    </p>
+
+    {% if movimiento.anexo_origen %}
+    <p>
+        <strong>Origen:</strong>
+        {{ movimiento.anexo_origen.nombre }}
+    </p>
+    {% endif %}
+
+    {% if movimiento.anexo_destino %}
+    <p>
+        <strong>Destino:</strong>
+        {{ movimiento.anexo_destino.nombre }}
+    </p>
+    {% endif %}
+
+    <p>
+        <strong>Registrado por:</strong>
+        {{ movimiento.usuario.email }}
+    </p>
+
+    {% if movimiento.motivo %}
+    <p>
+        <strong>Motivo:</strong>
+        {{ movimiento.motivo }}
+    </p>
+    {% endif %}
+
+    <strong>Artículos:</strong>
+
+    <ul>
+        {% for detalle in movimiento.detalles.all %}
+        <li>
+            {{ detalle.articulo.nombre }}
+            — {{ detalle.cantidad }} unidad(es)
+        </li>
+        {% endfor %}
+    </ul>
+
+</div>
+
+{% empty %}
+
+<div class="card">
+    No existen movimientos registrados.
+</div>
+
+{% endfor %}
+
+{% endblock %}

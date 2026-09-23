@@ -23,38 +23,50 @@ urlpatterns = [
     ),
 
     path(
-    "tecnico/",
-    views.panel_tecnico,
-    name="panel_tecnico",
-),
+        "tecnico/",
+        views.panel_tecnico,
+        name="panel_tecnico",
+    ),
 
-path(
-    "tecnico/<int:pk>/",
-    views.detalle_tecnico,
-    name="detalle_tecnico",
-),
-path(
-    "tecnico/<int:pk>/iniciar/",
-    views.iniciar_atencion,
-    name="iniciar_atencion",
-),
+    path(
+        "tecnico/<int:pk>/",
+        views.detalle_tecnico,
+        name="detalle_tecnico",
+    ),
+    path(
+        "tecnico/<int:pk>/asignarme/",
+        views.asignarme_requerimiento,
+        name="asignarme_requerimiento",
+    ),
 
-path(
-    "tecnico/<int:pk>/observacion/",
-    views.agregar_observacion,
-    name="agregar_observacion",
-),
 
-path(
-    "tecnico/<int:pk>/resolver/",
-    views.resolver_requerimiento,
-    name="resolver_requerimiento",
-),
+    path(
+        "tecnico/<int:pk>/iniciar/",
+        views.iniciar_atencion,
+        name="iniciar_atencion",
+    ),
 
-path(
-    "tecnico/<int:pk>/cerrar/",
-    views.cerrar_requerimiento,
-    name="cerrar_requerimiento",
-),
+    path(
+        "tecnico/<int:pk>/observacion/",
+        views.agregar_observacion,
+        name="agregar_observacion",
+    ),
 
+    path(
+        "tecnico/<int:pk>/resolver/",
+        views.resolver_requerimiento,
+        name="resolver_requerimiento",
+    ),
+
+    path(
+        "tecnico/<int:pk>/cerrar/",
+        views.cerrar_requerimiento,
+        name="cerrar_requerimiento",
+    ),
+
+    path(
+        "tecnico/<int:pk>/recurso/",
+        views.agregar_recurso,
+        name="agregar_recurso",
+    ),
 ]

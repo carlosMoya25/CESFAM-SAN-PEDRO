@@ -1,246 +1,702 @@
 {% extends "base.html" %}
 
 {% block title %}
-Panel Técnico TI
+Panel Técnico | CESFAM San Pedro
 {% endblock %}
+
 
 {% block content %}
 
-<h1>Panel Técnico TI</h1>
+<!-- ======================================================
+     ENCABEZADO
+     ====================================================== -->
 
-{% if messages %}
-{% for message in messages %}
-<div class="card">
-    {{ message }}
-</div>
-{% endfor %}
-{% endif %}
+<div class="page-header">
 
+    <p style="
+        margin:0 0 6px;
+        color:#087ea4;
+        font-size:12px;
+        font-weight:700;
+        text-transform:uppercase;
+        letter-spacing:1px;
+    ">
+        Soporte TI
+    </p>
 
-<div class="card">
+    <h1>
+        Panel Técnico
+    </h1>
 
-    <h2>Requerimientos pendientes</h2>
-
-    <table width="100%" cellpadding="10">
-
-        <thead>
-            <tr>
-                <th>ID</th>
-                <th>Solicitud</th>
-                <th>Solicitante</th>
-                <th>Anexo</th>
-                <th>Prioridad</th>
-                <th>Fecha</th>
-                <th>Acciones</th>
-            </tr>
-        </thead>
-
-        <tbody>
-
-            {% for requerimiento in pendientes %}
-
-            <tr>
-
-                <td>
-                    #{{ requerimiento.id }}
-                </td>
-
-                <td>
-                    {{ requerimiento.titulo }}
-                </td>
-
-                <td>
-                    {{ requerimiento.solicitante.nombres }}
-                    {{ requerimiento.solicitante.apellido_paterno }}
-                </td>
-
-                <td>
-                    {{ requerimiento.anexo }}
-                </td>
-
-                <td>
-                    {{ requerimiento.prioridad }}
-                </td>
-
-                <td>
-                    {{ requerimiento.fecha_solicitud|date:"d/m/Y H:i" }}
-                </td>
-
-                <td>
-
-                    <a href="{% url 'detalle_tecnico' requerimiento.id %}" class="btn">
-                        Ver
-                    </a>
-
-                    <form method="post" action="{% url 'asignarme_requerimiento' requerimiento.id %}"
-                        style="display:inline;">
-
-                        {% csrf_token %}
-
-                        <button type="submit" class="btn">
-                            Asignarme
-                        </button>
-
-                    </form>
-
-                </td>
-
-            </tr>
-
-            {% empty %}
-
-            <tr>
-                <td colspan="7">
-                    No existen requerimientos pendientes.
-                </td>
-            </tr>
-
-            {% endfor %}
-
-        </tbody>
-
-    </table>
+    <p>
+        Gestión y seguimiento de requerimientos informáticos.
+    </p>
 
 </div>
 
 
-<div class="card">
+<!-- ======================================================
+     RESUMEN
+     ====================================================== -->
 
-    <h2>Mis requerimientos asignados</h2>
+<div class="dashboard-grid">
 
-    <table width="100%" cellpadding="10">
+    <div class="stat-card stat-warning">
 
-        <thead>
+        <div class="stat-icon">
+            ◷
+        </div>
 
-            <tr>
-                <th>ID</th>
-                <th>Solicitud</th>
-                <th>Prioridad</th>
-                <th>Estado</th>
-                <th>Fecha</th>
-                <th></th>
-            </tr>
+        <div>
+            <div class="stat-label">
+                Pendientes
+            </div>
 
-        </thead>
+            <div class="stat-number">
+                {{ pendientes|length }}
+            </div>
 
-        <tbody>
+            <div class="stat-label">
+                Sin técnico asignado
+            </div>
+        </div>
 
-            {% for requerimiento in mis_asignados %}
+    </div>
 
-            <tr>
 
-                <td>
-                    #{{ requerimiento.id }}
-                </td>
+    <div class="stat-card stat-info">
 
-                <td>
-                    {{ requerimiento.titulo }}
-                </td>
+        <div class="stat-icon">
+            ⚙
+        </div>
 
-                <td>
-                    {{ requerimiento.prioridad }}
-                </td>
+        <div>
+            <div class="stat-label">
+                Mis asignados
+            </div>
 
-                <td>
-                    {{ requerimiento.estado }}
-                </td>
+            <div class="stat-number">
+                {{ mis_asignados|length }}
+            </div>
 
-                <td>
-                    {{ requerimiento.fecha_solicitud|date:"d/m/Y H:i" }}
-                </td>
+            <div class="stat-label">
+                Requerimientos asignados
+            </div>
+        </div>
 
-                <td>
-                    <a href="{% url 'detalle_tecnico' requerimiento.id %}" class="btn">
-                        Gestionar
-                    </a>
-                </td>
+    </div>
 
-            </tr>
 
-            {% empty %}
+    <div class="stat-card stat-success">
 
-            <tr>
-                <td colspan="6">
-                    No tienes requerimientos asignados.
-                </td>
-            </tr>
+        <div class="stat-icon">
+            ✓
+        </div>
 
-            {% endfor %}
+        <div>
+            <div class="stat-label">
+                Total visible
+            </div>
 
-        </tbody>
+            <div class="stat-number">
+                {{ requerimientos|length }}
+            </div>
 
-    </table>
+            <div class="stat-label">
+                Requerimientos registrados
+            </div>
+        </div>
+
+    </div>
 
 </div>
 
 
+<!-- ======================================================
+     REQUERIMIENTOS PENDIENTES
+     ====================================================== -->
+
 <div class="card">
 
-    <h2>Todos los requerimientos</h2>
+    <div class="section-header">
 
-    <table width="100%" cellpadding="10">
+        <div>
+            <h2>
+                Requerimientos pendientes
+            </h2>
 
-        <thead>
+            <p>
+                Solicitudes que todavía no tienen un técnico responsable.
+            </p>
+        </div>
 
-            <tr>
-                <th>ID</th>
-                <th>Solicitud</th>
-                <th>Estado</th>
-                <th>Responsable</th>
-                <th></th>
-            </tr>
+        <span class="section-counter">
+            {{ pendientes|length }}
+        </span>
 
-        </thead>
+    </div>
 
-        <tbody>
 
-            {% for requerimiento in requerimientos %}
+    <div class="requirement-list">
 
-            <tr>
+        {% for req in pendientes %}
 
-                <td>
-                    #{{ requerimiento.id }}
-                </td>
+        <div class="requirement-card">
 
-                <td>
-                    {{ requerimiento.titulo }}
-                </td>
+            <div class="requirement-header">
 
-                <td>
-                    {{ requerimiento.estado }}
-                </td>
+                <div>
 
-                <td>
+                    <div class="requirement-id">
+                        REQUERIMIENTO #{{ req.id }}
+                    </div>
 
-                    {% if requerimiento.responsable %}
+                    <h3 class="requirement-title">
+                        {{ req.titulo }}
+                    </h3>
 
-                    {{ requerimiento.responsable.nombres }}
-                    {{ requerimiento.responsable.apellido_paterno }}
+                </div>
+
+
+                <!-- PRIORIDAD -->
+
+                {% if req.prioridad.nombre == "Crítica" %}
+
+                <span class="priority priority-critica">
+                    ● Crítica
+                </span>
+
+                {% elif req.prioridad.nombre == "Alta" %}
+
+                <span class="priority priority-alta">
+                    ● Alta
+                </span>
+
+                {% elif req.prioridad.nombre == "Media" %}
+
+                <span class="priority priority-media">
+                    ● Media
+                </span>
+
+                {% else %}
+
+                <span class="priority priority-baja">
+                    ● {{ req.prioridad.nombre }}
+                </span>
+
+                {% endif %}
+
+            </div>
+
+
+            <div class="requirement-meta">
+
+                <div>
+                    <span class="meta-label">
+                        Solicitante
+                    </span>
+
+                    <span class="meta-value">
+                        {{ req.solicitante.nombres }}
+                        {{ req.solicitante.apellido_paterno }}
+                    </span>
+                </div>
+
+
+                <div>
+                    <span class="meta-label">
+                        Anexo
+                    </span>
+
+                    <span class="meta-value">
+                        {{ req.anexo }}
+                    </span>
+                </div>
+
+
+                <div>
+                    <span class="meta-label">
+                        Tipo
+                    </span>
+
+                    <span class="meta-value">
+                        {{ req.tipo_requerimiento }}
+                    </span>
+                </div>
+
+
+                <div>
+                    <span class="meta-label">
+                        Fecha
+                    </span>
+
+                    <span class="meta-value">
+                        {{ req.fecha_solicitud|date:"d/m/Y H:i" }}
+                    </span>
+                </div>
+
+            </div>
+
+
+            <div class="requirement-description">
+                {{ req.descripcion|truncatechars:180 }}
+            </div>
+
+
+            <div class="requirement-actions">
+
+                <a href="{% url 'detalle_tecnico' req.id %}" class="btn btn-secondary">
+                    Ver detalle
+                </a>
+
+
+                <form method="post" action="{% url 'asignarme_requerimiento' req.id %}" style="margin:0;">
+
+                    {% csrf_token %}
+
+                    <button type="submit" class="btn">
+                        + Asignarme
+                    </button>
+
+                </form>
+
+            </div>
+
+        </div>
+
+
+        {% empty %}
+
+        <div class="empty-state">
+
+            <div class="empty-icon">
+                ✓
+            </div>
+
+            <strong>
+                No existen requerimientos pendientes
+            </strong>
+
+            <p>
+                Todas las solicitudes tienen un responsable asignado.
+            </p>
+
+        </div>
+
+        {% endfor %}
+
+    </div>
+
+</div>
+
+
+<!-- ======================================================
+     MIS REQUERIMIENTOS
+     ====================================================== -->
+
+<div class="card">
+
+    <div class="section-header">
+
+        <div>
+
+            <h2>
+                Mis requerimientos
+            </h2>
+
+            <p>
+                Solicitudes actualmente asignadas a tu usuario.
+            </p>
+
+        </div>
+
+        <span class="section-counter">
+            {{ mis_asignados|length }}
+        </span>
+
+    </div>
+
+
+    <div class="requirement-list">
+
+        {% for req in mis_asignados %}
+
+        <div class="requirement-card">
+
+            <div class="requirement-header">
+
+                <div>
+
+                    <div class="requirement-id">
+                        REQUERIMIENTO #{{ req.id }}
+                    </div>
+
+                    <h3 class="requirement-title">
+                        {{ req.titulo }}
+                    </h3>
+
+                </div>
+
+
+                <div style="
+                    display:flex;
+                    gap:8px;
+                    flex-wrap:wrap;
+                    justify-content:flex-end;
+                ">
+
+                    <!-- ESTADO -->
+
+                    {% if req.estado.nombre == "Asignado" %}
+
+                    <span class="badge badge-info">
+                        ● Asignado
+                    </span>
+
+                    {% elif req.estado.nombre == "En proceso" %}
+
+                    <span class="badge badge-warning">
+                        ● En proceso
+                    </span>
+
+                    {% elif req.estado.nombre == "Resuelto" %}
+
+                    <span class="badge badge-success">
+                        ● Resuelto
+                    </span>
+
+                    {% elif req.estado.nombre == "Cerrado" %}
+
+                    <span class="badge">
+                        ● Cerrado
+                    </span>
 
                     {% else %}
 
-                    Sin asignar
+                    <span class="badge">
+                        {{ req.estado.nombre }}
+                    </span>
 
                     {% endif %}
 
-                </td>
 
-                <td>
+                    <!-- PRIORIDAD -->
 
-                    <a href="{% url 'detalle_tecnico' requerimiento.id %}" class="btn">
-                        Ver
-                    </a>
+                    {% if req.prioridad.nombre == "Crítica" %}
 
-                </td>
+                    <span class="priority priority-critica">
+                        Crítica
+                    </span>
 
-            </tr>
+                    {% elif req.prioridad.nombre == "Alta" %}
 
-            {% endfor %}
+                    <span class="priority priority-alta">
+                        Alta
+                    </span>
 
-        </tbody>
+                    {% elif req.prioridad.nombre == "Media" %}
 
-    </table>
+                    <span class="priority priority-media">
+                        Media
+                    </span>
+
+                    {% else %}
+
+                    <span class="priority priority-baja">
+                        {{ req.prioridad.nombre }}
+                    </span>
+
+                    {% endif %}
+
+                </div>
+
+            </div>
+
+
+            <div class="requirement-meta">
+
+                <div>
+                    <span class="meta-label">
+                        Solicitante
+                    </span>
+
+                    <span class="meta-value">
+                        {{ req.solicitante.nombres }}
+                        {{ req.solicitante.apellido_paterno }}
+                    </span>
+                </div>
+
+
+                <div>
+                    <span class="meta-label">
+                        Anexo
+                    </span>
+
+                    <span class="meta-value">
+                        {{ req.anexo }}
+                    </span>
+                </div>
+
+
+                <div>
+                    <span class="meta-label">
+                        Tipo
+                    </span>
+
+                    <span class="meta-value">
+                        {{ req.tipo_requerimiento }}
+                    </span>
+                </div>
+
+
+                <div>
+                    <span class="meta-label">
+                        Fecha
+                    </span>
+
+                    <span class="meta-value">
+                        {{ req.fecha_solicitud|date:"d/m/Y H:i" }}
+                    </span>
+                </div>
+
+            </div>
+
+
+            <div class="requirement-description">
+                {{ req.descripcion|truncatechars:180 }}
+            </div>
+
+
+            <div class="requirement-actions">
+
+                <a href="{% url 'detalle_tecnico' req.id %}" class="btn">
+                    Gestionar requerimiento →
+                </a>
+
+            </div>
+
+        </div>
+
+
+        {% empty %}
+
+        <div class="empty-state">
+
+            <div class="empty-icon">
+                ☷
+            </div>
+
+            <strong>
+                No tienes requerimientos asignados
+            </strong>
+
+            <p>
+                Puedes tomar uno desde la sección de pendientes.
+            </p>
+
+        </div>
+
+        {% endfor %}
+
+    </div>
 
 </div>
+
+
+<!-- ======================================================
+     TODOS LOS REQUERIMIENTOS
+     ====================================================== -->
+
+<div class="card">
+
+    <div class="section-header">
+
+        <div>
+            <h2>
+                Todos los requerimientos
+            </h2>
+
+            <p>
+                Vista general de las solicitudes registradas.
+            </p>
+        </div>
+
+    </div>
+
+
+    <div class="table-container">
+
+        <table>
+
+            <thead>
+
+                <tr>
+                    <th>#</th>
+                    <th>Requerimiento</th>
+                    <th>Solicitante</th>
+                    <th>Prioridad</th>
+                    <th>Estado</th>
+                    <th>Responsable</th>
+                    <th>Fecha</th>
+                    <th></th>
+                </tr>
+
+            </thead>
+
+
+            <tbody>
+
+                {% for req in requerimientos %}
+
+                <tr>
+
+                    <td>
+                        #{{ req.id }}
+                    </td>
+
+
+                    <td>
+                        <strong>
+                            {{ req.titulo }}
+                        </strong>
+
+                        <div class="table-secondary">
+                            {{ req.tipo_requerimiento }}
+                        </div>
+                    </td>
+
+
+                    <td>
+                        {{ req.solicitante.nombres }}
+                        {{ req.solicitante.apellido_paterno }}
+                    </td>
+
+
+                    <!-- PRIORIDAD -->
+
+                    <td>
+
+                        {% if req.prioridad.nombre == "Crítica" %}
+
+                        <span class="priority priority-critica">
+                            Crítica
+                        </span>
+
+                        {% elif req.prioridad.nombre == "Alta" %}
+
+                        <span class="priority priority-alta">
+                            Alta
+                        </span>
+
+                        {% elif req.prioridad.nombre == "Media" %}
+
+                        <span class="priority priority-media">
+                            Media
+                        </span>
+
+                        {% else %}
+
+                        <span class="priority priority-baja">
+                            {{ req.prioridad.nombre }}
+                        </span>
+
+                        {% endif %}
+
+                    </td>
+
+
+                    <!-- ESTADO -->
+
+                    <td>
+
+                        {% if req.estado.nombre == "Pendiente" %}
+
+                        <span class="badge badge-warning">
+                            Pendiente
+                        </span>
+
+                        {% elif req.estado.nombre == "Asignado" %}
+
+                        <span class="badge badge-info">
+                            Asignado
+                        </span>
+
+                        {% elif req.estado.nombre == "En proceso" %}
+
+                        <span class="badge badge-warning">
+                            En proceso
+                        </span>
+
+                        {% elif req.estado.nombre == "Resuelto" %}
+
+                        <span class="badge badge-success">
+                            Resuelto
+                        </span>
+
+                        {% else %}
+
+                        <span class="badge">
+                            {{ req.estado.nombre }}
+                        </span>
+
+                        {% endif %}
+
+                    </td>
+
+
+                    <td>
+
+                        {% if req.responsable %}
+
+                        {{ req.responsable.nombres }}
+                        {{ req.responsable.apellido_paterno }}
+
+                        {% else %}
+
+                        <span class="table-secondary">
+                            Sin asignar
+                        </span>
+
+                        {% endif %}
+
+                    </td>
+
+
+                    <td>
+                        {{ req.fecha_solicitud|date:"d/m/Y" }}
+                    </td>
+
+
+                    <td>
+
+                        <a href="{% url 'detalle_tecnico' req.id %}" class="table-link">
+                            Ver →
+                        </a>
+
+                    </td>
+
+                </tr>
+
+
+                {% empty %}
+
+                <tr>
+
+                    <td colspan="8" style="text-align:center;">
+                        No existen requerimientos registrados.
+                    </td>
+
+                </tr>
+
+                {% endfor %}
+
+            </tbody>
+
+        </table>
+
+    </div>
+
+</div>
+
 
 {% endblock %}
