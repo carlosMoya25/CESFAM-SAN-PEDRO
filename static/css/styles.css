@@ -2368,3 +2368,223 @@ textarea {
     }
 
 }
+
+/* =========================================================
+   BLOQUEO DE INICIO DE SESIÓN
+   ========================================================= */
+
+.lockout-card {
+    width: 100%;
+}
+
+.lockout-icon {
+    width: 64px;
+    height: 64px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    margin-bottom: 22px;
+
+    border-radius: 18px;
+
+    background: var(--danger-light);
+    color: var(--danger);
+
+    font-size: 30px;
+    font-weight: 700;
+}
+
+.lockout-eyebrow {
+    margin: 0 0 7px;
+
+    color: var(--danger);
+
+    font-size: 11px;
+    font-weight: 700;
+
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+}
+
+.lockout-card h2 {
+    margin: 0 0 10px;
+
+    color: var(--text);
+
+    font-size: 30px;
+    line-height: 1.2;
+}
+
+.lockout-description {
+    margin: 0 0 25px;
+
+    color: var(--text-muted);
+
+    font-size: 14px;
+    line-height: 1.6;
+}
+
+
+/* AVISO 15 MINUTOS */
+
+.lockout-warning {
+    display: flex;
+    align-items: center;
+
+    gap: 13px;
+
+    margin-bottom: 22px;
+
+    padding: 16px;
+
+    border: 1px solid #fde68a;
+    border-radius: 10px;
+
+    background: var(--warning-light);
+}
+
+.lockout-warning-icon {
+    flex-shrink: 0;
+
+    width: 40px;
+    height: 40px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    border-radius: 50%;
+
+    background: var(--warning);
+    color: white;
+
+    font-size: 18px;
+}
+
+.lockout-warning strong {
+    display: block;
+
+    margin-bottom: 3px;
+
+    color: #92400e;
+
+    font-size: 13px;
+}
+
+.lockout-warning span {
+    display: block;
+
+    color: #a16207;
+
+    font-size: 12px;
+    line-height: 1.5;
+}
+
+
+/* INFORMACIÓN */
+
+.lockout-security-info {
+    margin-bottom: 25px;
+
+    padding: 15px;
+
+    border-left: 3px solid var(--primary);
+
+    border-radius: 0 8px 8px 0;
+
+    background: #f8fafc;
+}
+
+.lockout-security-info strong {
+    color: #334155;
+
+    font-size: 13px;
+}
+
+.lockout-security-info p {
+    margin: 5px 0 0;
+
+    color: var(--text-muted);
+
+    font-size: 12px;
+    line-height: 1.6;
+}
+
+
+/* BOTÓN */
+
+.lockout-button {
+    display: flex;
+
+    text-decoration: none;
+}
+
+
+/* AYUDA */
+
+.lockout-help {
+    margin: 18px 0 0;
+
+    text-align: center;
+
+    color: #94a3b8;
+
+    font-size: 11px;
+    line-height: 1.5;
+}
+
+
+
+/* =========================================================
+   SESIÓN EXPIRADA
+   ========================================================= */
+
+.session-expired-alert {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+
+    margin-bottom: 22px;
+    padding: 15px;
+
+    background: #fff7ed;
+    border: 1px solid #fed7aa;
+    border-radius: 10px;
+}
+
+.session-expired-icon {
+    flex-shrink: 0;
+
+    width: 38px;
+    height: 38px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    background: #ffedd5;
+    color: #ea580c;
+
+    border-radius: 50%;
+
+    font-size: 18px;
+}
+
+.session-expired-alert strong {
+    display: block;
+
+    margin-bottom: 4px;
+
+    color: #9a3412;
+    font-size: 13px;
+}
+
+.session-expired-alert p {
+    margin: 0;
+
+    color: #c2410c;
+    font-size: 12px;
+    line-height: 1.55;
+}

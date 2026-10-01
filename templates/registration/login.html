@@ -9,7 +9,9 @@ Iniciar sesión | CESFAM San Pedro
 
 <div class="login-page">
 
-    <!--PANEL INSTITUCIONAL -->
+    <!-- =====================================================
+         PANEL INSTITUCIONAL
+         ===================================================== -->
 
     <div class="login-brand-panel">
 
@@ -104,15 +106,16 @@ Iniciar sesión | CESFAM San Pedro
     </div>
 
 
-    <!-- LOGIN -->
+    <!-- =====================================================
+         PANEL LOGIN
+         ===================================================== -->
 
     <div class="login-form-panel">
-
 
         <div class="login-box">
 
 
-            <!-- LOGO MOBILE -->
+            <!-- ENCABEZADO -->
 
             <div class="login-heading">
 
@@ -132,7 +135,40 @@ Iniciar sesión | CESFAM San Pedro
             </div>
 
 
-            <!-- ERROR LOGIN -->
+            <!-- =================================================
+                 SESIÓN EXPIRADA POR INACTIVIDAD
+                 ================================================= -->
+
+            {% if request.GET.expired == "1" %}
+
+            <div class="session-expired-alert">
+
+                <div class="session-expired-icon">
+                    ⏱
+                </div>
+
+                <div>
+
+                    <strong>
+                        Tu sesión ha expirado por inactividad.
+                    </strong>
+
+                    <p>
+                        Por seguridad, cerramos automáticamente las sesiones
+                        después de 30 minutos sin actividad.
+                        Inicia sesión nuevamente para continuar.
+                    </p>
+
+                </div>
+
+            </div>
+
+            {% endif %}
+
+
+            <!-- =================================================
+                 ERROR DE LOGIN
+                 ================================================= -->
 
             {% if form.errors %}
 
@@ -159,7 +195,9 @@ Iniciar sesión | CESFAM San Pedro
             {% endif %}
 
 
-            <!-- FORMULARIO -->
+            <!-- =================================================
+                 FORMULARIO
+                 ================================================= -->
 
             <form method="post" class="login-form">
 
@@ -188,7 +226,7 @@ Iniciar sesión | CESFAM San Pedro
                 </div>
 
 
-                <!-- PASSWORD -->
+                <!-- CONTRASEÑA -->
 
                 <div class="login-form-group">
 
@@ -210,7 +248,9 @@ Iniciar sesión | CESFAM San Pedro
                 </div>
 
 
-                <!-- NEXT -->
+                <!-- =================================================
+                     REDIRECCIÓN DESPUÉS DEL LOGIN
+                     ================================================= -->
 
                 {% if next %}
 
@@ -219,17 +259,24 @@ Iniciar sesión | CESFAM San Pedro
                 {% endif %}
 
 
-                <!-- BOTÓN -->
+                <!-- BOTÓN LOGIN -->
 
                 <button type="submit" class="btn login-submit">
+
                     Iniciar sesión
-                    <span>→</span>
+
+                    <span>
+                        →
+                    </span>
+
                 </button>
 
             </form>
 
 
-            <!-- GOOGLE FUTURO -->
+            <!-- =================================================
+                 GOOGLE - IMPLEMENTACIÓN FUTURA
+                 ================================================= -->
 
             <div class="login-divider">
 
@@ -255,6 +302,8 @@ Iniciar sesión | CESFAM San Pedro
                 Inicio de sesión institucional con Google próximamente.
             </p>
 
+
+            <!-- SEGURIDAD -->
 
             <div class="login-security">
 

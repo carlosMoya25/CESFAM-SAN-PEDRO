@@ -14,6 +14,8 @@ from pathlib import Path
 from dotenv import load_dotenv
 import os
 
+from datetime import timedelta
+
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -41,6 +43,8 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
 
+    'axes',
+
     "organizacion",
     "usuarios",
     "requerimientos",
@@ -56,6 +60,9 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+
+    "axes.middleware.AxesMiddleware",
+    "core.middleware.SessionExpiredMiddleware",
 ]
 
 ROOT_URLCONF = 'config.urls'
@@ -145,3 +152,60 @@ USE_TZ = True
 LOGIN_URL = "login"
 LOGIN_REDIRECT_URL = "dashboard"
 LOGOUT_REDIRECT_URL = "login"
+
+
+AUTHENTICATION_BACKENDS = [
+    "axes.backends.AxesStandaloneBackend",
+    "django.contrib.auth.backends.ModelBackend",
+]
+
+# ==========================================================
+# SEGURIDAD DE INICIO DE SESIÓN - DJANGO AXES
+# ==========================================================
+
+# Máximo de intentos fallidos
+AXES_FAILURE_LIMIT = 2
+
+# Bloqueo temporal de 15 minutos
+AXES_COOLOFF_TIME = timedelta(minutes=1)
+
+# Reiniciar contador después de un login correcto
+AXES_RESET_ON_SUCCESS = True
+
+# Nuestro usuario se identifica mediante email
+AXES_USERNAME_FORM_FIELD = "username"
+
+# Bloquear por usuario/correo y no por IP
+AXES_LOCKOUT_PARAMETERS = ["username"]
+
+# Ventana móvil para los intentos
+AXES_USE_ATTEMPT_EXPIRATION = True
+
+# Informar al cliente cuánto dura el bloqueo
+AXES_ENABLE_RETRY_AFTER_HEADER = True
+# Página personalizada cuando la cuenta queda bloqueada
+AXES_LOCKOUT_TEMPLATE = "registration/locked_out.html"
+
+
+# ==========================================================
+# SEGURIDAD DE SESIONES
+# ==========================================================
+
+# 30 minutos
+#SESSION_COOKIE_AGE = max_age=(30 * 60) + 300,
+
+#pruebas de 1 minuto
+SESSION_COOKIE_AGE = max_age=60
+
+# Renovar la expiración con cada solicitud del usuario.
+# Mientras siga utilizando el sistema, la sesión continúa activa.
+SESSION_SAVE_EVERY_REQUEST = True
+
+# Si el navegador se cierra, finalizar la sesión.
+SESSION_EXPIRE_AT_BROWSER_CLOSE = True
+
+# La cookie de sesión no puede ser leída desde JavaScript.
+# SESSION_COOKIE_HTTPONLY = True
+
+# # SameSite ayuda frente a solicitudes entre sitios.
+# SESSION_COOKIE_SAMESITE = "Lax"
