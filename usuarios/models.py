@@ -59,3 +59,56 @@ class Usuario(AbstractUser):
 
     def __str__(self):
         return f"{self.nombres} {self.apellido_paterno} ({self.email})"
+
+
+
+class HistorialSeguridad(models.Model):
+
+    TIPO_ACCION_CHOICES = [
+        ("DESBLOQUEO_USUARIO", "Desbloqueo de usuario"),
+        ("REINICIO_INTENTOS", "Reinicio de intentos"),
+        ("BLOQUEO_USUARIO", "Bloqueo de usuario"),
+        ("OTRO", "Otra acción de seguridad"),
+    ]
+
+    tipo_accion = models.CharField(
+        max_length=50,
+        choices=TIPO_ACCION_CHOICES
+    )
+
+    usuario_afectado = models.ForeignKey(
+        "usuarios.Usuario",
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="eventos_seguridad_recibidos"
+    )
+
+    email_afectado = models.EmailField()
+
+    realizado_por = models.ForeignKey(
+        "usuarios.Usuario",
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="acciones_seguridad_realizadas"
+    )
+
+    descripcion = models.TextField(
+        blank=True
+    )
+
+    fecha = models.DateTimeField(
+        auto_now_add=True
+    )
+
+    class Meta:
+        verbose_name = "Historial de seguridad"
+        verbose_name_plural = "Historial de seguridad"
+        ordering = ["-fecha"]
+
+    def __str__(self):
+        return (
+            f"{self.get_tipo_accion_display()} - "
+            f"{self.email_afectado}"
+        )

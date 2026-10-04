@@ -2588,3 +2588,343 @@ textarea {
     font-size: 12px;
     line-height: 1.55;
 }
+
+/* =========================================================
+   PANEL DE SEGURIDAD
+   ========================================================= */
+
+.security-card-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    margin-bottom: 22px;
+}
+
+.security-card-header h2 {
+    margin: 0 0 5px;
+
+    color: var(--text);
+    font-size: 18px;
+}
+
+.security-card-header p {
+    margin: 0;
+
+    color: var(--text-muted);
+    font-size: 13px;
+}
+
+
+/* TABLA */
+
+.security-table {
+    width: 100%;
+
+    border-collapse: collapse;
+}
+
+.security-table th {
+    padding: 12px 15px;
+
+    text-align: left;
+
+    color: var(--text-muted);
+
+    font-size: 11px;
+    font-weight: 700;
+
+    text-transform: uppercase;
+    letter-spacing: .5px;
+
+    border-bottom: 1px solid var(--border);
+}
+
+.security-table td {
+    padding: 15px;
+
+    vertical-align: middle;
+
+    border-bottom: 1px solid var(--border);
+
+    font-size: 13px;
+}
+
+.security-table tbody tr:hover {
+    background: #f8fafc;
+}
+
+
+/* USUARIO */
+
+.security-user {
+    display: flex;
+    align-items: center;
+
+    gap: 10px;
+}
+
+.security-avatar {
+    width: 36px;
+    height: 36px;
+
+    flex-shrink: 0;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    border-radius: 10px;
+
+    background: var(--primary-light);
+    color: var(--primary);
+
+    font-weight: 700;
+}
+
+.security-user strong {
+    color: var(--text);
+}
+
+.security-email {
+    color: var(--text-muted);
+}
+
+
+/* INTENTOS */
+
+.security-attempts {
+    display: inline-flex;
+
+    min-width: 30px;
+    height: 30px;
+
+    align-items: center;
+    justify-content: center;
+
+    padding: 0 8px;
+
+    border-radius: 8px;
+
+    background: var(--warning-light);
+    color: #92400e;
+}
+
+.security-attempts-danger {
+    background: var(--danger-light);
+    color: var(--danger);
+}
+
+
+/* BOTÓN */
+
+.security-unlock-button {
+    border: 1px solid #bbf7d0;
+
+    background: #f0fdf4;
+    color: #15803d;
+
+    cursor: pointer;
+}
+
+.security-unlock-button:hover {
+    background: #dcfce7;
+}
+
+
+/* VACÍO */
+
+.security-empty {
+    padding: 50px 20px;
+
+    text-align: center;
+}
+
+.security-empty-icon {
+    width: 55px;
+    height: 55px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    margin: 0 auto 15px;
+
+    border-radius: 50%;
+
+    background: var(--success-light);
+    color: var(--success);
+
+    font-size: 25px;
+    font-weight: 700;
+}
+
+.security-empty h3 {
+    margin: 0 0 7px;
+
+    color: var(--text);
+}
+
+.security-empty p {
+    margin: 0;
+
+    color: var(--text-muted);
+    font-size: 13px;
+}
+
+
+/* UTILIDADES */
+
+.text-muted {
+    color: var(--text-muted);
+}
+
+
+/* RESPONSIVE */
+
+@media (max-width: 900px) {
+
+    .table-responsive {
+        overflow-x: auto;
+    }
+
+    .security-table {
+        min-width: 800px;
+    }
+}
+
+/* =========================================================
+   HISTORIAL DE SEGURIDAD
+   ========================================================= */
+
+.security-history-card {
+    margin-top: 24px;
+}
+
+.security-timeline {
+    position: relative;
+}
+
+.security-history-item {
+    position: relative;
+
+    display: flex;
+    gap: 16px;
+
+    padding: 18px 0;
+
+    border-bottom: 1px solid var(--border);
+}
+
+.security-history-item:last-child {
+    border-bottom: none;
+}
+
+
+/* ICONO */
+
+.security-history-icon {
+    width: 42px;
+    height: 42px;
+
+    flex-shrink: 0;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    border-radius: 12px;
+
+    background: #f1f5f9;
+    color: #475569;
+
+    font-size: 17px;
+}
+
+.security-history-success {
+    background: var(--success-light);
+    color: var(--success);
+}
+
+.security-history-warning {
+    background: var(--warning-light);
+    color: #d97706;
+}
+
+.security-history-danger {
+    background: var(--danger-light);
+    color: var(--danger);
+}
+
+
+/* CONTENIDO */
+
+.security-history-content {
+    flex: 1;
+    min-width: 0;
+}
+
+.security-history-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 20px;
+}
+
+.security-history-header strong {
+    display: block;
+
+    margin-bottom: 3px;
+
+    color: var(--text);
+
+    font-size: 14px;
+}
+
+.security-history-email {
+    color: var(--primary);
+
+    font-size: 12px;
+    font-weight: 600;
+}
+
+.security-history-header time {
+    flex-shrink: 0;
+
+    color: var(--text-muted);
+
+    font-size: 11px;
+}
+
+.security-history-content p {
+    margin: 9px 0;
+
+    color: var(--text-muted);
+
+    font-size: 13px;
+    line-height: 1.55;
+}
+
+.security-history-admin {
+    color: #94a3b8;
+
+    font-size: 11px;
+}
+
+.security-history-admin strong {
+    display: inline;
+
+    color: #64748b;
+    font-size: 11px;
+}
+
+
+/* RESPONSIVE */
+
+@media (max-width: 700px) {
+
+    .security-history-header {
+        flex-direction: column;
+        gap: 5px;
+    }
+}

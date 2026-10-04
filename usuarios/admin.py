@@ -1,6 +1,6 @@
 from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin
-from .models import Usuario
+from .models import Usuario, HistorialSeguridad
 
 
 @admin.register(Usuario)
@@ -82,3 +82,39 @@ class UsuarioAdmin(UserAdmin):
             ),
         }),
     )
+
+@admin.register(HistorialSeguridad)
+class HistorialSeguridadAdmin(admin.ModelAdmin):
+
+    list_display = (
+        "fecha",
+        "tipo_accion",
+        "email_afectado",
+        "realizado_por",
+    )
+
+    list_filter = (
+        "tipo_accion",
+        "fecha",
+    )
+
+    search_fields = (
+        "email_afectado",
+        "usuario_afectado__email",
+        "realizado_por__email",
+    )
+
+    readonly_fields = (
+        "tipo_accion",
+        "usuario_afectado",
+        "email_afectado",
+        "realizado_por",
+        "descripcion",
+        "fecha",
+    )
+
+    def has_add_permission(self, request):
+        return False
+
+    def has_change_permission(self, request, obj=None):
+        return False
