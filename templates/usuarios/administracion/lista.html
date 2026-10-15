@@ -1,0 +1,237 @@
+{% extends "base.html" %}
+
+{% block title %}
+Usuarios | SIGRI
+{% endblock %}
+
+
+{% block content %}
+
+<div class="page-header admin-page-header">
+
+    <div>
+
+        <p class="admin-eyebrow">
+            Administración
+        </p>
+
+        <h1>
+            Usuarios
+        </h1>
+
+        <p>
+            Gestiona las personas autorizadas para acceder al sistema.
+        </p>
+
+    </div>
+
+
+    <a href="{% url 'usuarios:crear_usuario' %}" class="btn btn-primary">
+
+        + Nuevo usuario
+
+    </a>
+
+</div>
+
+
+<div class="card">
+
+
+    <!-- BUSCADOR / FILTROS -->
+
+    <form method="get" class="admin-filters">
+
+        <div class="admin-search">
+
+            <input type="search" name="q" value="{{ busqueda }}" placeholder="Buscar por nombre o correo...">
+
+        </div>
+
+
+        <select name="rol">
+
+            <option value="">
+                Todos los roles
+            </option>
+
+            {% for rol in roles %}
+
+            <option value="{{ rol.name }}" {% if rol_actual == rol.name %}selected{% endif %}>
+                {{ rol.name }}
+            </option>
+
+            {% endfor %}
+
+        </select>
+
+
+        <select name="estado">
+
+            <option value="">
+                Todos los estados
+            </option>
+
+            <option value="activo" {% if estado_actual == activo %}selected{% endif %}>
+                Activos
+            </option>
+
+            <option value="inactivo" {% if estado_actual == inactivo %}selected{% endif %}>
+                Inactivos
+            </option>
+
+        </select>
+
+
+        <button type="submit" class="btn btn-secondary">
+            Filtrar
+        </button>
+
+
+        <a href="{% url 'usuarios:lista_usuarios' %}" class="btn btn-secondary">
+            Limpiar
+        </a>
+
+    </form>
+
+
+    <!-- TABLA -->
+
+    <div class="table-wrapper">
+
+        <table>
+
+            <thead>
+
+                <tr>
+
+                    <th>Usuario</th>
+
+                    <th>Correo electrónico</th>
+
+                    <th>Roles</th>
+
+                    <th>Anexo</th>
+
+                    <th>Estado</th>
+
+                    <th></th>
+
+                </tr>
+
+            </thead>
+
+
+            <tbody>
+
+                {% for usuario in usuarios %}
+
+                <tr>
+
+                    <td>
+
+                        <strong>
+                            {{ usuario.nombres }}
+                            {{ usuario.apellido_paterno }}
+                            {{ usuario.apellido_materno }}
+                        </strong>
+
+                    </td>
+
+
+                    <td>
+                        {{ usuario.email }}
+                    </td>
+
+
+                    <td>
+
+                        <div class="admin-role-list">
+
+                            {% for grupo in usuario.groups.all %}
+
+                            <span class="badge badge-info">
+                                {{ grupo.name }}
+                            </span>
+
+                            {% empty %}
+
+                            <span class="stat-label">
+                                Sin rol
+                            </span>
+
+                            {% endfor %}
+
+                        </div>
+
+                    </td>
+
+
+                    <td>
+
+                        {% if usuario.anexo %}
+
+                        {{ usuario.anexo.nombre }}
+
+                        {% else %}
+
+                        —
+
+                        {% endif %}
+
+                    </td>
+
+
+                    <td>
+
+                        {% if usuario.is_active %}
+
+                        <span class="badge badge-success">
+                            Activo
+                        </span>
+
+                        {% else %}
+
+                        <span class="badge badge-danger">
+                            Inactivo
+                        </span>
+
+                        {% endif %}
+
+                    </td>
+
+
+                    <td>
+
+                        <a href="{% url 'usuarios:detalle_usuario' usuario.pk %}" class="btn btn-secondary btn-sm">
+                            Ver
+                        </a>
+
+                    </td>
+
+                </tr>
+
+
+                {% empty %}
+
+                <tr>
+
+                    <td colspan="6" class="admin-empty">
+
+                        No se encontraron usuarios.
+
+                    </td>
+
+                </tr>
+
+                {% endfor %}
+
+            </tbody>
+
+        </table>
+
+    </div>
+
+</div>
+
+{% endblock %}

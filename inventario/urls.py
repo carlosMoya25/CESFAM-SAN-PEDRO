@@ -27,4 +27,12 @@ urlpatterns = [
     path("articulos/", views.articulos, name="articulos"),
     path("articulos/nuevo/", views.crear_articulo, name="crear_articulo"),
     path("articulos/<int:pk>/editar/", views.editar_articulo, name="editar_articulo"),
+
+
+    path(
+        "stock/",
+        views.consultar_stock,
+        name="consultar_stock"
+    ),
+    
 ]

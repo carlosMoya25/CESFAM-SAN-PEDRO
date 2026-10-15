@@ -1,0 +1,224 @@
+{% extends "base.html" %}
+
+{% block title %}
+{{ usuario_detalle.nombres }} | SIGRI
+{% endblock %}
+
+
+{% block content %}
+
+<div class="page-header admin-page-header">
+
+    <div>
+
+        <p class="admin-eyebrow">
+            Administración / Usuarios
+        </p>
+
+        <h1>
+            {{ usuario_detalle.nombres }}
+            {{ usuario_detalle.apellido_paterno }}
+            {{ usuario_detalle.apellido_materno }}
+        </h1>
+
+        <p>
+            Información y permisos del usuario.
+        </p>
+
+    </div>
+
+
+    <a href="{% url 'usuarios:editar_usuario' usuario_detalle.pk %}" class="btn btn-primary">
+
+        Editar usuario
+
+    </a>
+
+</div>
+
+
+<div class="admin-user-layout">
+
+
+    <!-- INFORMACIÓN -->
+
+    <div class="card">
+
+        <h2>
+            Información del usuario
+        </h2>
+
+
+        <div class="admin-detail-grid">
+
+
+            <div class="admin-detail-item">
+
+                <span>
+                    Correo electrónico
+                </span>
+
+                <strong>
+                    {{ usuario_detalle.email }}
+                </strong>
+
+            </div>
+
+
+            <div class="admin-detail-item">
+
+                <span>
+                    Teléfono
+                </span>
+
+                <strong>
+                    {{ usuario_detalle.telefono|default:"No registrado" }}
+                </strong>
+
+            </div>
+
+
+            <div class="admin-detail-item">
+
+                <span>
+                    Anexo
+                </span>
+
+                <strong>
+
+                    {% if usuario_detalle.anexo %}
+
+                    {{ usuario_detalle.anexo.nombre }}
+
+                    {% else %}
+
+                    No asignado
+
+                    {% endif %}
+
+                </strong>
+
+            </div>
+
+
+            <div class="admin-detail-item">
+
+                <span>
+                    Departamento
+                </span>
+
+                <strong>
+
+                    {% if usuario_detalle.departamento %}
+
+                    {{ usuario_detalle.departamento.nombre }}
+
+                    {% else %}
+
+                    No asignado
+
+                    {% endif %}
+
+                </strong>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- ACCESO -->
+
+    <div class="card">
+
+        <h2>
+            Acceso y permisos
+        </h2>
+
+
+        <div class="admin-user-status">
+
+            {% if usuario_detalle.is_active %}
+
+            <span class="badge badge-success">
+                Usuario activo
+            </span>
+
+            {% else %}
+
+            <span class="badge badge-danger">
+                Usuario inactivo
+            </span>
+
+            {% endif %}
+
+        </div>
+
+
+        <h3>
+            Roles asignados
+        </h3>
+
+
+        <div class="admin-role-list">
+
+            {% for grupo in usuario_detalle.groups.all %}
+
+            <span class="badge badge-info">
+                {{ grupo.name }}
+            </span>
+
+            {% empty %}
+
+            <span class="stat-label">
+                Sin roles asignados
+            </span>
+
+            {% endfor %}
+
+        </div>
+
+
+        {% if usuario_detalle.pk != request.user.pk %}
+
+        <form method="post" action="{% url 'usuarios:cambiar_estado_usuario' usuario_detalle.pk %}"
+            class="admin-status-form">
+
+            {% csrf_token %}
+
+
+            {% if usuario_detalle.is_active %}
+
+            <button type="submit" class="btn btn-danger">
+                Desactivar usuario
+            </button>
+
+            {% else %}
+
+            <button type="submit" class="btn btn-success">
+                Activar usuario
+            </button>
+
+            {% endif %}
+
+        </form>
+
+        {% endif %}
+
+    </div>
+
+</div>
+
+
+<div class="admin-bottom-actions">
+
+    <a href="{% url 'usuarios:lista_usuarios' %}" class="btn btn-secondary">
+
+        ← Volver a usuarios
+
+    </a>
+
+</div>
+
+{% endblock %}

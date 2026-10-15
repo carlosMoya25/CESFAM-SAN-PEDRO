@@ -43,6 +43,12 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
 
+    # Django Allauth
+    "allauth",
+    "allauth.account",
+    "allauth.socialaccount",
+    "allauth.socialaccount.providers.google",
+
     'axes',
 
     "organizacion",
@@ -50,6 +56,7 @@ INSTALLED_APPS = [
     "requerimientos",
     "core",
     "inventario",
+    "farmacia",
 ]
 
 MIDDLEWARE = [
@@ -63,6 +70,8 @@ MIDDLEWARE = [
 
     "axes.middleware.AxesMiddleware",
     "core.middleware.SessionExpiredMiddleware",
+
+    "allauth.account.middleware.AccountMiddleware",
 ]
 
 ROOT_URLCONF = 'config.urls'
@@ -150,13 +159,17 @@ USE_I18N = True
 USE_TZ = True
 
 LOGIN_URL = "login"
-LOGIN_REDIRECT_URL = "dashboard"
-LOGOUT_REDIRECT_URL = "login"
+#LOGIN_REDIRECT_URL = "dashboard"
+#LOGOUT_REDIRECT_URL = "login"
+
+LOGIN_REDIRECT_URL = "/"
+LOGOUT_REDIRECT_URL = "/login/"
 
 
 AUTHENTICATION_BACKENDS = [
     "axes.backends.AxesStandaloneBackend",
     "django.contrib.auth.backends.ModelBackend",
+    "allauth.account.auth_backends.AuthenticationBackend",
 ]
 
 # ==========================================================
@@ -209,3 +222,57 @@ SESSION_EXPIRE_AT_BROWSER_CLOSE = True
 
 # # SameSite ayuda frente a solicitudes entre sitios.
 # SESSION_COOKIE_SAMESITE = "Lax"
+
+SITE_ID = 1
+
+
+# ============================================================
+# DJANGO-ALLAUTH - AUTENTICACIÓN POR CORREO
+# ============================================================
+
+# Nuestro modelo Usuario NO utiliza username.
+ACCOUNT_USER_MODEL_USERNAME_FIELD = None
+
+# El correo electrónico es el identificador de autenticación.
+ACCOUNT_LOGIN_METHODS = {"email"}
+
+# El correo debe ser único para poder utilizarlo como login.
+ACCOUNT_UNIQUE_EMAIL = True
+
+# No necesitamos username durante el registro.
+ACCOUNT_SIGNUP_FIELDS = [
+    "email*",
+    "password1*",
+    "password2*",
+]
+
+# Actualmente el proyecto no exige verificación por correo.
+ACCOUNT_EMAIL_VERIFICATION = "none"
+
+#inicio sesion google
+
+SOCIALACCOUNT_ADAPTER = "usuarios.adapters.CesfamSocialAccountAdapter"
+
+SOCIALACCOUNT_AUTO_SIGNUP = True
+
+SOCIALACCOUNT_LOGIN_ON_GET = True
+
+ACCOUNT_EMAIL_VERIFICATION = "none"
+
+SOCIALACCOUNT_PROVIDERS = {
+    "google": {
+        "APP": {
+            "client_id": os.environ["GOOGLE_CLIENT_ID"],
+            "secret": os.environ["GOOGLE_CLIENT_SECRET"],
+            "key": "",
+        },
+        "SCOPE": [
+            "profile",
+            "email",
+        ],
+        "AUTH_PARAMS": {
+            "access_type": "online",
+        },
+        "OAUTH_PKCE_ENABLED": True,
+    }
+}

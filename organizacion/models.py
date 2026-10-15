@@ -1,19 +1,47 @@
 from django.db import models
 
-from django.db import models
+
+
 
 
 class Anexo(models.Model):
+
+    TIPO_CESFAM = "CESFAM"
+    TIPO_FARMACIA = "FARMACIA"
+    TIPO_ANEXO = "ANEXO"
+
+    TIPOS_ESTABLECIMIENTO = [
+        (TIPO_CESFAM, "CESFAM"),
+        (TIPO_FARMACIA, "Farmacia Central"),
+        (TIPO_ANEXO, "Anexo"),
+    ]
+
     nombre = models.CharField(max_length=150)
-    direccion = models.CharField(max_length=255, blank=True)
-    telefono = models.CharField(max_length=30, blank=True)
+
+    tipo = models.CharField(
+        max_length=20,
+        choices=TIPOS_ESTABLECIMIENTO,
+        default=TIPO_ANEXO,
+    )
+
+    direccion = models.CharField(
+        max_length=255,
+        blank=True
+    )
+
+    telefono = models.CharField(
+        max_length=30,
+        blank=True
+    )
+
     activo = models.BooleanField(default=True)
+
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
     class Meta:
-        verbose_name = "Anexo"
-        verbose_name_plural = "Anexos"
+        verbose_name = "Ubicación de inventario"
+        verbose_name_plural = "Ubicaciones de inventario"
         ordering = ["nombre"]
 
     def __str__(self):

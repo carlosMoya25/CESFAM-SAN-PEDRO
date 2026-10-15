@@ -1,155 +1,724 @@
+
 {% extends "base.html" %}
 
 {% block content %}
 
-<h1>Inventario General</h1>
+<style>
+.inventario-dashboard {
+    display: flex;
+    flex-direction: column;
+    gap: 22px;
+}
 
-<div class="card">
-    <a class="btn" href="{% url 'inventario:entrada' %}">
-        Registrar entrada
-    </a>
+.inventario-dashboard .card {
+    margin: 0;
+}
 
-    <a class="btn" href="{% url 'inventario:salida' %}">
-        Registrar salida
-    </a>
+.inventario-encabezado h1 {
+    margin-bottom: 6px;
+}
 
-    <a class="btn" href="{% url 'inventario:transferencia' %}">
-        Transferir
-    </a>
+.inventario-encabezado p {
+    color: #64748b;
+    margin: 0;
+}
 
-    <a class="btn" href="{% url 'inventario:historial' %}">
-        Historial
-    </a>
+/* INDICADORES */
 
-    <a class="btn" href="{% url 'inventario:ajuste' %}">
-        Ajustar stock
-    </a>
+.inventario-indicadores {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 16px;
+}
 
-</div>
+.inventario-indicador {
+    background: white;
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+    padding: 22px;
+    box-shadow: 0 3px 12px rgba(0,0,0,.04);
+}
+
+.inventario-indicador .titulo {
+    font-size: 14px;
+    color: #64748b;
+    margin-bottom: 12px;
+}
+
+.inventario-indicador .valor {
+    font-size: 30px;
+    font-weight: 700;
+    color: #172033;
+}
+
+.inventario-indicador.alerta .valor {
+    color: #dc2626;
+}
+
+/* ACCESOS RÁPIDOS */
+
+.inventario-accesos {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 14px;
+}
+
+.inventario-acceso {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    padding: 18px;
+    border: 1px solid #e2e8f0;
+    border-radius: 10px;
+    text-decoration: none;
+    background: #f8fafc;
+    color: #172033;
+    transition: .2s;
+}
+
+.inventario-acceso:hover {
+    background: #eaf5fa;
+    border-color: #087fa5;
+    transform: translateY(-2px);
+}
+
+.inventario-acceso strong {
+    font-size: 15px;
+}
+
+.inventario-acceso span {
+    font-size: 13px;
+    color: #64748b;
+}
+
+/* ACCESO DESTACADO CONSULTAR STOCK */
+
+.inventario-acceso.consultar-stock {
+    background: #eff8fc;
+    border-color: #a9dbe9;
+}
+
+.inventario-acceso.consultar-stock strong {
+    color: #087fa5;
+}
+
+.inventario-acceso.consultar-stock:hover {
+    background: #dff2fa;
+    border-color: #087fa5;
+}
+
+/* ENCABEZADOS DE SECCIONES */
+
+.inventario-seccion-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 15px;
+    margin-bottom: 18px;
+}
+
+.inventario-seccion-header h2 {
+    margin: 0;
+}
+
+.inventario-btn-consultar {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 10px 16px;
+    background: #087fa5;
+    color: white;
+    text-decoration: none;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 600;
+    transition: .2s;
+}
+
+.inventario-btn-consultar:hover {
+    background: #066783;
+    color: white;
+}
+
+/* TABLA DE STOCK */
+
+.inventario-tabla {
+    width: 100%;
+    overflow-x: auto;
+}
+
+.inventario-tabla table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.inventario-tabla th,
+.inventario-tabla td {
+    padding: 12px;
+    text-align: left;
+    border-bottom: 1px solid #e2e8f0;
+}
+
+.inventario-tabla th {
+    background: #f8fafc;
+    color: #334155;
+    font-weight: 600;
+}
+
+.inventario-tabla tbody tr:hover {
+    background: #f8fafc;
+}
+
+.inventario-tabla td {
+    vertical-align: middle;
+}
+
+.inventario-stock-cantidad {
+    font-weight: 700;
+    font-size: 15px;
+}
+
+/* ESTADOS DEL INVENTARIO */
+
+.inventario-estado {
+    display: inline-block;
+    padding: 5px 10px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 600;
+    white-space: nowrap;
+}
+
+.inventario-estado.ok {
+    background: #dcfce7;
+    color: #166534;
+}
+
+.inventario-estado.bajo {
+    background: #fef3c7;
+    color: #92400e;
+}
+
+.inventario-estado.agotado {
+    background: #fee2e2;
+    color: #991b1b;
+}
+
+/* MOVIMIENTOS */
+
+.inventario-movimiento {
+    padding: 15px 0;
+    border-bottom: 1px solid #e2e8f0;
+}
+
+.inventario-movimiento:last-child {
+    border-bottom: none;
+}
+
+.inventario-movimiento small {
+    display: block;
+    margin-top: 6px;
+    color: #64748b;
+}
+
+.inventario-movimiento-detalle {
+    margin-top: 8px;
+    color: #334155;
+}
+
+.inventario-movimiento-ubicacion {
+    margin-top: 6px;
+    font-size: 14px;
+    color: #475569;
+}
+
+/* MENSAJES SIN REGISTROS */
+
+.inventario-vacio {
+    padding: 25px;
+    text-align: center;
+    color: #64748b;
+}
+
+/* RESPONSIVE */
+
+@media (max-width: 1100px) {
+    .inventario-indicadores,
+    .inventario-accesos {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+}
+
+@media (max-width: 600px) {
+    .inventario-indicadores,
+    .inventario-accesos {
+        grid-template-columns: 1fr;
+    }
+
+    .inventario-indicador {
+        padding: 18px;
+    }
+
+    .inventario-seccion-header {
+        align-items: stretch;
+        flex-direction: column;
+    }
+
+    .inventario-btn-consultar {
+        width: 100%;
+    }
+}
+</style>
 
 
-<div class="card">
-    <h2>Stock actual</h2>
+<div class="inventario-dashboard">
 
-    <table>
-        <thead>
-            <tr>
-                <th>Artículo</th>
-                <th>Categoría</th>
-                <th>Anexo</th>
-                <th>Stock</th>
-                <th>Mínimo</th>
-                <th>Estado</th>
-            </tr>
-        </thead>
+    <!-- ======================================= -->
+    <!-- ENCABEZADO -->
+    <!-- ======================================= -->
 
-        <tbody>
-            {% for stock in stocks %}
-            <tr>
-                <td>{{ stock.articulo.nombre }}</td>
+    <div class="inventario-encabezado">
 
-                <td>
-                    {{ stock.articulo.categoria.nombre }}
-                </td>
+        <h1>Inventario General</h1>
 
-                <td>
-                    {{ stock.anexo.nombre }}
-                </td>
-
-                <td>
-                    {{ stock.cantidad }}
-                </td>
-
-                <td>
-                    {{ stock.articulo.stock_minimo }}
-                </td>
-
-                <td>
-                    {% if stock.stock_bajo %}
-                    stock bajo {%else%} disponible {%endif%}</td>
-            </tr>
-
-            {% empty %}
-
-            <tr>
-                <td colspan="6">
-                    Todavía no existe stock registrado.
-                </td>
-            </tr>
-
-            {% endfor %}
-        </tbody>
-    </table>
-</div>
-
-
-<div class="card">
-    <h2>Últimos movimientos</h2>
-
-    {% for movimiento in movimientos %}
-
-    <div style="margin-bottom: 20px;">
-
-        <strong>
-            {{ movimiento.tipo_movimiento.nombre }}
-        </strong>
-
-        — {{ movimiento.fecha|date:"d/m/Y H:i" }}
-
-        <br>
-
-        {% if movimiento.anexo_origen %}
-        Origen: {{ movimiento.anexo_origen.nombre }}
-        {% endif %}
-
-        {% if movimiento.anexo_destino %}
-        Destino: {{ movimiento.anexo_destino.nombre }}
-        {% endif %}
-
-        <br>
-
-        {% for detalle in movimiento.detalles.all %}
-        {{ detalle.articulo.nombre }}
-        — {{ detalle.cantidad }} unidad(es)
-        <br>
-        {% endfor %}
-
-        <small>
-            Registrado por: {{ movimiento.usuario.email }}
-        </small>
+        <p>
+            Control de existencias, movimientos
+            y recursos del CESFAM San Pedro.
+        </p>
 
     </div>
 
-    {% empty %}
 
-    <p>No existen movimientos registrados.</p>
+    <!-- ======================================= -->
+    <!-- INDICADORES -->
+    <!-- ======================================= -->
 
-    {% endfor %}
-</div>
+    <div class="inventario-indicadores">
 
-<div class="card">
-    <h3>Categorías</h3>
+        <div class="inventario-indicador">
 
-    <p>
-        Crear y administrar las categorías de los artículos.
-    </p>
+            <div class="titulo">
+                Total de artículos
+            </div>
 
-    <a href="{% url 'inventario:categorias' %}" class="btn">
-        Administrar categorías
-    </a>
-</div>
+            <div class="valor">
+                {{ total_articulos|default:0 }}
+            </div>
+
+        </div>
 
 
-<div class="card">
-    <h3>Artículos</h3>
+        <div class="inventario-indicador alerta">
 
-    <p>
-        Crear y administrar los artículos disponibles en inventario.
-    </p>
+            <div class="titulo">
+                Registros con stock bajo
+            </div>
 
-    <a href="{% url 'inventario:articulos' %}" class="btn">
-        Administrar artículos
-    </a>
+            <div class="valor">
+                {{ total_stock_bajo|default:0 }}
+            </div>
+
+        </div>
+
+
+        <div class="inventario-indicador">
+
+            <div class="titulo">
+                Unidades disponibles
+            </div>
+
+            <div class="valor">
+                {{ total_unidades|default:0 }}
+            </div>
+
+        </div>
+
+
+        <div class="inventario-indicador">
+
+            <div class="titulo">
+                Movimientos registrados
+            </div>
+
+            <div class="valor">
+                {{ total_movimientos|default:0 }}
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- ======================================= -->
+    <!-- ACCESOS RÁPIDOS -->
+    <!-- ======================================= -->
+
+    <div class="card">
+
+        <h2>Accesos rápidos</h2>
+
+        <div class="inventario-accesos">
+
+            <!-- CATEGORÍAS -->
+
+            <a href="{% url 'inventario:categorias' %}"
+               class="inventario-acceso">
+
+                <strong>▤ Categorías</strong>
+
+                <span>
+                    Administrar categorías
+                </span>
+
+            </a>
+
+
+            <!-- ARTÍCULOS -->
+
+            <a href="{% url 'inventario:articulos' %}"
+               class="inventario-acceso">
+
+                <strong>▣ Artículos</strong>
+
+                <span>
+                    Administrar artículos
+                </span>
+
+            </a>
+
+
+            <!-- CONSULTAR STOCK HU-10 -->
+
+            <a href="{% url 'inventario:consultar_stock' %}"
+               class="inventario-acceso consultar-stock">
+
+                <strong>▦ Consultar stock</strong>
+
+                <span>
+                    Consultar existencias por anexo
+                </span>
+
+            </a>
+
+
+            <!-- ENTRADA -->
+
+            <a href="{% url 'inventario:entrada' %}"
+               class="inventario-acceso">
+
+                <strong>↓ Registrar entrada</strong>
+
+                <span>
+                    Ingresar existencias
+                </span>
+
+            </a>
+
+
+            <!-- SALIDA -->
+
+            <a href="{% url 'inventario:salida' %}"
+               class="inventario-acceso">
+
+                <strong>↑ Registrar salida</strong>
+
+                <span>
+                    Registrar consumo o entrega
+                </span>
+
+            </a>
+
+
+            <!-- TRANSFERENCIA -->
+
+            <a href="{% url 'inventario:transferencia' %}"
+               class="inventario-acceso">
+
+                <strong>⇄ Transferir</strong>
+
+                <span>
+                    Mover artículos entre anexos
+                </span>
+
+            </a>
+
+
+            <!-- AJUSTE -->
+
+            <a href="{% url 'inventario:ajuste' %}"
+               class="inventario-acceso">
+
+                <strong>⚙ Ajustar stock</strong>
+
+                <span>
+                    Regularizar existencias
+                </span>
+
+            </a>
+
+
+            <!-- HISTORIAL -->
+
+            <a href="{% url 'inventario:historial' %}"
+               class="inventario-acceso">
+
+                <strong>◷ Historial</strong>
+
+                <span>
+                    Consultar movimientos
+                </span>
+
+            </a>
+
+        </div>
+
+    </div>
+
+
+    <!-- ======================================= -->
+    <!-- STOCK ACTUAL POR ANEXO -->
+    <!-- ======================================= -->
+
+    <div class="card">
+
+        <div class="inventario-seccion-header">
+
+            <h2>Stock actual por anexo</h2>
+
+            <a href="{% url 'inventario:consultar_stock' %}"
+               class="inventario-btn-consultar">
+
+                Ver stock completo →
+
+            </a>
+
+        </div>
+
+
+        <div class="inventario-tabla">
+
+            <table>
+
+                <thead>
+
+                    <tr>
+                        <th>Artículo</th>
+                        <th>Categoría</th>
+                        <th>Anexo</th>
+                        <th>Stock</th>
+                        <th>Mínimo</th>
+                        <th>Estado</th>
+                    </tr>
+
+                </thead>
+
+
+                <tbody>
+
+                    {% for stock in stocks %}
+
+                    <tr>
+
+                        <!-- ARTÍCULO -->
+
+                        <td>
+                            <strong>
+                                {{ stock.articulo.nombre }}
+                            </strong>
+                        </td>
+
+
+                        <!-- CATEGORÍA -->
+
+                        <td>
+                            {{ stock.articulo.categoria.nombre }}
+                        </td>
+
+
+                        <!-- ANEXO -->
+
+                        <td>
+                            {{ stock.anexo.nombre }}
+                        </td>
+
+
+                        <!-- CANTIDAD -->
+
+                        <td>
+                            <span class="inventario-stock-cantidad">
+                                {{ stock.cantidad }}
+                            </span>
+                        </td>
+
+
+                        <!-- STOCK MÍNIMO -->
+
+                        <td>
+                            {{ stock.articulo.stock_minimo }}
+                        </td>
+
+
+                        <!-- ESTADO -->
+
+                        <td>
+
+                            {% if stock.cantidad == 0 %}
+
+                                <span class="inventario-estado agotado">
+                                    Agotado
+                                </span>
+
+                            {% elif stock.stock_bajo %}
+
+                                <span class="inventario-estado bajo">
+                                    Stock bajo
+                                </span>
+
+                            {% else %}
+
+                                <span class="inventario-estado ok">
+                                    Disponible
+                                </span>
+
+                            {% endif %}
+
+                        </td>
+
+                    </tr>
+
+
+                    {% empty %}
+
+                    <tr>
+
+                        <td colspan="6"
+                            class="inventario-vacio">
+
+                            No existe stock registrado.
+
+                        </td>
+
+                    </tr>
+
+                    {% endfor %}
+
+                </tbody>
+
+            </table>
+
+        </div>
+
+    </div>
+
+
+    <!-- ======================================= -->
+    <!-- ÚLTIMOS MOVIMIENTOS -->
+    <!-- ======================================= -->
+
+    <div class="card">
+
+        <div class="inventario-seccion-header">
+
+            <h2>Últimos movimientos</h2>
+
+            <a href="{% url 'inventario:historial' %}"
+               class="inventario-btn-consultar">
+
+                Ver historial completo →
+
+            </a>
+
+        </div>
+
+
+        {% for movimiento in movimientos %}
+
+        <div class="inventario-movimiento">
+
+            <!-- TIPO Y FECHA -->
+
+            <strong>
+                {{ movimiento.tipo_movimiento.nombre }}
+            </strong>
+
+            —
+            {{ movimiento.fecha|date:"d/m/Y H:i" }}
+
+
+            <!-- ANEXOS -->
+
+            <div class="inventario-movimiento-ubicacion">
+
+                {% if movimiento.anexo_origen %}
+
+                    <span>
+                        <strong>Origen:</strong>
+                        {{ movimiento.anexo_origen.nombre }}
+                    </span>
+
+                {% endif %}
+
+
+                {% if movimiento.anexo_destino %}
+
+                    <span>
+                        <strong>Destino:</strong>
+                        {{ movimiento.anexo_destino.nombre }}
+                    </span>
+
+                {% endif %}
+
+            </div>
+
+
+            <!-- ARTÍCULOS DEL MOVIMIENTO -->
+
+            {% for detalle in movimiento.detalles.all %}
+
+            <div class="inventario-movimiento-detalle">
+
+                {{ detalle.articulo.nombre }}
+
+                —
+                {{ detalle.cantidad }} unidad(es)
+
+            </div>
+
+            {% endfor %}
+
+
+            <!-- USUARIO RESPONSABLE -->
+
+            <small>
+
+                Registrado por:
+
+                {% if movimiento.usuario %}
+
+                    {{ movimiento.usuario.email }}
+
+                {% else %}
+
+                    Usuario no disponible
+
+                {% endif %}
+
+            </small>
+
+        </div>
+
+
+        {% empty %}
+
+        <p class="inventario-vacio">
+            No existen movimientos registrados.
+        </p>
+
+        {% endfor %}
+
+    </div>
+
 </div>
 
 {% endblock %}

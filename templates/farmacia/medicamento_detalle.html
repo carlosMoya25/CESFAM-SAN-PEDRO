@@ -1,0 +1,96 @@
+
+{% extends "base.html" %}
+
+{% block content %}
+
+<h1>{{ medicamento.articulo.nombre }}</h1>
+
+<div class="card">
+
+    <h3>Información del medicamento</h3>
+
+    <p><strong>Código:</strong>
+        {{ medicamento.articulo.codigo|default:"-" }}
+    </p>
+
+    <p><strong>Principio activo:</strong>
+        {{ medicamento.principio_activo }}
+    </p>
+
+    <p><strong>Concentración:</strong>
+        {{ medicamento.concentracion }}
+    </p>
+
+    <p><strong>Forma farmacéutica:</strong>
+        {{ medicamento.forma_farmaceutica }}
+    </p>
+
+    <p><strong>Presentación:</strong>
+        {{ medicamento.presentacion }}
+    </p>
+
+    <p><strong>Stock total:</strong>
+        {{ stock_total }}
+    </p>
+
+    <a class="btn"
+       href="{% url 'farmacia:editar_medicamento' medicamento.pk %}">
+        Editar medicamento
+    </a>
+
+    <form method="post"
+          action="{% url 'farmacia:cambiar_estado_medicamento' medicamento.pk %}"
+          style="display:inline;">
+        {% csrf_token %}
+        <button type="submit" class="btn">
+            {% if medicamento.activo %}
+                Desactivar
+            {% else %}
+                Activar
+            {% endif %}
+        </button>
+    </form>
+
+</div>
+
+<div class="card">
+
+    <h3>Stock por ubicación y lote</h3>
+
+    <div style="overflow-x:auto;">
+        <table style="width:100%;">
+            <thead>
+                <tr>
+                    <th>Ubicación</th>
+                    <th>Lote</th>
+                    <th>Vencimiento</th>
+                    <th>Cantidad</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for stock in stocks %}
+                <tr>
+                    <td>{{ stock.anexo.nombre }}</td>
+                    <td>{{ stock.lote.numero_lote }}</td>
+                    <td>{{ stock.lote.fecha_vencimiento|date:"d/m/Y" }}</td>
+                    <td>{{ stock.cantidad }}</td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="4">
+                        No existen ingresos registrados.
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+</div>
+
+<a href="{% url 'farmacia:lista_medicamentos' %}"
+   class="btn">
+    Volver al catálogo
+</a>
+
+{% endblock %}

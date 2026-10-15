@@ -6,6 +6,7 @@ from django.contrib.auth.decorators import login_required
 from django.core.exceptions import ValidationError
 from django.http import HttpResponseForbidden
 from django.shortcuts import redirect, render
+from django.db.models import Sum, F
 
 from usuarios.utils import puede_gestionar_inventario
 
@@ -31,18 +32,36 @@ def validar_acceso_inventario(usuario):
     return puede_gestionar_inventario(usuario)
 
 
+
 @login_required
 def panel_inventario(request):
+
+    # Validación de permisos
     if not validar_acceso_inventario(request.user):
         return HttpResponseForbidden(
             "No tienes permisos para acceder al inventario."
         )
 
+    # ==========================================
+    # STOCK ACTUAL
+    # ==========================================
+
     stocks = (
         StockAnexo.objects
-        .select_related("articulo", "articulo__categoria", "anexo")
+        .select_related(
+            "articulo",
+            "articulo__categoria",
+            "anexo"
+        )
         .order_by("articulo__nombre", "anexo__nombre")
     )
+
+    # consulta de stock
+
+
+    # ==========================================
+    # ÚLTIMOS MOVIMIENTOS
+    # ==========================================
 
     movimientos = (
         MovimientoInventario.objects
@@ -50,20 +69,170 @@ def panel_inventario(request):
             "tipo_movimiento",
             "anexo_origen",
             "anexo_destino",
-            "usuario",
+            "usuario"
         )
         .prefetch_related("detalles__articulo")
         .order_by("-fecha")[:10]
     )
 
+    # ==========================================
+    # INDICADORES DEL DASHBOARD
+    # ==========================================
+
+    # Total de artículos registrados
+    total_articulos = Articulo.objects.count()
+
+    # Total de categorías
+    total_categorias = CategoriaArticulo.objects.count()
+
+    # Total de unidades en inventario
+    total_unidades = (
+        StockAnexo.objects.aggregate(
+            total=Sum("cantidad")
+        )["total"] or 0
+    )
+
+    # Registros de stock bajo o igual al mínimo
+    total_stock_bajo = (
+        StockAnexo.objects
+        .filter(
+            cantidad__lte=F("articulo__stock_minimo")
+        )
+        .count()
+    )
+
+    # Total de movimientos registrados
+    total_movimientos = MovimientoInventario.objects.count()
+
+    # ==========================================
+    # CONTEXTO
+    # ==========================================
+
+    context = {
+        "stocks": stocks,
+        "movimientos": movimientos,
+
+        "total_articulos": total_articulos,
+        "total_categorias": total_categorias,
+        "total_unidades": total_unidades,
+        "total_stock_bajo": total_stock_bajo,
+        "total_movimientos": total_movimientos,
+    }
+
     return render(
         request,
         "inventario/panel.html",
-        {
-            "stocks": stocks,
-            "movimientos": movimientos,
-        },
+        context
     )
+
+
+
+@login_required
+def consultar_stock(request):
+
+    if not validar_acceso_inventario(request.user):
+        return HttpResponseForbidden(
+            "No tienes permisos para consultar el inventario."
+        )
+
+    # Filtros enviados mediante GET
+    busqueda = request.GET.get("buscar", "").strip()
+    anexo_id = request.GET.get("anexo", "")
+    categoria_id = request.GET.get("categoria", "")
+    estado = request.GET.get("estado", "")
+
+    # Consultar existencias
+    stocks = (
+        StockAnexo.objects
+        .select_related(
+            "articulo",
+            "articulo__categoria",
+            "anexo"
+        )
+    )
+
+    if busqueda:
+        stocks = stocks.filter(
+            articulo__nombre__icontains=busqueda
+        )
+
+    if anexo_id.isdigit():
+        stocks = stocks.filter(anexo_id=int(anexo_id))
+
+    if categoria_id.isdigit():
+        stocks = stocks.filter(
+            articulo__categoria_id=int(categoria_id)
+        )
+
+    if estado == "agotado":
+        stocks = stocks.filter(cantidad=0)
+
+    elif estado == "bajo":
+        stocks = stocks.filter(
+            cantidad__gt=0,
+            cantidad__lte=F("articulo__stock_minimo")
+        )
+
+    elif estado == "disponible":
+        stocks = stocks.filter(
+            cantidad__gt=F("articulo__stock_minimo")
+        )
+
+    stocks = stocks.order_by(
+        "articulo__nombre",
+        "anexo__nombre"
+    )
+
+    # Indicadores correspondientes a los filtros
+    resumen = stocks.aggregate(
+        total_unidades=Sum("cantidad")
+    )
+
+    total_unidades = resumen["total_unidades"] or 0
+
+    total_registros = stocks.count()
+
+    total_agotados = stocks.filter(
+        cantidad=0
+    ).count()
+
+    total_stock_bajo = stocks.filter(
+        cantidad__gt=0,
+        cantidad__lte=F("articulo__stock_minimo")
+    ).count()
+
+    # Obtener anexos existentes desde StockAnexo
+    # para evitar depender del nombre de su modelo.
+    Anexo = StockAnexo._meta.get_field(
+        "anexo"
+    ).remote_field.model
+
+    anexos = Anexo.objects.all().order_by("nombre")
+
+    categorias = CategoriaArticulo.objects.all().order_by(
+        "nombre"
+    )
+
+    context = {
+        "stocks": stocks,
+        "anexos": anexos,
+        "categorias": categorias,
+        "busqueda": busqueda,
+        "anexo_seleccionado": anexo_id,
+        "categoria_seleccionada": categoria_id,
+        "estado_seleccionado": estado,
+        "total_registros": total_registros,
+        "total_unidades": total_unidades,
+        "total_agotados": total_agotados,
+        "total_stock_bajo": total_stock_bajo,
+    }
+
+    return render(
+        request,
+        "inventario/consultar_stock.html",
+        context
+    )
+
 
 
 @login_required

@@ -112,3 +112,49 @@ class HistorialSeguridad(models.Model):
             f"{self.get_tipo_accion_display()} - "
             f"{self.email_afectado}"
         )
+
+
+class HistorialAdministracion(models.Model):
+
+    ACCIONES = [
+        ("CREAR_USUARIO", "Creación de usuario"),
+        ("EDITAR_USUARIO", "Modificación de usuario"),
+        ("CAMBIAR_ROLES", "Cambio de roles"),
+        ("ACTIVAR_USUARIO", "Activación de usuario"),
+        ("DESACTIVAR_USUARIO", "Desactivación de usuario"),
+    ]
+
+    accion = models.CharField(
+        max_length=50,
+        choices=ACCIONES,
+    )
+
+    administrador = models.ForeignKey(
+        "usuarios.Usuario",
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="acciones_administrativas",
+    )
+
+    usuario_afectado = models.ForeignKey(
+        "usuarios.Usuario",
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="historial_administrativo",
+    )
+
+    descripcion = models.TextField()
+
+    fecha = models.DateTimeField(
+        auto_now_add=True
+    )
+
+    class Meta:
+        verbose_name = "Historial administrativo"
+        verbose_name_plural = "Historial administrativo"
+        ordering = ["-fecha"]
+
+    def __str__(self):
+        return f"{self.get_accion_display()} - {self.fecha}"

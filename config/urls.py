@@ -5,6 +5,7 @@ from django.urls import include, path
 
 urlpatterns = [
     path("admin/", admin.site.urls),
+    path("accounts/", include("allauth.urls")),
 
     path(
         "login/",
@@ -35,7 +36,12 @@ urlpatterns = [
     path(
         "usuarios/",
     include("usuarios.urls")
-),
+    ),
+
+    path(
+        "farmacia/",
+        include("farmacia.urls"),
+    ),
 
 
 ]

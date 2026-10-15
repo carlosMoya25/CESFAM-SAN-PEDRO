@@ -1,0 +1,411 @@
+{% extends "base.html" %}
+
+{% block title %}
+Administración | SIGRI
+{% endblock %}
+
+
+{% block content %}
+
+<div class="page-header">
+
+    <p class="admin-eyebrow">
+        Administración
+    </p>
+
+    <h1>
+        Administración del sistema
+    </h1>
+
+    <p>
+        Gestiona usuarios, accesos y configuración general de SIGRI.
+    </p>
+
+</div>
+
+
+<!-- ======================================================
+     ESTADÍSTICAS
+     ====================================================== -->
+
+<div class="dashboard-grid">
+
+
+    <a href="{% url 'usuarios:lista_usuarios' %}" class="stat-card stat-info dashboard-link-card">
+
+        <div class="stat-icon">
+            ♟
+        </div>
+
+        <div class="stat-card-content">
+
+            <div class="stat-label">
+                Usuarios registrados
+            </div>
+
+            <div class="stat-number">
+                {{ total_usuarios }}
+            </div>
+
+            <div class="stat-label">
+                Usuarios del sistema
+            </div>
+
+        </div>
+
+        <span class="stat-card-arrow">›</span>
+
+    </a>
+
+
+
+    <a href="{% url 'usuarios:lista_usuarios' %}?estado=activo" class="stat-card stat-success dashboard-link-card">
+
+        <div class="stat-icon">
+            ✓
+        </div>
+
+        <div class="stat-card-content">
+
+            <div class="stat-label">
+                Usuarios activos
+            </div>
+
+            <div class="stat-number">
+                {{ usuarios_activos }}
+            </div>
+
+            <div class="stat-label">
+                Con acceso habilitado
+            </div>
+
+        </div>
+
+        <span class="stat-card-arrow">›</span>
+
+    </a>
+
+
+
+    <a href="{% url 'usuarios:lista_usuarios' %}?estado=inactivo" class="stat-card stat-danger dashboard-link-card">
+
+        <div class="stat-icon">
+            ×
+        </div>
+
+        <div class="stat-card-content">
+
+            <div class="stat-label">
+                Usuarios inactivos
+            </div>
+
+            <div class="stat-number">
+                {{ usuarios_inactivos }}
+            </div>
+
+            <div class="stat-label">
+                Acceso deshabilitado
+            </div>
+
+        </div>
+
+        <span class="stat-card-arrow">›</span>
+
+    </a>
+
+
+
+    <a href="{% url 'usuarios:lista_usuarios' %}?rol=Administrador" class="stat-card stat-warning dashboard-link-card">
+
+        <div class="stat-icon">
+            ⚙
+        </div>
+
+        <div class="stat-card-content">
+
+            <div class="stat-label">
+                Administradores
+            </div>
+
+            <div class="stat-number">
+                {{ total_administradores }}
+            </div>
+
+            <div class="stat-label">
+                Acceso administrativo
+            </div>
+
+        </div>
+
+        <span class="stat-card-arrow">›</span>
+
+    </a>
+
+</div>
+
+
+<!-- ======================================================
+     ACCIONES
+     ====================================================== -->
+
+<div class="card">
+
+    <div class="admin-section-header">
+
+        <div>
+
+            <h2>
+                Gestión del sistema
+            </h2>
+
+            <p>
+                Accede a las principales funciones administrativas.
+            </p>
+
+        </div>
+
+    </div>
+
+
+    <div class="dashboard-grid">
+
+
+        <a href="{% url 'usuarios:lista_usuarios' %}" class="stat-card stat-info dashboard-link-card">
+
+            <div class="stat-icon">
+                ☷
+            </div>
+
+            <div class="stat-card-content">
+
+                <strong>
+                    Gestionar usuarios
+                </strong>
+
+                <div class="stat-label">
+                    Consultar y modificar usuarios
+                </div>
+
+            </div>
+
+            <span class="stat-card-arrow">›</span>
+
+        </a>
+
+
+
+        <a href="{% url 'usuarios:crear_usuario' %}" class="stat-card stat-success dashboard-link-card">
+
+            <div class="stat-icon">
+                +
+            </div>
+
+            <div class="stat-card-content">
+
+                <strong>
+                    Nuevo usuario
+                </strong>
+
+                <div class="stat-label">
+                    Autorizar acceso a SIGRI
+                </div>
+
+            </div>
+
+            <span class="stat-card-arrow">›</span>
+
+        </a>
+
+
+
+        <a href="{% url 'usuarios:seguridad' %}" class="stat-card stat-warning dashboard-link-card">
+
+            <div class="stat-icon">
+                🔐
+            </div>
+
+            <div class="stat-card-content">
+
+                <strong>
+                    Seguridad
+                </strong>
+
+                <div class="stat-label">
+                    Bloqueos e intentos de acceso
+                </div>
+
+            </div>
+
+            <span class="stat-card-arrow">›</span>
+
+        </a>
+
+        <a href="{% url 'usuarios:historial_administracion' %}" class="stat-card stat-info dashboard-link-card">
+
+            <div class="stat-icon">
+                ◷
+            </div>
+
+            <div class="stat-card-content">
+
+                <strong>
+                    Historial administrativo
+                </strong>
+
+                <div class="stat-label">
+                    Consultar acciones realizadas
+                </div>
+
+            </div>
+
+            <span class="stat-card-arrow">
+                ›
+            </span>
+
+        </a>
+
+    </div>
+
+</div>
+
+
+<!-- ======================================================
+     ÚLTIMOS USUARIOS
+     ====================================================== -->
+
+<div class="card">
+
+    <div class="admin-section-header">
+
+        <div>
+
+            <h2>
+                Usuarios recientes
+            </h2>
+
+            <p>
+                Últimos usuarios incorporados al sistema.
+            </p>
+
+        </div>
+
+
+        <a href="{% url 'usuarios:lista_usuarios' %}" class="btn btn-secondary">
+
+            Ver todos
+
+        </a>
+
+    </div>
+
+
+    <div class="table-wrapper">
+
+        <table>
+
+            <thead>
+
+                <tr>
+                    <th>Usuario</th>
+                    <th>Correo</th>
+                    <th>Rol</th>
+                    <th>Estado</th>
+                    <th></th>
+                </tr>
+
+            </thead>
+
+
+            <tbody>
+
+                {% for usuario in ultimos_usuarios %}
+
+                <tr>
+
+                    <td>
+
+                        <strong>
+                            {{ usuario.nombres }}
+                            {{ usuario.apellido_paterno }}
+                        </strong>
+
+                    </td>
+
+
+                    <td>
+                        {{ usuario.email }}
+                    </td>
+
+
+                    <td>
+
+                        {% for grupo in usuario.groups.all %}
+
+                        <span class="badge badge-info">
+                            {{ grupo.name }}
+                        </span>
+
+                        {% empty %}
+
+                        <span class="stat-label">
+                            Sin rol
+                        </span>
+
+                        {% endfor %}
+
+                    </td>
+
+
+                    <td>
+
+                        {% if usuario.is_active %}
+
+                        <span class="badge badge-success">
+                            Activo
+                        </span>
+
+                        {% else %}
+
+                        <span class="badge badge-danger">
+                            Inactivo
+                        </span>
+
+                        {% endif %}
+
+                    </td>
+
+
+                    <td>
+
+                        <a href="{% url 'usuarios:detalle_usuario' usuario.pk %}" class="btn btn-secondary btn-sm">
+
+                            Ver
+
+                        </a>
+
+                    </td>
+
+                </tr>
+
+
+                {% empty %}
+
+                <tr>
+
+                    <td colspan="5">
+                        No hay usuarios registrados.
+                    </td>
+
+                </tr>
+
+                {% endfor %}
+
+            </tbody>
+
+        </table>
+
+    </div>
+
+</div>
+
+{% endblock %}

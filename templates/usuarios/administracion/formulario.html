@@ -1,0 +1,267 @@
+{% extends "base.html" %}
+
+{% block title %}
+{{ titulo }} | SIGRI
+{% endblock %}
+
+
+{% block content %}
+
+<div class="page-header">
+
+    <p class="admin-eyebrow">
+        Administración / Usuarios
+    </p>
+
+    <h1>
+        {{ titulo }}
+    </h1>
+
+    <p>
+        {{ subtitulo }}
+    </p>
+
+</div>
+
+
+<div class="card admin-form-card">
+
+    <form method="post">
+
+        {% csrf_token %}
+
+
+        {% if form.non_field_errors %}
+
+        <div class="login-error">
+
+            {% for error in form.non_field_errors %}
+
+            <span>
+                {{ error }}
+            </span>
+
+            {% endfor %}
+
+        </div>
+
+        {% endif %}
+
+
+        <!-- INFORMACIÓN PERSONAL -->
+
+        <div class="admin-form-section">
+
+            <h2>
+                Información personal
+            </h2>
+
+            <p>
+                Datos principales de identificación del usuario.
+            </p>
+
+
+            <div class="form-grid">
+
+                <div class="form-group">
+
+                    <label>
+                        {{ form.nombres.label }}
+                    </label>
+
+                    {{ form.nombres }}
+
+                    {{ form.nombres.errors }}
+
+                </div>
+
+
+                <div class="form-group">
+
+                    <label>
+                        {{ form.apellido_paterno.label }}
+                    </label>
+
+                    {{ form.apellido_paterno }}
+
+                    {{ form.apellido_paterno.errors }}
+
+                </div>
+
+
+                <div class="form-group">
+
+                    <label>
+                        {{ form.apellido_materno.label }}
+                    </label>
+
+                    {{ form.apellido_materno }}
+
+                    {{ form.apellido_materno.errors }}
+
+                </div>
+
+
+                <div class="form-group">
+
+                    <label>
+                        {{ form.email.label }}
+                    </label>
+
+                    {{ form.email }}
+
+                    {{ form.email.errors }}
+
+                </div>
+
+
+                <div class="form-group">
+
+                    <label>
+                        {{ form.telefono.label }}
+                    </label>
+
+                    {{ form.telefono }}
+
+                    {{ form.telefono.errors }}
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <!-- INFORMACIÓN INSTITUCIONAL -->
+
+        <div class="admin-form-section">
+
+            <h2>
+                Información institucional
+            </h2>
+
+            <p>
+                Ubicación y dependencia del funcionario.
+            </p>
+
+
+            <div class="form-grid">
+
+                <div class="form-group">
+
+                    <label>
+                        {{ form.anexo.label }}
+                    </label>
+
+                    {{ form.anexo }}
+
+                    {{ form.anexo.errors }}
+
+                </div>
+
+
+                <div class="form-group">
+
+                    <label>
+                        {{ form.departamento.label }}
+                    </label>
+
+                    {{ form.departamento }}
+
+                    {{ form.departamento.errors }}
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <!-- ROLES -->
+
+        <div class="admin-form-section">
+
+            <h2>
+                Roles y permisos
+            </h2>
+
+            <p>
+                Selecciona las funciones que podrá realizar el usuario.
+            </p>
+
+
+            <div class="admin-role-selector">
+
+                {% for checkbox in form.roles %}
+
+                <label class="admin-role-option">
+
+                    {{ checkbox.tag }}
+
+                    <span>
+                        {{ checkbox.choice_label }}
+                    </span>
+
+                </label>
+
+                {% endfor %}
+
+            </div>
+
+            {{ form.roles.errors }}
+
+        </div>
+
+
+        <!-- ACCESO -->
+
+        <div class="admin-form-section">
+
+            <h2>
+                Acceso al sistema
+            </h2>
+
+
+            <label class="admin-active-option">
+
+                {{ form.is_active }}
+
+                <div>
+
+                    <strong>
+                        Usuario activo
+                    </strong>
+
+                    <span>
+                        Permitir que este usuario pueda iniciar sesión.
+                    </span>
+
+                </div>
+
+            </label>
+
+        </div>
+
+
+        <div class="admin-form-actions">
+
+            <a href="{% url 'usuarios:lista_usuarios' %}" class="btn btn-secondary">
+
+                Cancelar
+
+            </a>
+
+
+            <button type="submit" class="btn btn-primary">
+
+                {{ texto_boton }}
+
+            </button>
+
+        </div>
+
+    </form>
+
+</div>
+
+{% endblock %}

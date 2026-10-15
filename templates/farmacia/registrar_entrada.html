@@ -1,0 +1,68 @@
+
+{% extends "base.html" %}
+
+{% block title %}
+Registrar Entrada - Farmacia
+{% endblock %}
+
+{% block content %}
+
+<h1>Registrar entrada de medicamentos</h1>
+
+<div class="card">
+
+    <h3>Datos del ingreso</h3>
+
+    <p>
+        Registre los medicamentos recibidos,
+        indicando el lote, vencimiento y ubicación.
+    </p>
+
+    <form method="post">
+
+        {% csrf_token %}
+
+        {% if form.non_field_errors %}
+            <div class="alert alert-danger">
+                {{ form.non_field_errors }}
+            </div>
+        {% endif %}
+
+        {% for field in form %}
+
+            <div class="form-group">
+
+                <label for="{{ field.id_for_label }}">
+                    {{ field.label }}
+                </label>
+
+                {{ field }}
+
+                {% if field.errors %}
+                    <div class="error">
+                        {{ field.errors }}
+                    </div>
+                {% endif %}
+
+            </div>
+
+        {% endfor %}
+
+        <div class="form-actions">
+
+            <button type="submit" class="btn">
+                Registrar entrada
+            </button>
+
+            <a href="{% url 'farmacia:dashboard' %}"
+               class="btn">
+                Cancelar
+            </a>
+
+        </div>
+
+    </form>
+
+</div>
+
+{% endblock %}

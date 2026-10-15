@@ -24,7 +24,9 @@
 
     <div class="app-layout">
 
-        <!-- SIDEBAR -->
+        <!-- =====================================================
+             SIDEBAR
+             ===================================================== -->
 
         <aside class="sidebar">
 
@@ -61,100 +63,148 @@
                 </a>
 
 
-                <!-- PANEL TÉCNICO -->
+                <!-- =================================================
+                     OPCIONES SEGÚN ROL
+                     ================================================= -->
 
                 {% for grupo in user.groups.all %}
 
-                {% if grupo.name == "Técnico TI" %}
 
-                <a href="{% url 'panel_tecnico' %}" class="sidebar-link">
-                    <span class="sidebar-icon">⚙</span>
-                    <span>Panel Técnico</span>
-                </a>
+                    <!-- TÉCNICO TI -->
 
-                {% endif %}
+                    {% if grupo.name == "Técnico TI" %}
+
+                        <a href="{% url 'panel_tecnico' %}" class="sidebar-link">
+                            <span class="sidebar-icon">⚙</span>
+                            <span>Panel Técnico</span>
+                        </a>
+
+                    {% endif %}
+
+
+                    <!-- ENCARGADO DE INVENTARIO -->
+
+                    {% if grupo.name == "Encargado de Inventario" %}
+
+                        <a href="{% url 'inventario:panel' %}" class="sidebar-link">
+                            <span class="sidebar-icon">□</span>
+                            <span>Inventario</span>
+                        </a>
+
+                    {% endif %}
+
+
+                    <!-- ENCARGADO DE FARMACIA -->
+
+                    {% if grupo.name == "Encargado de Farmacia" %}
+
+                        <a href="#" class="sidebar-link">
+                            <span class="sidebar-icon">✚</span>
+                            <span>Farmacia</span>
+                        </a>
+
+                    {% endif %}
+
+
+                    <!-- =================================================
+                         ADMINISTRADOR
+                         ================================================= -->
+
+                    {% if grupo.name == "Administrador" %}
+
+                        <a href="{% url 'panel_tecnico' %}" class="sidebar-link">
+                            <span class="sidebar-icon">⚙</span>
+                            <span>Panel Técnico</span>
+                        </a>
+
+                        <a href="{% url 'inventario:panel' %}" class="sidebar-link">
+                            <span class="sidebar-icon">□</span>
+                            <span>Inventario</span>
+                        </a>
+
+                        <!-- Farmacia todavía no está implementada -->
+
+                        <a href="#" class="sidebar-link">
+                            <span class="sidebar-icon">✚</span>
+                            <span>Farmacia</span>
+                        </a>
+
+
+                        <!-- NUEVO PANEL DE ADMINISTRACIÓN -->
+
+                        <a
+                            href="{% url 'usuarios:administracion' %}"
+                            class="sidebar-link"
+                        >
+                            <span class="sidebar-icon">♙</span>
+                            <span>Administración</span>
+                        </a>
+
+
+                        <!-- SEGURIDAD -->
+
+                        <a
+                            href="{% url 'usuarios:seguridad' %}"
+                            class="sidebar-link"
+                        >
+                            <span class="sidebar-icon">🔐</span>
+                            <span>Seguridad</span>
+                        </a>
+
+                    {% endif %}
+
 
                 {% endfor %}
 
 
-                <!-- INVENTARIO -->
+                <!-- =================================================
+                     SUPERUSUARIO DJANGO
+                     =================================================
 
-                {% for grupo in user.groups.all %}
+                     El superusuario puede acceder al panel administrativo
+                     aunque no tenga asignado el grupo Administrador.
 
-                {% if grupo.name == "Encargado de Inventario" %}
+                -->
 
-                <a href="{% url 'inventario:panel' %}" class="sidebar-link">
-                    <span class="sidebar-icon">□</span>
-                    <span>Inventario</span>
-                </a>
+                {% if user.is_superuser %}
 
-                {% endif %}
+                    {% if not user.groups.all %}
 
-                {% endfor %}
+                        <a
+                            href="{% url 'usuarios:administracion' %}"
+                            class="sidebar-link"
+                        >
+                            <span class="sidebar-icon">♙</span>
+                            <span>Administración</span>
+                        </a>
 
+                        <a
+                            href="{% url 'usuarios:seguridad' %}"
+                            class="sidebar-link"
+                        >
+                            <span class="sidebar-icon">🔐</span>
+                            <span>Seguridad</span>
+                        </a>
 
-                <!-- FARMACIA - PRÓXIMO MÓDULO -->
-
-                {% for grupo in user.groups.all %}
-
-                {% if grupo.name == "Encargado de Farmacia" %}
-
-                <a href="#" class="sidebar-link">
-                    <span class="sidebar-icon">✚</span>
-                    <span>Farmacia</span>
-                </a>
-
-                {% endif %}
-
-                {% endfor %}
-
-
-                <!-- ADMINISTRADOR -->
-
-                {% for grupo in user.groups.all %}
-
-                {% if grupo.name == "Administrador" %}
-
-                <a href="{% url 'panel_tecnico' %}" class="sidebar-link">
-                    <span class="sidebar-icon">⚙</span>
-                    <span>Panel Técnico</span>
-                </a>
-
-                <a href="{% url 'inventario:panel' %}" class="sidebar-link">
-                    <span class="sidebar-icon">□</span>
-                    <span>Inventario</span>
-                </a>
-
-                <a href="#" class="sidebar-link">
-                    <span class="sidebar-icon">✚</span>
-                    <span>Farmacia</span>
-                </a>
-
-                <a href="/admin/" class="sidebar-link">
-                    <span class="sidebar-icon">♙</span>
-                    <span>Administración</span>
-                </a>
-
-                <a href="{% url 'usuarios:seguridad' %}" class="sidebar-link">
-                    <span>🔐</span>
-                    Seguridad
-                </a>
+                    {% endif %}
 
                 {% endif %}
-
-                {% endfor %}
 
             </nav>
 
         </aside>
 
 
-        <!-- CONTENIDO -->
+        <!-- =====================================================
+             CONTENIDO
+             ===================================================== -->
 
         <div class="main-wrapper">
 
 
-            <!-- TOPBAR -->
+            <!-- =================================================
+                 TOPBAR
+                 ================================================= -->
 
             <header class="topbar">
 
@@ -165,77 +215,92 @@
 
                 {% if user.is_authenticated %}
 
-                <div class="user-info">
+                    <div class="user-info">
 
-                    <div class="user-avatar">
-                        {{ user.nombres|slice:":1" }}{{ user.apellido_paterno|slice:":1" }}
-                    </div>
+                        <div class="user-avatar">
 
+                            {{ user.nombres|slice:":1" }}{{ user.apellido_paterno|slice:":1" }}
 
-                    <div>
-
-                        <strong>
-                            {{ user.nombres }}
-                            {{ user.apellido_paterno }}
-                        </strong>
-
-                        <div style="
-                        font-size:12px;
-                        color:#64748b;
-                    ">
-                            {{ user.email }}
                         </div>
 
+
+                        <div>
+
+                            <strong>
+                                {{ user.nombres }}
+                                {{ user.apellido_paterno }}
+                            </strong>
+
+                            <div style="
+                                font-size:12px;
+                                color:#64748b;
+                            ">
+                                {{ user.email }}
+                            </div>
+
+                        </div>
+
+
+                        <form
+                            method="post"
+                            action="{% url 'logout' %}"
+                            style="margin:0;"
+                        >
+
+                            {% csrf_token %}
+
+                            <button
+                                type="submit"
+                                class="btn btn-secondary"
+                            >
+                                Salir
+                            </button>
+
+                        </form>
+
                     </div>
-
-
-                    <form method="post" action="{% url 'logout' %}" style="margin:0;">
-
-                        {% csrf_token %}
-
-                        <button type="submit" class="btn btn-secondary">
-                            Salir
-                        </button>
-
-                    </form>
-
-                </div>
 
                 {% endif %}
 
             </header>
 
 
-            <!-- MAIN -->
+            <!-- =================================================
+                 CONTENIDO PRINCIPAL
+                 ================================================= -->
 
             <main class="content">
 
 
+                <!-- MENSAJES -->
+
                 {% if messages %}
 
-                <div class="messages">
+                    <div class="messages">
 
-                    {% for message in messages %}
+                        {% for message in messages %}
 
-                    <div class="
-                            alert
-                            {% if message.tags == 'success' %}
-                                alert-success
-                            {% else %}
-                                alert-error
-                            {% endif %}
-                        ">
+                            <div class="
+                                alert
+                                {% if message.tags == 'success' %}
+                                    alert-success
+                                {% else %}
+                                    alert-error
+                                {% endif %}
+                            ">
 
-                        {{ message }}
+                                {{ message }}
+
+                            </div>
+
+                        {% endfor %}
 
                     </div>
 
-                    {% endfor %}
-
-                </div>
-
                 {% endif %}
 
+
+                <!-- CONTENIDO DE CADA PÁGINA -->
 
                 {% block content %}
                 {% endblock %}

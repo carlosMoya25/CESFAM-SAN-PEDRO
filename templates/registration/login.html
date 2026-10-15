@@ -1,24 +1,20 @@
 {% extends "base_login.html" %}
+{% load static socialaccount %}
 
 {% block title %}
 Iniciar sesión | CESFAM San Pedro
 {% endblock %}
 
-
 {% block content %}
 
 <div class="login-page">
-
-    <!-- =====================================================
-         PANEL INSTITUCIONAL
-         ===================================================== -->
 
     <div class="login-brand-panel">
 
         <div class="login-brand-content">
 
             <div class="login-logo">
-                +
+                <img src="{% static 'img/logo.jpg' %}" alt="CESFAM San Pedro" class="login-logo-image">
             </div>
 
             <p class="login-brand-label">
@@ -106,16 +102,12 @@ Iniciar sesión | CESFAM San Pedro
     </div>
 
 
-    <!-- =====================================================
-         PANEL LOGIN
-         ===================================================== -->
+    <!-- PANEL LOGIN -->
 
     <div class="login-form-panel">
 
         <div class="login-box">
 
-
-            <!-- ENCABEZADO -->
 
             <div class="login-heading">
 
@@ -135,9 +127,45 @@ Iniciar sesión | CESFAM San Pedro
             </div>
 
 
-            <!-- =================================================
-                 SESIÓN EXPIRADA POR INACTIVIDAD
-                 ================================================= -->
+            <!-- MENSAJES DEL SISTEMA / GOOGLE -->
+
+            {% if messages %}
+
+            {% for message in messages %}
+
+            <div class="login-error">
+
+                <div class="login-error-icon">
+                    !
+                </div>
+
+                <div>
+
+                    <strong>
+                        {% if message.tags == "error" %}
+                        Acceso no autorizado
+                        {% elif message.tags == "success" %}
+                        Operación realizada
+                        {% else %}
+                        Información
+                        {% endif %}
+                    </strong>
+
+                    <span>
+                        {{ message }}
+                    </span>
+
+                </div>
+
+            </div>
+
+            {% endfor %}
+
+            {% endif %}
+
+
+
+            <!-- SESIÓN EXPIRADA POR NO USO -->
 
             {% if request.GET.expired == "1" %}
 
@@ -166,10 +194,6 @@ Iniciar sesión | CESFAM San Pedro
             {% endif %}
 
 
-            <!-- =================================================
-                 ERROR DE LOGIN
-                 ================================================= -->
-
             {% if form.errors %}
 
             <div class="login-error">
@@ -194,17 +218,12 @@ Iniciar sesión | CESFAM San Pedro
 
             {% endif %}
 
-
-            <!-- =================================================
-                 FORMULARIO
-                 ================================================= -->
-
             <form method="post" class="login-form">
 
                 {% csrf_token %}
 
 
-                <!-- EMAIL -->
+                <!-- CORREO ELECTRÓNICO -->
 
                 <div class="login-form-group">
 
@@ -248,9 +267,7 @@ Iniciar sesión | CESFAM San Pedro
                 </div>
 
 
-                <!-- =================================================
-                     REDIRECCIÓN DESPUÉS DEL LOGIN
-                     ================================================= -->
+                <!-- REDIRECCIÓN DESPUÉS DEL LOGIN -->
 
                 {% if next %}
 
@@ -265,18 +282,9 @@ Iniciar sesión | CESFAM San Pedro
 
                     Iniciar sesión
 
-                    <span>
-                        →
-                    </span>
-
                 </button>
 
             </form>
-
-
-            <!-- =================================================
-                 GOOGLE - IMPLEMENTACIÓN FUTURA
-                 ================================================= -->
 
             <div class="login-divider">
 
@@ -287,7 +295,11 @@ Iniciar sesión | CESFAM San Pedro
             </div>
 
 
-            <button type="button" class="google-login-button" disabled title="Disponible próximamente">
+            <!-- =================================================
+                 LOGIN CON GOOGLE
+                 ================================================= -->
+
+            <a href="{% provider_login_url 'google' %}" class="google-login-button">
 
                 <span class="google-symbol">
                     G
@@ -295,22 +307,14 @@ Iniciar sesión | CESFAM San Pedro
 
                 Continuar con Google
 
-            </button>
+            </a>
 
 
-            <p class="login-coming-soon">
-                Inicio de sesión institucional con Google próximamente.
-            </p>
-
-
-            <!-- SEGURIDAD -->
+            <!-- =================================================
+                 INFORMACIÓN DE SEGURIDAD
+                 ================================================= -->
 
             <div class="login-security">
-
-                <span>
-                    🔒
-                </span>
-
                 Acceso exclusivo para usuarios autorizados.
 
             </div>

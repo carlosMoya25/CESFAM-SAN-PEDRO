@@ -16,9 +16,9 @@ def dashboard(request):
     )
 )
 
-    # ==========================
+ 
     # REQUERIMIENTOS
-    # ==========================
+    
 
     total_requerimientos = Requerimiento.objects.count()
 
@@ -35,9 +35,9 @@ def dashboard(request):
     ).count()
 
 
-    # ==========================
+
     # INVENTARIO
-    # ==========================
+
 
     total_articulos = Articulo.objects.filter(
         activo=True

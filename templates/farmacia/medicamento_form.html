@@ -1,0 +1,50 @@
+
+{% extends "base.html" %}
+
+{% block content %}
+
+<h1>{{ titulo }}</h1>
+
+<div class="card">
+
+    <form method="post">
+        {% csrf_token %}
+
+        {% if form.non_field_errors %}
+            <div class="alert alert-danger">
+                {{ form.non_field_errors }}
+            </div>
+        {% endif %}
+
+        {% for field in form %}
+        <div class="form-group">
+
+            <label for="{{ field.id_for_label }}">
+                {{ field.label }}
+            </label>
+
+            {{ field }}
+
+            {% if field.errors %}
+                <div class="error">
+                    {{ field.errors }}
+                </div>
+            {% endif %}
+
+        </div>
+        {% endfor %}
+
+        <button type="submit" class="btn">
+            Guardar medicamento
+        </button>
+
+        <a href="{% url 'farmacia:lista_medicamentos' %}"
+           class="btn">
+            Cancelar
+        </a>
+
+    </form>
+
+</div>
+
+{% endblock %}

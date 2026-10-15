@@ -7,17 +7,19 @@ Dashboard | CESFAM San Pedro
 
 {% block content %}
 
-<!-- ENCABEZADO -->
+<!-- =========================================================
+     ENCABEZADO
+     ========================================================= -->
 
 <div class="page-header">
 
     <p style="
-        text-transform:uppercase;
-        letter-spacing:3px;
-        font-size:12px;
-        color:#087ea4;
-        font-weight:bold;
-        margin-bottom:8px;
+        text-transform: uppercase;
+        letter-spacing: 3px;
+        font-size: 12px;
+        color: #087ea4;
+        font-weight: bold;
+        margin-bottom: 8px;
     ">
         Bienvenido
     </p>
@@ -33,20 +35,22 @@ Dashboard | CESFAM San Pedro
 </div>
 
 
-<!--REQUERIMIENTOS-->
+<!-- =========================================================
+     RESUMEN DE REQUERIMIENTOS
+     ========================================================= -->
 
 <div style="
-    display:flex;
-    align-items:center;
-    gap:10px;
-    margin-bottom:15px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 15px;
 ">
 
-    <span style="font-size:22px;">
+    <span style="font-size: 22px;">
         ☷
     </span>
 
-    <h2 style="margin:0;">
+    <h2 style="margin: 0;">
         Resumen de Requerimientos
     </h2>
 
@@ -56,140 +60,236 @@ Dashboard | CESFAM San Pedro
 <div class="dashboard-grid">
 
 
-    <!-- PENDIENTES -->
+    <!-- =====================================================
+         PENDIENTES
+         ===================================================== -->
 
-    <div class="stat-card stat-danger">
+    {% if "Técnico TI" in grupos or "Administrador" in grupos %}
 
-        <div class="stat-icon">
-            ◷
-        </div>
+    <a href="{% url 'panel_tecnico' %}" class="stat-card stat-danger dashboard-link-card">
 
-        <div>
+        {% else %}
 
-            <div class="stat-label">
-                Pendientes
+        <a href="{% url 'mis_requerimientos' %}" class="stat-card stat-danger dashboard-link-card">
+
+            {% endif %}
+
+            <div class="stat-icon">
+                ◷
             </div>
 
-            <div class="stat-number">
-                {{ pendientes }}
+            <div class="stat-card-content">
+
+                <div class="stat-label">
+                    Pendientes
+                </div>
+
+                <div class="stat-number">
+                    {{ pendientes }}
+                </div>
+
+                <div class="stat-label">
+                    Solicitudes sin asignar
+                </div>
+
             </div>
 
-            <div class="stat-label">
-                Solicitudes sin asignar
-            </div>
+            <span class="stat-card-arrow">
+                ›
+            </span>
 
-        </div>
-
-    </div>
+        </a>
 
 
-    <!-- EN PROCESO -->
 
-    <div class="stat-card stat-warning">
+        <!-- =====================================================
+         EN PROCESO
+         ===================================================== -->
 
-        <div class="stat-icon">
-            ⚙
-        </div>
+        {% if "Técnico TI" in grupos or "Administrador" in grupos %}
 
-        <div>
+        <a href="{% url 'panel_tecnico' %}" class="stat-card stat-warning dashboard-link-card">
 
-            <div class="stat-label">
-                En proceso
-            </div>
+            {% else %}
 
-            <div class="stat-number">
-                {{ en_proceso }}
-            </div>
+            <a href="{% url 'mis_requerimientos' %}" class="stat-card stat-warning dashboard-link-card">
 
-            <div class="stat-label">
-                En atención
-            </div>
+                {% endif %}
 
-        </div>
+                <div class="stat-icon">
+                    ⚙
+                </div>
 
-    </div>
+                <div class="stat-card-content">
 
+                    <div class="stat-label">
+                        En proceso
+                    </div>
 
-    <!-- RESUELTOS -->
+                    <div class="stat-number">
+                        {{ en_proceso }}
+                    </div>
 
-    <div class="stat-card stat-success">
+                    <div class="stat-label">
+                        En atención
+                    </div>
 
-        <div class="stat-icon">
-            ✓
-        </div>
+                </div>
 
-        <div>
+                <span class="stat-card-arrow">
+                    ›
+                </span>
 
-            <div class="stat-label">
-                Resueltos
-            </div>
-
-            <div class="stat-number">
-                {{ resueltos }}
-            </div>
-
-            <div class="stat-label">
-                Requerimientos resueltos
-            </div>
-
-        </div>
-
-    </div>
+            </a>
 
 
-    <!-- TOTAL -->
 
-    <div class="stat-card stat-info">
+            <!-- =====================================================
+         RESUELTOS
+         ===================================================== -->
 
-        <div class="stat-icon">
-            ▤
-        </div>
+            {% if "Técnico TI" in grupos or "Administrador" in grupos %}
 
-        <div>
+            <a href="{% url 'panel_tecnico' %}" class="stat-card stat-success dashboard-link-card">
 
-            <div class="stat-label">
-                Total
-            </div>
+                {% else %}
 
-            <div class="stat-number">
-                {{ total_requerimientos }}
-            </div>
+                <a href="{% url 'mis_requerimientos' %}" class="stat-card stat-success dashboard-link-card">
 
-            <div class="stat-label">
-                Requerimientos registrados
-            </div>
+                    {% endif %}
 
-        </div>
+                    <div class="stat-icon">
+                        ✓
+                    </div>
 
-    </div>
+                    <div class="stat-card-content">
 
+                        <div class="stat-label">
+                            Resueltos
+                        </div>
+
+                        <div class="stat-number">
+                            {{ resueltos }}
+                        </div>
+
+                        <div class="stat-label">
+                            Requerimientos resueltos
+                        </div>
+
+                    </div>
+
+                    <span class="stat-card-arrow">
+                        ›
+                    </span>
+
+                </a>
+
+
+
+                <!-- =====================================================
+         TOTAL REQUERIMIENTOS
+         ===================================================== -->
+
+                {% if "Técnico TI" in grupos or "Administrador" in grupos %}
+
+                <a href="{% url 'panel_tecnico' %}" class="stat-card stat-info dashboard-link-card">
+
+                    {% else %}
+
+                    <a href="{% url 'mis_requerimientos' %}" class="stat-card stat-info dashboard-link-card">
+
+                        {% endif %}
+
+                        <div class="stat-icon">
+                            ▤
+                        </div>
+
+                        <div class="stat-card-content">
+
+                            <div class="stat-label">
+                                Total
+                            </div>
+
+                            <div class="stat-number">
+                                {{ total_requerimientos }}
+                            </div>
+
+                            <div class="stat-label">
+                                Requerimientos registrados
+                            </div>
+
+                        </div>
+
+                        <span class="stat-card-arrow">
+                            ›
+                        </span>
+
+                    </a>
 
 </div>
 
 
-<!-- INVENTARIO -->
+
+<!-- =========================================================
+     INVENTARIO
+     ========================================================= -->
 
 <div style="
-    display:flex;
-    align-items:center;
-    gap:10px;
-    margin-bottom:15px;
-    ">
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 15px;
+">
 
-    <span style="font-size:22px;">
+    <span style="font-size: 22px;">
         □
     </span>
 
-    <h2 style="margin:0;">
+    <h2 style="margin: 0;">
         Inventario
     </h2>
+
 </div>
 
 
 <div class="dashboard-grid">
 
 
-    <!-- ARTÍCULOS -->
+    <!-- =====================================================
+         ARTÍCULOS REGISTRADOS
+         ===================================================== -->
+
+    {% if "Encargado de Inventario" in grupos or "Administrador" in grupos %}
+
+    <a href="{% url 'inventario:panel' %}" class="stat-card stat-info dashboard-link-card">
+
+        <div class="stat-icon">
+            ▣
+        </div>
+
+        <div class="stat-card-content">
+
+            <div class="stat-label">
+                Artículos registrados
+            </div>
+
+            <div class="stat-number">
+                {{ total_articulos }}
+            </div>
+
+            <div class="stat-label">
+                Insumos y equipamiento
+            </div>
+
+        </div>
+
+        <span class="stat-card-arrow">
+            ›
+        </span>
+
+    </a>
+
+    {% else %}
 
     <div class="stat-card stat-info">
 
@@ -215,8 +315,45 @@ Dashboard | CESFAM San Pedro
 
     </div>
 
+    {% endif %}
 
-    <!-- STOCK BAJO -->
+
+
+    <!-- =====================================================
+         STOCK BAJO
+         ===================================================== -->
+
+    {% if "Encargado de Inventario" in grupos or "Administrador" in grupos %}
+
+    <a href="{% url 'inventario:panel' %}" class="stat-card stat-danger dashboard-link-card">
+
+        <div class="stat-icon">
+            ⚠
+        </div>
+
+        <div class="stat-card-content">
+
+            <div class="stat-label">
+                Stock bajo
+            </div>
+
+            <div class="stat-number">
+                {{ stock_bajo }}
+            </div>
+
+            <div class="stat-label">
+                Requieren reposición
+            </div>
+
+        </div>
+
+        <span class="stat-card-arrow">
+            ›
+        </span>
+
+    </a>
+
+    {% else %}
 
     <div class="stat-card stat-danger">
 
@@ -242,11 +379,15 @@ Dashboard | CESFAM San Pedro
 
     </div>
 
+    {% endif %}
 
 </div>
 
 
-<!--ACCESOS RÁPIDOS-->
+
+<!-- =========================================================
+     ACCESOS RÁPIDOS
+     ========================================================= -->
 
 <div class="card">
 
@@ -254,7 +395,7 @@ Dashboard | CESFAM San Pedro
         Accesos rápidos
     </h2>
 
-    <p style="color:#64748b;">
+    <p style="color: #64748b;">
         Accede rápidamente a las funciones principales del sistema.
     </p>
 
@@ -264,13 +405,13 @@ Dashboard | CESFAM San Pedro
 
         <!-- NUEVO REQUERIMIENTO -->
 
-        <a href="{% url 'crear_requerimiento' %}" class="stat-card stat-info">
+        <a href="{% url 'crear_requerimiento' %}" class="stat-card stat-info dashboard-link-card">
 
             <div class="stat-icon">
                 +
             </div>
 
-            <div>
+            <div class="stat-card-content">
 
                 <strong>
                     Nuevo requerimiento
@@ -282,18 +423,23 @@ Dashboard | CESFAM San Pedro
 
             </div>
 
+            <span class="stat-card-arrow">
+                ›
+            </span>
+
         </a>
+
 
 
         <!-- MIS REQUERIMIENTOS -->
 
-        <a href="{% url 'mis_requerimientos' %}" class="stat-card stat-info">
+        <a href="{% url 'mis_requerimientos' %}" class="stat-card stat-info dashboard-link-card">
 
             <div class="stat-icon">
                 ☷
             </div>
 
-            <div>
+            <div class="stat-card-content">
 
                 <strong>
                     Mis requerimientos
@@ -305,20 +451,25 @@ Dashboard | CESFAM San Pedro
 
             </div>
 
+            <span class="stat-card-arrow">
+                ›
+            </span>
+
         </a>
+
 
 
         <!-- PANEL TÉCNICO -->
 
         {% if "Técnico TI" in grupos or "Administrador" in grupos %}
 
-        <a href="{% url 'panel_tecnico' %}" class="stat-card stat-warning">
+        <a href="{% url 'panel_tecnico' %}" class="stat-card stat-warning dashboard-link-card">
 
             <div class="stat-icon">
                 ⚙
             </div>
 
-            <div>
+            <div class="stat-card-content">
 
                 <strong>
                     Panel Técnico
@@ -330,22 +481,27 @@ Dashboard | CESFAM San Pedro
 
             </div>
 
+            <span class="stat-card-arrow">
+                ›
+            </span>
+
         </a>
 
         {% endif %}
+
 
 
         <!-- INVENTARIO -->
 
         {% if "Encargado de Inventario" in grupos or "Administrador" in grupos %}
 
-        <a href="{% url 'inventario:panel' %}" class="stat-card stat-success">
+        <a href="{% url 'inventario:panel' %}" class="stat-card stat-success dashboard-link-card">
 
             <div class="stat-icon">
                 ▣
             </div>
 
-            <div>
+            <div class="stat-card-content">
 
                 <strong>
                     Inventario
@@ -357,10 +513,13 @@ Dashboard | CESFAM San Pedro
 
             </div>
 
+            <span class="stat-card-arrow">
+                ›
+            </span>
+
         </a>
 
         {% endif %}
-
 
     </div>
 
