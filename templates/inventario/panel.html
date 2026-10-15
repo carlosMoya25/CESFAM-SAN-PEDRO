@@ -55,6 +55,36 @@
     color: #dc2626;
 }
 
+.inventario-aviso-stock {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    padding: 16px 18px;
+    border: 1px solid #fcd34d;
+    border-left: 4px solid #d97706;
+    border-radius: 8px;
+    background: #fffbeb;
+    color: #78350f;
+}
+
+.inventario-aviso-stock p {
+    margin: 4px 0 0;
+}
+
+.inventario-aviso-stock a {
+    color: #92400e;
+    font-weight: 700;
+    white-space: nowrap;
+}
+
+@media (max-width: 600px) {
+    .inventario-aviso-stock {
+        align-items: flex-start;
+        flex-direction: column;
+    }
+}
+
 /* ACCESOS RÁPIDOS */
 
 .inventario-accesos {
@@ -348,6 +378,21 @@
         </div>
 
     </div>
+
+
+    {% if total_stock_bajo %}
+    <div class="inventario-aviso-stock" role="alert">
+        <div>
+            <strong>Atención: hay artículos con stock bajo o agotado.</strong>
+            <p>
+                {{ total_stock_bajo }} registro{{ total_stock_bajo|pluralize:"s" }} está{{ total_stock_bajo|pluralize:"n" }} en o bajo su stock mínimo.
+            </p>
+        </div>
+        <a href="{% url 'inventario:consultar_stock' %}">
+            Revisar existencias
+        </a>
+    </div>
+    {% endif %}
 
 
     <!-- ======================================= -->
