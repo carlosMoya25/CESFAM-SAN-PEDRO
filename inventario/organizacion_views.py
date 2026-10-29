@@ -1,3 +1,4 @@
+from core.auditoria import marcar_formulario
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.http import HttpResponseForbidden
@@ -16,6 +17,7 @@ def crear_registro(request, *, form_class, titulo, descripcion, boton, mensaje):
         registro = form.save()
         messages.success(request, f"{mensaje}: {registro.nombre}.")
         return redirect("inventario:panel")
+    marcar_formulario(form)
     return render(request, "inventario/organizacion_form.html", {
         "form": form, "titulo": titulo, "descripcion": descripcion, "boton": boton,
     })

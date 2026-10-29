@@ -152,7 +152,7 @@ Panel Técnico | CESFAM San Pedro
                     </div>
 
                     <h3 class="requirement-title">
-                        {{ req.titulo }}
+                        {% if es_admin_panel %}{{ req.titulo }}{% else %}{{ req.tipo_requerimiento }}{% endif %}
                     </h3>
 
                 </div>
@@ -197,8 +197,7 @@ Panel Técnico | CESFAM San Pedro
                     </span>
 
                     <span class="meta-value">
-                        {{ req.solicitante.nombres }}
-                        {{ req.solicitante.apellido_paterno }}
+                        {% if es_admin_panel %}{{ req.solicitante.nombres }} {{ req.solicitante.apellido_paterno }}{% else %}Disponible al asignarte{% endif %}
                     </span>
                 </div>
 
@@ -239,15 +238,15 @@ Panel Técnico | CESFAM San Pedro
 
 
             <div class="requirement-description">
-                {{ req.descripcion|truncatechars:180 }}
+                {% if es_admin_panel %}{{ req.descripcion|truncatechars:180 }}{% else %}Asigna esta solicitud a tu cuenta para consultar sus antecedentes.{% endif %}
             </div>
 
 
             <div class="requirement-actions">
 
-                <a href="{% url 'detalle_tecnico' req.id %}" class="btn btn-secondary">
+                {% if es_admin_panel %}<a href="{% url 'detalle_tecnico' req.id %}" class="btn btn-secondary">
                     Ver detalle
-                </a>
+                </a>{% endif %}
 
 
                 <form method="post" action="{% url 'asignarme_requerimiento' req.id %}" style="margin:0;">
@@ -546,7 +545,7 @@ Panel Técnico | CESFAM San Pedro
 
             <tbody>
 
-                {% for req in requerimientos %}
+                {% for req in historial_visible %}
 
                 <tr>
 

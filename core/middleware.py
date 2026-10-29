@@ -47,6 +47,10 @@ class SessionExpiredMiddleware:
 
             return response
 
+        # El aviso público sigue disponible aunque la sesión anterior haya vencido.
+        if request.path == reverse("aviso_privacidad"):
+            return self.get_response(request)
+
         # No está autenticado, pero el navegador indica que
         # anteriormente existía una sesión.
         if request.COOKIES.get(self.COOKIE_NAME):

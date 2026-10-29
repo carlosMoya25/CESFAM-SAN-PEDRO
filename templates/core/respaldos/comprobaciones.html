@@ -1,0 +1,6 @@
+<details class="privacy-history-details backup-checks"><summary>Ver comprobaciones y detalles</summary>
+<p class="backup-help">Identificador: {{ copia.pk }}</p><p class="backup-help">Motor: {{ copia.motor }} {{ copia.version_origen }} · Última prueba correcta: {{ copia.verificado_at|date:"d/m/Y H:i"|default:"Sin registrar" }}</p>
+{% if copia.verificacion.motivo %}<p class="privacy-error">{{ copia.verificacion.motivo }}</p>{% endif %}
+{% if copia.verificacion.contenedor_pendiente %}<p class="privacy-error">Mantenimiento debe retirar el contenedor temporal {{ copia.verificacion.contenedor_pendiente }}.</p>{% endif %}
+<ol class="privacy-timeline">{% for prueba in copia.pruebas.all %}<li><time>{{ prueba.fecha|date:"d/m/Y H:i" }}</time><strong>{% if prueba.correcta %}Restauración comprobada{% else %}Prueba fallida o pendiente de revisión{% endif %}</strong><p>{{ prueba.detalle.motivo|default:"Importación y recuentos comprobados; contenedor temporal retirado." }}</p></li>{% empty %}<li>Todavía no se ha registrado una prueba de restauración.</li>{% endfor %}</ol>
+</details>

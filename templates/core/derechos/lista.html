@@ -1,0 +1,21 @@
+{% extends "core/derechos/base.html" %}
+{% block rights_content %}
+<div class="privacy-overview">
+    <div class="privacy-card"><p class="privacy-label">Acceso</p><h2>Conocer mis datos</h2><p class="privacy-section-description">Describe qué información personal sobre ti quieres consultar y el alcance de tu solicitud.</p></div>
+    <div class="privacy-card"><p class="privacy-label">Rectificación</p><h2>Solicitar una corrección</h2><p class="privacy-section-description">Indica el dato que deseas corregir y el valor que propones. Guardarlo no modifica tu perfil.</p></div>
+</div>
+<section class="privacy-card" aria-labelledby="drafts-title">
+    <div class="privacy-section-heading"><div><p class="privacy-label">Tu seguimiento</p><h2 id="drafts-title">Mis solicitudes</h2><p>{{ solicitudes.paginator.count }} registro{{ solicitudes.paginator.count|pluralize:"s" }} asociado{{ solicitudes.paginator.count|pluralize:"s" }} a tu cuenta.</p></div><a class="privacy-button privacy-button-primary" href="{% url 'crear_derecho' %}">Preparar solicitud</a></div>
+    <div class="privacy-draft-list">
+    {% for solicitud in solicitudes %}
+        <a class="privacy-draft-item" href="{% url 'detalle_derecho' solicitud.identificador %}">
+            <div><span class="privacy-label">{{ solicitud.folio }}</span><h3>{{ solicitud.get_tipo_display }}</h3><p>Última actualización: {{ solicitud.actualizada_at|date:"d/m/Y H:i" }} · Chile continental</p></div>
+            <span class="privacy-badge">{{ solicitud.get_estado_display }}</span><span aria-hidden="true">→</span>
+        </a>
+    {% empty %}
+        <div class="privacy-empty"><span aria-hidden="true">☷</span><strong>Aún no tienes borradores.</strong><p>Puedes preparar una solicitud de acceso o rectificación sin haber confirmado la lectura del aviso.</p></div>
+    {% endfor %}
+    </div>
+    {% if solicitudes.has_other_pages %}<nav class="privacy-pagination" aria-label="Páginas de mis solicitudes">{% if solicitudes.has_previous %}<a href="?pagina={{ solicitudes.previous_page_number }}">Anterior</a>{% endif %}<span>Página {{ solicitudes.number }} de {{ solicitudes.paginator.num_pages }}</span>{% if solicitudes.has_next %}<a href="?pagina={{ solicitudes.next_page_number }}">Siguiente</a>{% endif %}</nav>{% endif %}
+</section>
+{% endblock %}

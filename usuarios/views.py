@@ -1,3 +1,5 @@
+from core.auditoria import marcar_rechazo
+from core.auditoria import marcar_formulario
 from config import settings
 from django.contrib import messages
 from django.contrib.auth import get_user_model
@@ -449,6 +451,7 @@ def crear_usuario(request):
 
         form = UsuarioAdminForm()
 
+    marcar_formulario(form)
     return render(
         request,
         "usuarios/administracion/formulario.html",
@@ -502,13 +505,14 @@ def detalle_usuario(request, pk):
 # EDITAR USUARIO
 # ==========================================================
 
+@transaction.atomic
 def editar_usuario(request, pk):
 
     if not es_administrador(request.user):
         return HttpResponseForbidden("No tienes permisos para acceder a esta sección.")
 
     usuario = get_object_or_404(
-        Usuario,
+        Usuario.objects.select_for_update(),
         pk=pk,
     )
 
@@ -528,6 +532,7 @@ def editar_usuario(request, pk):
         form = UsuarioAdminForm(
             request.POST,
             instance=usuario,
+            administrador=request.user,
         )
 
         if form.is_valid():
@@ -633,6 +638,7 @@ def editar_usuario(request, pk):
             instance=usuario
         )
 
+    marcar_formulario(form)
     return render(
         request,
         "usuarios/administracion/formulario.html",
@@ -658,144 +664,27 @@ def editar_usuario(request, pk):
 # ==========================================================
 
 @require_POST
+@transaction.atomic
 def cambiar_estado_usuario(request, pk):
-
     if not es_administrador(request.user):
         return HttpResponseForbidden("No tienes permisos para acceder a esta sección.")
-
-    usuario = get_object_or_404(
-        Usuario,
-        pk=pk,
-    )
-
-    # ------------------------------------------------------
-    # EVITAR QUE UN ADMINISTRADOR SE DESACTIVE A SÍ MISMO
-    # ------------------------------------------------------
-
+    usuario = get_object_or_404(Usuario.objects.select_for_update(), pk=pk)
     if usuario.pk == request.user.pk:
-
-        messages.error(
-            request,
-            "No puedes desactivar tu propia cuenta."
-        )
-
-        return redirect(
-            "usuarios:detalle_usuario",
-            pk=usuario.pk,
-        )
-
-    # ------------------------------------------------------
-    # CAMBIAR ESTADO
-    # ------------------------------------------------------
-
-    usuario.is_active = not usuario.is_active
-
-    usuario.save(
-        update_fields=["is_active"]
-    )
-
-    # ------------------------------------------------------
-    # REGISTRAR EN HISTORIAL ADMINISTRATIVO
-    # ------------------------------------------------------
-
-    if usuario.is_active:
-
-        HistorialAdministracion.objects.create(
-            accion="ACTIVAR_USUARIO",
-            administrador=request.user,
-            usuario_afectado=usuario,
-            descripcion=(
-                f"Se activó la cuenta del usuario "
-                f"{usuario.nombres} {usuario.apellido_paterno} "
-                f"({usuario.email})."
-            ),
-        )
-
-        messages.success(
-            request,
-            f"El usuario {usuario.email} fue activado."
-        )
-
+        marcar_rechazo()
+        messages.error(request, "No puedes cambiar el estado de tu propia cuenta.")
+    elif usuario.is_active:
+        return redirect("usuarios:desvincular_usuario", pk=pk)
     else:
-
+        # Reactivar nunca restaura sesiones ni asignaciones anteriores.
+        usuario.is_active = True
+        usuario.save(update_fields=["is_active"])
         HistorialAdministracion.objects.create(
-            accion="DESACTIVAR_USUARIO",
-            administrador=request.user,
-            usuario_afectado=usuario,
-            descripcion=(
-                f"Se desactivó la cuenta del usuario "
-                f"{usuario.nombres} {usuario.apellido_paterno} "
-                f"({usuario.email})."
-            ),
+            accion="ACTIVAR_USUARIO", administrador=request.user, usuario_afectado=usuario,
+            descripcion="Cuenta reactivada; requiere iniciar una nueva sesión.",
         )
+        messages.success(request, "Cuenta reactivada. El usuario deberá iniciar sesión nuevamente.")
+    return redirect("usuarios:detalle_usuario", pk=pk)
 
-        messages.success(
-            request,
-            f"El usuario {usuario.email} fue desactivado."
-        )
-
-    return redirect(
-        "usuarios:detalle_usuario",
-        pk=usuario.pk,
-    )
-
-    if not es_administrador(request.user):
-        return HttpResponseForbidden(
-            "No tienes permisos para realizar esta acción."
-        )
-
-    usuario = get_object_or_404(
-        Usuario,
-        pk=pk,
-    )
-
-
-    # Evitar que un administrador se desactive a sí mismo.
-
-    if usuario.pk == request.user.pk:
-
-        messages.error(
-            request,
-            "No puedes desactivar tu propia cuenta."
-        )
-
-        return redirect(
-            "usuarios:detalle_usuario",
-            pk=usuario.pk,
-        )
-
-
-    usuario.is_active = not usuario.is_active
-
-    usuario.save(
-        update_fields=["is_active"]
-    )
-
-
-    if usuario.is_active:
-
-        messages.success(
-            request,
-            f"El usuario {usuario.email} fue activado."
-        )
-
-    else:
-
-        messages.success(
-            request,
-            f"El usuario {usuario.email} fue desactivado."
-        )
-
-
-    return redirect(
-        "usuarios:detalle_usuario",
-        pk=usuario.pk,
-    )
-
-
-# ==========================================================
-# HISTORIAL ADMINISTRATIVO
-# ==========================================================
 
 def historial_administracion(request):
 

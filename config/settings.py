@@ -28,9 +28,20 @@ load_dotenv(BASE_DIR / ".env")
 SECRET_KEY = os.environ["DJANGO_SECRET_KEY"]
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = os.environ.get("DEBUG", "False") == "True"
+BACKUP_WORKER_ID = os.getenv("BACKUP_WORKER_ID", "").strip()
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = [
+    host.strip()
+    for host in os.getenv("ALLOWED_HOSTS", "").split(",")
+    if host.strip()
+]
+
+CSRF_TRUSTED_ORIGINS = [
+    origin.strip()
+    for origin in os.getenv("CSRF_TRUSTED_ORIGINS", "").split(",")
+    if origin.strip()
+]
 
 
 # Application definition
@@ -42,6 +53,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    "django.contrib.sites",
 
     # Django Allauth
     "allauth",
@@ -61,10 +73,12 @@ INSTALLED_APPS = [
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
+    "whitenoise.middleware.WhiteNoiseMiddleware",
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
+    'core.auditoria_middleware.AuditoriaMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'usuarios.middleware.CambioClaveObligatorioMiddleware',
     'core.errores.PaginasAccesoMiddleware',
@@ -108,6 +122,8 @@ DATABASES = {
         "PASSWORD": os.environ["DB_PASSWORD"],
         "HOST": os.getenv("DB_HOST", "127.0.0.1"),
         "PORT": os.getenv("DB_PORT", "3306"),
+        # Incluye las vistas de allauth y del admin en la transacción de su auditoría.
+        "ATOMIC_REQUESTS": True,
         "OPTIONS": {
             "charset": "utf8mb4",
         },
@@ -146,6 +162,7 @@ STATIC_URL = "static/"
 STATICFILES_DIRS = [
     BASE_DIR / "static",
 ]
+STATIC_ROOT = BASE_DIR / "staticfiles"
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
@@ -251,6 +268,7 @@ ACCOUNT_EMAIL_VERIFICATION = "none"
 
 #inicio sesion google
 
+ACCOUNT_ADAPTER = "usuarios.adapters.CesfamAccountAdapter"
 SOCIALACCOUNT_ADAPTER = "usuarios.adapters.CesfamSocialAccountAdapter"
 
 SOCIALACCOUNT_AUTO_SIGNUP = True
@@ -275,4 +293,24 @@ SOCIALACCOUNT_PROVIDERS = {
         },
         "OAUTH_PKCE_ENABLED": True,
     }
+}
+
+SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
+
+# Almacenamiento privado; nunca servir estas rutas mediante el servidor web.
+BACKUP_ROOT = Path(os.getenv("BACKUP_ROOT", str(BASE_DIR / "respaldos_locales" / "base_de_datos")))
+BACKUP_KEY_FILE = Path(os.getenv("BACKUP_KEY_FILE", str(BASE_DIR / ".secrets" / "backup.key")))
+
+LOGGING = {
+    "version": 1,
+    "disable_existing_loggers": False,
+    "formatters": {"seguro": {"()": "core.logging.FormatoSeguroJSON"}},
+    "handlers": {"consola": {"class": "logging.StreamHandler", "formatter": "seguro"}},
+    "root": {"handlers": ["consola"], "level": "WARNING"},
+    "loggers": {
+        "cesfam": {"handlers": ["consola"], "level": "INFO", "propagate": False},
+        "django": {"handlers": ["consola"], "level": "WARNING", "propagate": False},
+        "django.server": {"handlers": ["consola"], "level": "WARNING", "propagate": False},
+        "axes": {"handlers": ["consola"], "level": "WARNING", "propagate": False},
+    },
 }

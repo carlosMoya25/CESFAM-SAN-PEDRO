@@ -1,5 +1,5 @@
 def tiene_rol(usuario, rol):
-    if not usuario.is_authenticated:
+    if not usuario.is_authenticated or not usuario.is_active:
         return False
 
     return usuario.groups.filter(name=rol).exists()
@@ -9,8 +9,12 @@ def es_tecnico(usuario):
     return tiene_rol(usuario, "Técnico TI")
 
 
+def puede_ver_auditoria(usuario):
+    return es_administrador(usuario) or es_tecnico(usuario)
+
+
 def es_administrador(usuario):
-    return tiene_rol(usuario, "Administrador") or usuario.is_superuser
+    return usuario.is_authenticated and usuario.is_active and (tiene_rol(usuario, "Administrador") or usuario.is_superuser)
 
 def es_encargado_inventario(usuario):
     return tiene_rol(usuario, "Encargado de Inventario")

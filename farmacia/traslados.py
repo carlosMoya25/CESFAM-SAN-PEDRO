@@ -1,3 +1,4 @@
+from core.auditoria import marcar_formulario
 import uuid
 
 from django import forms
@@ -104,6 +105,7 @@ def trasladar_a_anexo(request):
     stocks_anexos = list(StockLote.objects.filter(
         lote__in=lotes, anexo__in=form.fields["destino"].queryset,
     ).values("lote_id", "anexo_id", "cantidad"))
+    marcar_formulario(form)
     return render(request, "farmacia/trasladar.html", {
         "form": form, "titulo": "Trasladar a anexo", "stocks_traslado": stocks, "stocks_anexos": stocks_anexos,
     })

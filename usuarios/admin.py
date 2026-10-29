@@ -12,6 +12,13 @@ from organizacion.models import Anexo, Departamento
 class UsuarioAdmin(UserAdmin):
     model = Usuario
 
+    def get_readonly_fields(self, request, obj=None):
+        campos = super().get_readonly_fields(request, obj)
+        return (*campos, "is_active", "groups") if obj else campos
+
+    def has_delete_permission(self, request, obj=None):
+        return False
+
     list_display = (
         "email",
         "nombres",
@@ -122,6 +129,9 @@ class HistorialSeguridadAdmin(admin.ModelAdmin):
         return False
 
     def has_change_permission(self, request, obj=None):
+        return False
+
+    def has_delete_permission(self, request, obj=None):
         return False
 
 

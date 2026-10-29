@@ -1,3 +1,4 @@
+from core.auditoria import marcar_formulario, marcar_rechazo
 
 from farmacia.models import MovimientoFarmacia
 from datetime import datetime, time, timedelta
@@ -113,13 +114,16 @@ def crear_medicamento(request):
         try:
             medicamento, movimiento = form.guardar_recepcion(usuario=request.user)
         except ValidationError as error:
+            marcar_rechazo()
             form.add_error(None, error)
         except IntegrityError:
+            marcar_rechazo()
             form.add_error(None, "El código o la recepción ya existen, o los datos cambiaron. No se guardó ningún cambio. Revise el catálogo y el historial antes de intentarlo nuevamente.")
         else:
             messages.success(request, f"Medicamento, lote y recepción registrados correctamente. Movimiento #{movimiento.pk}.")
             return redirect("farmacia:detalle_medicamento", pk=medicamento.pk)
 
+    marcar_formulario(form)
     return render(
         request,
         "farmacia/medicamento_form.html",
@@ -146,11 +150,13 @@ def editar_medicamento(request, pk):
         try:
             form.save()
         except ValidationError as error:
+            marcar_rechazo()
             form.add_error(None, error)
         else:
             messages.success(request, "Medicamento actualizado correctamente.")
             return redirect("farmacia:detalle_medicamento", pk=medicamento.pk)
 
+    marcar_formulario(form)
     return render(
         request,
         "farmacia/medicamento_form.html",
@@ -233,8 +239,10 @@ def registrar_entrada(request):
                 return redirect("farmacia:dashboard")
 
             except ValidationError as error:
+                marcar_rechazo()
                 form.add_error(None, error)
             except IntegrityError:
+                marcar_rechazo()
                 form.add_error(None, "La recepción ya fue registrada o sus datos cambiaron. Revise el historial antes de volver a intentar.")
 
     else:
@@ -248,6 +256,7 @@ def registrar_entrada(request):
                 pass
         form = IngresoMedicamentoForm(initial=inicial)
 
+    marcar_formulario(form)
     return render(
         request,
         "farmacia/registrar_entrada.html",

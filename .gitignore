@@ -42,6 +42,7 @@ local_settings.py
 
 # Respaldos locales de mantenimiento (contienen datos de inventario)
 /respaldos_locales/
+/.secrets/
 
 # Notas de trabajo locales y datos auxiliares
 /CONTINUAR.md

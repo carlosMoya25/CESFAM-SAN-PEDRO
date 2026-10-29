@@ -1,3 +1,4 @@
+from core.auditoria import marcar_formulario, marcar_rechazo
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.core.exceptions import ValidationError
@@ -91,7 +92,9 @@ def registrar_movimiento(request, clase_form, servicio, operacion, titulo, boton
             messages.success(request, mensaje)
             return redirect("inventario:panel")
         except ValidationError as error:
+            marcar_rechazo()
             form.add_error(None, error)
+    marcar_formulario(form)
     return render(request, "inventario/movimiento_form.html", {
         "form": form, "titulo": titulo, "boton": boton, "operacion": operacion,
         "articulos_movimiento": list(Articulo.objects.filter(
@@ -168,6 +171,7 @@ def crear_categoria(request):
     else:
         form = CategoriaArticuloForm()
 
+    marcar_formulario(form)
     return render(
         request,
         "inventario/categoria_form.html",
@@ -195,6 +199,7 @@ def editar_categoria(request, pk):
     else:
         form = CategoriaArticuloForm(instance=categoria)
 
+    marcar_formulario(form)
     return render(
         request,
         "inventario/categoria_form.html",
@@ -233,6 +238,7 @@ def crear_articulo(request):
     else:
         form = ArticuloForm()
 
+    marcar_formulario(form)
     return render(
         request,
         "inventario/articulo_form.html",
@@ -260,6 +266,7 @@ def editar_articulo(request, pk):
     else:
         form = ArticuloForm(instance=articulo)
 
+    marcar_formulario(form)
     return render(
         request,
         "inventario/articulo_form.html",

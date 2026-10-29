@@ -1,12 +1,14 @@
 from django.urls import path
 
 from . import views, clave_views
+from .desvinculacion_views import desvincular_usuario
 
 
 app_name = "usuarios"
 
 
 urlpatterns = [
+    path("administracion/usuarios/<int:pk>/desvincular/", desvincular_usuario, name="desvincular_usuario"),
     path("mi-cuenta/clave/", clave_views.cambiar_clave, name="cambiar_clave"),
     path("administracion/usuarios/<int:pk>/clave/", clave_views.restablecer_clave, name="restablecer_clave"),
 

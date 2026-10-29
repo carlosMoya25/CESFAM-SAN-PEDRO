@@ -39,6 +39,15 @@ class ArticuloAdmin(admin.ModelAdmin):
 
 @admin.register(StockAnexo)
 class StockAnexoAdmin(admin.ModelAdmin):
+    def has_add_permission(self, request):
+        return False
+
+    def has_change_permission(self, request, obj=None):
+        return False
+
+    def has_delete_permission(self, request, obj=None):
+        return False
+
     def get_queryset(self, request):
         return super().get_queryset(request).filter(articulo__medicamento__isnull=True, articulo__saldos_pendientes_farmacia__isnull=True)
 
@@ -71,6 +80,9 @@ class DetalleMovimientoInline(admin.TabularInline):
     extra = 0
     readonly_fields = ("articulo", "cantidad")
     can_delete = False
+
+    def has_add_permission(self, request, obj):
+        return False
 
 
 @admin.register(MovimientoInventario)
@@ -109,6 +121,12 @@ class MovimientoInventarioAdmin(admin.ModelAdmin):
     def has_add_permission(self, request):
         return False
 
+    def has_change_permission(self, request, obj=None):
+        return False
+
+    def has_delete_permission(self, request, obj=None):
+        return False
+
 
 @admin.register(RecursoRequerimiento)
 class RecursoRequerimientoAdmin(admin.ModelAdmin):
@@ -135,4 +153,10 @@ class RecursoRequerimientoAdmin(admin.ModelAdmin):
     )
 
     def has_add_permission(self, request):
+        return False
+
+    def has_change_permission(self, request, obj=None):
+        return False
+
+    def has_delete_permission(self, request, obj=None):
         return False

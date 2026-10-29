@@ -29,6 +29,15 @@ class EstadoRequerimientoAdmin(admin.ModelAdmin):
 
 @admin.register(Requerimiento)
 class RequerimientoAdmin(admin.ModelAdmin):
+    def has_add_permission(self, request):
+        return False
+
+    def has_change_permission(self, request, obj=None):
+        return False
+
+    def has_delete_permission(self, request, obj=None):
+        return False
+
     list_display = (
         "id",
         "titulo",
@@ -63,6 +72,15 @@ class RequerimientoAdmin(admin.ModelAdmin):
 
 @admin.register(HistorialRequerimiento)
 class HistorialRequerimientoAdmin(admin.ModelAdmin):
+    def has_add_permission(self, request):
+        return False
+
+    def has_change_permission(self, request, obj=None):
+        return False
+
+    def has_delete_permission(self, request, obj=None):
+        return False
+
     list_display = (
         "requerimiento",
         "accion",

@@ -125,6 +125,15 @@ class UsuarioAdminForm(forms.ModelForm):
 
     def clean(self):
         datos = super().clean()
+        if self.instance.pk and "is_active" in self.changed_data:
+            self.add_error("is_active", "Para cambiar el estado utiliza la acción de activar o desactivar en el detalle del usuario.")
+        if self.instance.pk and self.administrador and self.instance.pk == self.administrador.pk:
+            if not self.administrador.is_superuser and not datos.get("roles", Group.objects.none()).filter(name="Administrador").exists():
+                self.add_error("roles", "No puedes quitarte tu propio rol de administrador.")
+        if self.instance.pk and self.instance.groups.filter(name="Técnico TI").exists():
+            from .desvinculacion import pendientes_usuario
+            if not datos.get("roles", Group.objects.none()).filter(name="Técnico TI").exists() and pendientes_usuario(self.instance).exists():
+                self.add_error("roles", "Reasigna las solicitudes pendientes antes de retirar el rol Técnico TI; puedes usar la desactivación con reemplazo.")
         if not self.instance.pk and datos.get("modo_acceso") == "clave":
             candidato = copy(self.instance)
             for campo in ("email", "nombres", "apellido_paterno", "apellido_materno"):
@@ -153,3 +162,18 @@ class UsuarioAdminForm(forms.ModelForm):
             )
 
         return usuario
+
+
+class DesvinculacionForm(forms.Form):
+    reemplazo = forms.ModelChoiceField(queryset=Usuario.objects.none(), required=False,
+                                      label="Técnico TI que recibirá las solicitudes pendientes")
+    motivo = forms.CharField(max_length=500, label="Motivo administrativo",
+                             help_text="No incluyas información clínica ni antecedentes sensibles.",
+                             widget=forms.Textarea(attrs={"rows": 3}))
+    confirmar = forms.BooleanField(label="Confirmo la desactivación de la cuenta y la revocación de sus sesiones.")
+
+    def __init__(self, *args, usuario, tiene_pendientes, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields["reemplazo"].queryset = Usuario.objects.filter(
+            is_active=True, groups__name="Técnico TI").exclude(pk=usuario.pk).distinct()
+        self.fields["reemplazo"].required = tiene_pendientes

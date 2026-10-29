@@ -1,3 +1,4 @@
+from core.auditoria import marcar_formulario, marcar_rechazo
 import csv
 import io
 
@@ -34,9 +35,11 @@ def importar_csv(request):
         try:
             carga = preparar_importacion(archivo=form.cleaned_data["archivo"], usuario=request.user)
         except ValidationError as error:
+            marcar_rechazo()
             form.add_error("archivo", error)
         else:
             return redirect("farmacia:revisar_importacion", pk=carga.pk)
+    marcar_formulario(form)
     return render(request, "farmacia/importar_csv.html", {
         "titulo": "Importar medicamentos y recepciones", "form": form,
         "ubicaciones": ubicaciones_recepcion(),
@@ -60,13 +63,16 @@ def revisar_importacion(request, pk):
             carga = confirmar_importacion(importacion_id=carga.pk, usuario=request.user,
                                          omitir_errores=parcial, revision=request.POST["revision"])
         except ValidationError as error:
+            marcar_rechazo()
             messages.error(request, " ".join(error.messages))
         except IntegrityError:
+            marcar_rechazo()
             messages.error(request, "Los datos cambiaron durante la confirmación o esta recepción ya existe. No se guardó ningún cambio de esta carga. Revise el historial y vuelva a cargar el archivo.")
         else:
             if carga.estado == "IMPORTADA":
                 messages.success(request, f"Carga completada: {carga.cantidad_importada} medicamentos nuevos, {carga.cantidad_lotes_creados} lotes nuevos y {carga.cantidad_movimientos} recepciones registradas y {carga.cantidad_omitidas} filas omitidas.")
             else:
+                marcar_rechazo()
                 messages.error(request, "La validación requiere una nueva revisión. No se guardaron medicamentos, lotes ni existencias. Revise el resumen actualizado y las filas con errores antes de confirmar nuevamente.")
         return redirect("farmacia:revisar_importacion", pk=carga.pk)
     solo_errores = request.GET.get("filas") == "errores"

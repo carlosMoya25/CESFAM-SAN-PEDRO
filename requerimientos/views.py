@@ -1,3 +1,5 @@
+from core.auditoria import marcar_formulario
+from core.auditoria import marcar_rechazo
 from django.core.exceptions import ValidationError
 import requerimientos
 import requerimientos
@@ -14,6 +16,7 @@ from django.contrib import messages
 from django.db import transaction
 from django.http import HttpResponseForbidden
 from django.utils import timezone
+from django.db.models import Q
 
 from usuarios.utils import es_administrador, es_tecnico
 
@@ -55,6 +58,7 @@ def crear_requerimiento(request):
             }
         )
 
+    marcar_formulario(form)
     return render(
         request,
         "requerimientos/crear.html",
@@ -142,6 +146,11 @@ def panel_tecnico(request):
         .order_by("-fecha_solicitud")
     )
 
+    if not es_administrador(request.user):
+        requerimientos = requerimientos.filter(
+            Q(responsable=request.user) | Q(responsable__isnull=True, estado__nombre="Pendiente")
+        )
+
     pendientes = requerimientos.filter(
         responsable__isnull=True,
         estado__nombre="Pendiente",
@@ -157,6 +166,8 @@ def panel_tecnico(request):
         "requerimientos": requerimientos,
         "pendientes": pendientes,
         "mis_asignados": mis_asignados,
+        "es_admin_panel": es_administrador(request.user),
+        "historial_visible": requerimientos if es_administrador(request.user) else requerimientos.filter(responsable=request.user),
     }
 
     return render(
@@ -179,12 +190,19 @@ def asignarme_requerimiento(request, pk):
             "Solo un Técnico TI puede asignarse requerimientos."
         )
 
+    # Coordinar con la desactivación para no asignar a una cuenta dada de baja.
+    from usuarios.models import Usuario
+    actual = Usuario.objects.select_for_update().get(pk=request.user.pk)
+    if not actual.is_active or not es_tecnico(actual):
+        return HttpResponseForbidden("Tu cuenta ya no está habilitada como técnico.")
+
     requerimiento = get_object_or_404(
         Requerimiento.objects.select_for_update(),
         pk=pk,
     )
 
     if requerimiento.responsable_id is not None:
+        marcar_rechazo()
         messages.error(
             request,
             "Este requerimiento ya fue asignado a otro técnico."
@@ -193,6 +211,7 @@ def asignarme_requerimiento(request, pk):
         return redirect("panel_tecnico")
 
     if requerimiento.estado.nombre != "Pendiente":
+        marcar_rechazo()
         messages.error(
             request,
             "El requerimiento ya no se encuentra pendiente."
@@ -261,6 +280,9 @@ def detalle_tecnico(request, pk):
         pk=pk,
     )
 
+    if not es_administrador(request.user) and requerimiento.responsable_id != request.user.pk:
+        return HttpResponseForbidden("Debes ser responsable para consultar el detalle.")
+
     historial = (
         requerimiento.historial
         .select_related(
@@ -306,6 +328,8 @@ def iniciar_atencion(request, pk):
         pk=pk,
     )
 
+    if not (es_tecnico(request.user) or es_administrador(request.user)):
+        return HttpResponseForbidden("No tienes permisos de atención técnica.")
     if (
         requerimiento.responsable_id != request.user.id
         and not es_administrador(request.user)
@@ -315,6 +339,7 @@ def iniciar_atencion(request, pk):
         )
 
     if requerimiento.estado.nombre != "Asignado":
+        marcar_rechazo()
         messages.error(
             request,
             "Solo se puede iniciar un requerimiento que esté asignado."
@@ -349,13 +374,16 @@ def iniciar_atencion(request, pk):
     return redirect("detalle_tecnico", pk=pk)
 
 @login_required
+@transaction.atomic
 def agregar_observacion(request, pk):
 
     requerimiento = get_object_or_404(
-        Requerimiento,
+        Requerimiento.objects.select_for_update(),
         pk=pk,
     )
 
+    if not (es_tecnico(request.user) or es_administrador(request.user)):
+        return HttpResponseForbidden("No tienes permisos de atención técnica.")
     if (
         requerimiento.responsable_id != request.user.id
         and not es_administrador(request.user)
@@ -368,6 +396,7 @@ def agregar_observacion(request, pk):
         "Asignado",
         "En proceso",
     ]:
+        marcar_rechazo()
         messages.error(
             request,
             "No se pueden agregar observaciones en este estado."
@@ -377,6 +406,7 @@ def agregar_observacion(request, pk):
     if request.method == "POST":
 
         form = ObservacionRequerimientoForm(request.POST)
+        marcar_formulario(form)
 
         if form.is_valid():
 
@@ -408,6 +438,8 @@ def resolver_requerimiento(request, pk):
         pk=pk,
     )
 
+    if not (es_tecnico(request.user) or es_administrador(request.user)):
+        return HttpResponseForbidden("No tienes permisos de atención técnica.")
     if (
         requerimiento.responsable_id != request.user.id
         and not es_administrador(request.user)
@@ -417,6 +449,7 @@ def resolver_requerimiento(request, pk):
         )
 
     if requerimiento.estado.nombre != "En proceso":
+        marcar_rechazo()
         messages.error(
             request,
             "Solo se pueden resolver requerimientos en proceso."
@@ -426,6 +459,7 @@ def resolver_requerimiento(request, pk):
     form = ResolverRequerimientoForm(request.POST)
 
     if not form.is_valid():
+        marcar_rechazo()
         messages.error(
             request,
             "Debes ingresar la solución aplicada."
@@ -481,6 +515,8 @@ def cerrar_requerimiento(request, pk):
         pk=pk,
     )
 
+    if not (es_tecnico(request.user) or es_administrador(request.user)):
+        return HttpResponseForbidden("No tienes permisos de atención técnica.")
     if (
         requerimiento.responsable_id != request.user.id
         and not es_administrador(request.user)
@@ -490,6 +526,7 @@ def cerrar_requerimiento(request, pk):
         )
 
     if requerimiento.estado.nombre != "Resuelto":
+        marcar_rechazo()
         messages.error(
             request,
             "Solo se puede cerrar un requerimiento resuelto."
@@ -571,12 +608,14 @@ def agregar_recurso(request, pk):
             )
 
         except ValidationError as error:
+            marcar_rechazo()
             messages.error(
                 request,
                 "; ".join(error.messages),
             )
 
     else:
+        marcar_rechazo()
         messages.error(
             request,
             "Revisa los datos ingresados.",

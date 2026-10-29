@@ -1,3 +1,4 @@
+from core.auditoria import marcar_formulario
 from django import forms
 from django.contrib import messages
 from django.contrib.auth import update_session_auth_hash
@@ -58,6 +59,7 @@ def cambiar_clave(request):
                 update_session_auth_hash(request, usuario)
                 messages.success(request, "Contraseña actualizada correctamente.")
                 return redirect("dashboard")
+    marcar_formulario(form)
     return render(request, "usuarios/cambiar_clave.html", {
         "form": form, "titulo": "Cambiar contraseña",
         "cambio_obligatorio": usuario.debe_cambiar_clave,
@@ -89,6 +91,7 @@ def restablecer_clave(request, pk):
                 return redirect("usuarios:detalle_usuario", pk=usuario.pk)
     else:
         form = ClaveTemporalForm(usuario=usuario, administrador=request.user)
+    marcar_formulario(form)
     return render(request, "usuarios/restablecer_clave.html", {
         "form": form, "usuario_afectado": usuario, "titulo": "Restablecer contraseña temporal",
     })

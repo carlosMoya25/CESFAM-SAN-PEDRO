@@ -1,3 +1,4 @@
+from core.auditoria import auditar_comando
 import json
 import os
 from pathlib import Path
@@ -17,6 +18,7 @@ class Command(BaseCommand):
         parser.add_argument("--huella")
         parser.add_argument("--respaldo", type=Path)
 
+    @auditar_comando
     def handle(self, *args, **opciones):
         try:
             plan = plan_regularizacion_general()

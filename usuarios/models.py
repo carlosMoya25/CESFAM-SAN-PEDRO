@@ -50,6 +50,15 @@ class Usuario(AbstractUser):
     )
 
     debe_cambiar_clave = models.BooleanField(default=False, verbose_name="Debe cambiar su contraseña temporal")
+    revision_acceso = models.PositiveIntegerField(default=0, editable=False)
+
+    def _get_session_auth_hash(self, secret=None):
+        original = super()._get_session_auth_hash(secret=secret)
+        if not self.revision_acceso:
+            return original
+        from django.utils.crypto import salted_hmac
+        return salted_hmac("usuarios.revision_acceso", f"{original}:{self.revision_acceso}",
+                           secret=secret, algorithm="sha256").hexdigest()
 
     USERNAME_FIELD = "email"
     REQUIRED_FIELDS = ["nombres", "apellido_paterno"]

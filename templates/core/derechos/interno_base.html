@@ -1,0 +1,10 @@
+{% extends "base.html" %}
+{% load static %}
+{% block title %}Atención de privacidad · CESFAM San Pedro{% endblock %}
+{% block extra_css %}<link rel="stylesheet" href="{% static 'css/privacidad.css' %}">{% endblock %}
+{% block content %}
+<article class="privacy-page">
+    <a class="privacy-back-link" href="{% url 'aviso_privacidad' %}">← Volver a Ley 21.719 · Privacidad</a>
+    {% block institution_content %}{% endblock %}
+</article>
+{% endblock %}

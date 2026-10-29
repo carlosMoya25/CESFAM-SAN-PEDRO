@@ -193,9 +193,7 @@
 
             {% if usuario_detalle.is_active %}
 
-            <button type="submit" class="btn btn-danger">
-                Desactivar usuario
-            </button>
+            <a href="{% url 'usuarios:desvincular_usuario' usuario_detalle.pk %}" class="btn btn-danger">Revisar desactivación</a>
 
             {% else %}
 

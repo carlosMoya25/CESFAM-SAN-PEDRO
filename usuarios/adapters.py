@@ -1,12 +1,20 @@
+from allauth.account.adapter import DefaultAccountAdapter
 from allauth.socialaccount.adapter import DefaultSocialAccountAdapter
 from allauth.core.exceptions import ImmediateHttpResponse
 
 from django.contrib import messages
 from django.contrib.auth import get_user_model
+from django.db import transaction
 from django.shortcuts import redirect
+from core.auditoria import intentar_registrar_evento, marcar_rechazo
 
 
 Usuario = get_user_model()
+
+
+class CesfamAccountAdapter(DefaultAccountAdapter):
+    def is_open_for_signup(self, request):
+        return False
 
 
 class CesfamSocialAccountAdapter(DefaultSocialAccountAdapter):
@@ -35,6 +43,8 @@ class CesfamSocialAccountAdapter(DefaultSocialAccountAdapter):
         )
 
         if not email:
+            marcar_rechazo()
+            intentar_registrar_evento(modulo="usuarios", accion="ACCESO_FALLIDO", resultado="RECHAZADA")
             messages.error(
                 request,
                 "Google no proporcionó un correo electrónico válido."
@@ -49,6 +59,8 @@ class CesfamSocialAccountAdapter(DefaultSocialAccountAdapter):
             )
 
         except Usuario.DoesNotExist:
+            marcar_rechazo()
+            intentar_registrar_evento(modulo="usuarios", accion="ACCESO_FALLIDO", resultado="RECHAZADA")
 
             messages.error(
                 request,
@@ -61,6 +73,8 @@ class CesfamSocialAccountAdapter(DefaultSocialAccountAdapter):
             )
 
         if not usuario.is_active:
+            marcar_rechazo()
+            intentar_registrar_evento(modulo="usuarios", accion="ACCESO_FALLIDO", resultado="RECHAZADA")
 
             messages.error(
                 request,
@@ -73,7 +87,5 @@ class CesfamSocialAccountAdapter(DefaultSocialAccountAdapter):
             )
 
         # Vincular la cuenta Google al usuario existente.
-        sociallogin.connect(
-            request,
-            usuario
-        )
+        with transaction.atomic():
+            sociallogin.connect(request, usuario)

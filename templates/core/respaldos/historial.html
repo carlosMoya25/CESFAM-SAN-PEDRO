@@ -1,0 +1,13 @@
+{% extends "core/derechos/interno_base.html" %}
+{% load static %}
+{% block extra_css %}{{ block.super }}<link rel="stylesheet" href="{% static 'css/respaldos.css' %}?v=20261025-3">{% endblock %}
+{% block title %}Historial de descargas · CESFAM San Pedro{% endblock %}
+{% block institution_content %}
+<div class="backup-page">
+<header class="backup-heading"><div><p class="backup-eyebrow">Respaldos / Trazabilidad</p><h1>Historial de descargas</h1><p class="backup-subtitle">Revisa quién solicitó cada copia y cuándo.</p></div><a class="privacy-button backup-outline" href="{% url 'panel_respaldos' %}">← Volver a respaldos</a></header>
+<section class="backup-card"><h2>Actividad registrada</h2><p>El registro indica que el servidor preparó el archivo y comenzó a entregarlo. No confirma que la descarga haya finalizado ni que exista una copia en el servidor Windows del CESFAM.</p>
+<ol class="privacy-timeline">{% for descarga in descargas %}<li><time>{{ descarga.fecha|date:"d/m/Y H:i" }}</time><strong>{{ descarga.usuario.email }}</strong><p>Copia {{ descarga.respaldo_id }} · Descarga preparada</p></li>{% empty %}<li>Todavía no hay descargas registradas.</li>{% endfor %}</ol>
+{% if descargas.has_other_pages %}<nav class="privacy-pagination" aria-label="Páginas del historial">{% if descargas.has_previous %}<a href="?pagina={{ descargas.previous_page_number }}">Anterior</a>{% endif %}<span>Página {{ descargas.number }} de {{ descargas.paginator.num_pages }}</span>{% if descargas.has_next %}<a href="?pagina={{ descargas.next_page_number }}">Siguiente</a>{% endif %}</nav>{% endif %}
+</section>
+</div>
+{% endblock %}

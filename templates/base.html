@@ -165,6 +165,15 @@
                     <span>Farmacia</span>
                 </a>
                 {% endif %}
+                {% if puede_ver_auditoria %}
+                <a href="{% url 'panel_auditoria' %}" class="sidebar-link" aria-label="Auditoría"{% if request.resolver_match.url_name == 'panel_auditoria' or request.resolver_match.url_name == 'detalle_auditoria' %} aria-current="page"{% endif %}>
+                    <span class="sidebar-icon" aria-hidden="true">≡</span><span>Auditoría</span>
+                </a>
+                {% endif %}
+                <a href="{% url 'aviso_privacidad' %}" class="sidebar-link"{% if request.resolver_match.url_name == 'aviso_privacidad' %} aria-current="page"{% endif %}>
+                    <span class="sidebar-icon" aria-hidden="true">ⓘ</span>
+                    <span>Ley 21.719 · Privacidad</span>
+                </a>
             </nav>
 
         </aside>

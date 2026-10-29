@@ -1,0 +1,335 @@
+{
+  "schema_version": 1,
+  "diagram_type": "architecture",
+  "meta": {
+    "title": "CESFAM San Pedro · arquitectura del proyecto",
+    "locale": "es",
+    "output": ".archify/architecture-cesfam-san-pedro-20261026-211547/cesfam-arquitectura.html",
+    "quality_profile": "showcase",
+    "repository": {
+      "url": "git@ssh.github.com:carlosMoya25/CESFAM-SAN-PEDRO.git",
+      "revision": "e12e37d7ea3214507d5a6d2fbe54561a2dbf9eee",
+      "link_mode": "local-only"
+    }
+  },
+  "components": [
+    {
+      "id": "personal",
+      "type": "frontend",
+      "label": "Personal del CESFAM",
+      "sublabel": "Navegador · interfaz web",
+      "pos": [
+        40,
+        190
+      ],
+      "size": [
+        190,
+        70
+      ],
+      "sources": [
+        {
+          "path": "templates/base.html",
+          "line": 24,
+          "end_line": 81
+        }
+      ]
+    },
+    {
+      "id": "acceso",
+      "type": "security",
+      "label": "Usuarios y acceso",
+      "sublabel": "Sesión local · permisos por rol",
+      "tag": "Registro público cerrado",
+      "pos": [
+        335,
+        185
+      ],
+      "size": [
+        220,
+        80
+      ],
+      "sources": [
+        {
+          "path": "usuarios/adapters.py",
+          "line": 13,
+          "end_line": 85
+        },
+        {
+          "path": "usuarios/utils.py",
+          "line": 1,
+          "end_line": 32
+        },
+        {
+          "path": "config/settings.py",
+          "line": 186,
+          "end_line": 232
+        }
+      ]
+    },
+    {
+      "id": "google",
+      "type": "external",
+      "label": "Google",
+      "sublabel": "Cuenta previamente autorizada",
+      "pos": [
+        335,
+        40
+      ],
+      "size": [
+        220,
+        65
+      ],
+      "sources": [
+        {
+          "path": "config/settings.py",
+          "line": 268,
+          "end_line": 292
+        },
+        {
+          "path": "usuarios/adapters.py",
+          "line": 27,
+          "end_line": 85
+        }
+      ]
+    },
+    {
+      "id": "aplicacion",
+      "type": "backend",
+      "label": "Aplicación Django",
+      "sublabel": "6 módulos · vistas HTML + ORM",
+      "tag": "Una aplicación compartida",
+      "pos": [
+        660,
+        185
+      ],
+      "size": [
+        235,
+        80
+      ],
+      "sources": [
+        {
+          "path": "config/urls.py",
+          "line": 6,
+          "end_line": 44
+        },
+        {
+          "path": "config/settings.py",
+          "line": 49,
+          "end_line": 128
+        },
+        {
+          "path": "core/respaldo_views.py",
+          "line": 119,
+          "end_line": 155
+        }
+      ]
+    },
+    {
+      "id": "datos",
+      "type": "database",
+      "label": "MySQL / MariaDB",
+      "sublabel": "Usuarios · operaciones · auditoría",
+      "pos": [
+        1010,
+        190
+      ],
+      "size": [
+        220,
+        70
+      ],
+      "sources": [
+        {
+          "path": "config/settings.py",
+          "line": 116,
+          "end_line": 128
+        },
+        {
+          "path": "core/respaldos.py",
+          "line": 29,
+          "end_line": 47
+        }
+      ]
+    },
+    {
+      "id": "ejecutor",
+      "type": "backend",
+      "label": "Ejecutor de respaldos",
+      "sublabel": "Opcional · política y clave válidas",
+      "tag": "Requiere despliegue y activación",
+      "pos": [
+        995,
+        420
+      ],
+      "size": [
+        250,
+        80
+      ],
+      "sources": [
+        {
+          "path": "core/respaldo_programacion.py",
+          "line": 135,
+          "end_line": 192
+        },
+        {
+          "path": "Docker-compose.yml",
+          "line": 47,
+          "end_line": 63
+        },
+        {
+          "path": "core/respaldos.py",
+          "line": 59,
+          "end_line": 143
+        }
+      ]
+    },
+    {
+      "id": "copias",
+      "type": "database",
+      "label": "Copias privadas",
+      "sublabel": "SQL cifrado + manifiesto firmado",
+      "tag": "Clave custodiada por separado",
+      "pos": [
+        660,
+        420
+      ],
+      "size": [
+        235,
+        80
+      ],
+      "sources": [
+        {
+          "path": "core/respaldos.py",
+          "line": 59,
+          "end_line": 143
+        },
+        {
+          "path": "docs/privacidad/respaldos.md",
+          "line": 73,
+          "end_line": 82
+        }
+      ]
+    },
+    {
+      "id": "windows",
+      "type": "external",
+      "label": "Servidor Windows",
+      "sublabel": "Destino previsto · sin verificar",
+      "tag": "Traslado por personal autorizado",
+      "pos": [
+        660,
+        650
+      ],
+      "size": [
+        235,
+        80
+      ],
+      "sources": [
+        {
+          "path": "docs/privacidad/respaldos.md",
+          "line": 15,
+          "end_line": 22
+        },
+        {
+          "path": "docs/privacidad/respaldos.md",
+          "line": 65,
+          "end_line": 71
+        }
+      ]
+    }
+  ],
+  "connections": [
+    {
+      "id": "entrada",
+      "from": "personal",
+      "to": "acceso",
+      "label": "Inicia sesión",
+      "variant": "emphasis"
+    },
+    {
+      "id": "oauth",
+      "from": "google",
+      "to": "acceso",
+      "label": "OAuth 2.0",
+      "variant": "security"
+    },
+    {
+      "id": "autorizacion",
+      "from": "acceso",
+      "to": "aplicacion",
+      "label": "Según rol",
+      "variant": "security"
+    },
+    {
+      "id": "persistencia",
+      "from": "aplicacion",
+      "to": "datos",
+      "label": "ORM / SQL",
+      "variant": "emphasis"
+    },
+    {
+      "id": "consulta-copia",
+      "from": "aplicacion",
+      "to": "copias",
+      "label": "Descarga autorizada"
+    },
+    {
+      "id": "lectura-respaldo",
+      "from": "ejecutor",
+      "to": "datos",
+      "label": "Política + dump SQL",
+      "variant": "dashed"
+    },
+    {
+      "id": "escritura-copia",
+      "from": "ejecutor",
+      "to": "copias",
+      "label": "Genera copia",
+      "variant": "dashed"
+    },
+    {
+      "id": "traslado-manual",
+      "from": "copias",
+      "to": "windows",
+      "label": "Traslado manual previsto",
+      "variant": "dashed"
+    }
+  ],
+  "cards": [
+    {
+      "dot": "cyan",
+      "title": "Módulos de operación",
+      "items": [
+        "requerimientos: solicitud → asignación → atención → resolución → cierre; registra recursos utilizados.",
+        "inventario: catálogo y stock general por ubicación; entradas, salidas, transferencias y ajustes.",
+        "farmacia: catálogo, recepción manual/CSV, lotes y vencimientos; Bodega Central → anexos."
+      ]
+    },
+    {
+      "dot": "emerald",
+      "title": "Módulos compartidos",
+      "items": [
+        "usuarios: cuentas, roles, contraseñas temporales, sesiones y desvinculación con continuidad.",
+        "organizacion: anexos y departamentos compartidos por usuarios y operaciones.",
+        "core: panel, privacidad, derechos, simulación de conservación y gestión de respaldos."
+      ]
+    },
+    {
+      "dot": "rose",
+      "title": "Separación y trazabilidad",
+      "items": [
+        "Inventario general excluye medicamentos y saldos pendientes de conciliación; Farmacia conserva stock por lote.",
+        "El admin deja en consulta el stock general, movimientos, recursos, requerimientos y los historiales protegidos.",
+        "Las operaciones conservan sus flujos de autorización; leer el aviso de privacidad no equivale a consentir tratamientos."
+      ]
+    },
+    {
+      "dot": "amber",
+      "title": "Alcance de esta vista",
+      "items": [
+        "Código local actual, incluidos cambios sin commit en config/settings.py, usuarios/adapters.py, los admin y core; referencias verificadas contra una instantánea local.",
+        "Compose configura Gunicorn y Traefik; el diagrama no acredita el despliegue. El ejecutor solo genera copias si está instalado, activado y preparado.",
+        "La transferencia a Windows es manual y su recepción no está acreditada. La prueba de restauración se ejecuta por comando en un contenedor aislado; no restaura producción."
+      ]
+    }
+  ]
+}

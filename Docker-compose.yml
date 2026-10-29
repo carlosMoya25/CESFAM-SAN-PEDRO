@@ -1,0 +1,83 @@
+
+services:
+  web:
+    build:
+      context: .
+      dockerfile: Dockerfile
+
+    container_name: cesfam_web
+    restart: unless-stopped
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "5"
+
+    env_file:
+      - .env
+
+    command: >
+      gunicorn config.wsgi:application
+      --bind 0.0.0.0:8000
+      --workers 3
+      --timeout 120
+
+    volumes:
+      - cesfam_static:/app/staticfiles
+      - cesfam_media:/app/media
+      - cesfam_backups:/app/respaldos_locales
+      - cesfam_backup_keys:/app/.secrets
+
+    expose:
+      - "8000"
+
+    networks:
+      - cesfam_db
+
+    labels:
+      - "traefik.enable=true"
+
+      # Dominio principal y www
+      - "traefik.http.routers.cesfam.rule=Host(`cesfam.liceosp.cl`) || Host(`www.cesfam.liceosp.cl`)"
+
+      # HTTPS
+      - "traefik.http.routers.cesfam.entrypoints=websecure"
+      - "traefik.http.routers.cesfam.tls=true"
+      - "traefik.http.routers.cesfam.tls.certresolver=letsencrypt"
+
+      # Servicio Django
+      - "traefik.http.routers.cesfam.service=cesfam"
+      - "traefik.http.services.cesfam.loadbalancer.server.port=8000"
+
+  respaldos:
+    profiles: ["respaldos"]
+    build:
+      context: .
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "5"
+    env_file:
+      - .env
+    command: python manage.py ejecutar_respaldos_programados --continuo
+    volumes:
+      - cesfam_backups:/app/respaldos_locales
+      - cesfam_backup_keys:/app/.secrets
+    networks:
+      - cesfam_db
+    labels:
+      - "traefik.enable=false"
+
+volumes:
+  cesfam_static:
+  cesfam_media:
+  cesfam_backups:
+  cesfam_backup_keys:
+
+networks:
+  cesfam_db:
+    external: true
+    name: mariadb-dgfx_default
