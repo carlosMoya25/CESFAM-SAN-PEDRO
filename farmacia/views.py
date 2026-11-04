@@ -7,8 +7,8 @@ from django.contrib import messages
 from django.core.exceptions import ValidationError
 from django.shortcuts import render, redirect
 from .decorators import acceso_farmacia
-from .forms import IngresoMedicamentoForm
-from .services import registrar_entrada_lote
+from .forms import IngresoMedicamentoForm, SalidaFarmaciaForm
+from .services import registrar_entrada_lote, registrar_salida_farmacia
 from .models import Medicamento, LoteMedicamento, StockLote
 from .forms import MedicamentoForm
 from .registro import RegistroMedicamentoForm
@@ -19,6 +19,7 @@ from django.db.models.functions import Coalesce
 from django.core.paginator import Paginator
 from .filters import consultar_farmacia, contexto_filtros, FiltrosHistorialFarmaciaForm
 from django.shortcuts import get_object_or_404
+from organizacion.models import Anexo
 
 
 
@@ -278,6 +279,77 @@ def registrar_entrada(request):
             )),
         },
     )
+
+
+@acceso_farmacia
+def registrar_salida(request):
+    if request.method == "POST":
+        form = SalidaFarmaciaForm(request.POST)
+        if form.is_valid():
+            datos = form.cleaned_data
+            try:
+                movimiento = registrar_salida_farmacia(
+                    lote=datos["lote"],
+                    origen=datos["origen"],
+                    cantidad=datos["cantidad"],
+                    usuario=request.user,
+                    documento_entrega=datos["documento_entrega"],
+                    destinatario=datos["destinatario"],
+                    solicitud_id=datos["solicitud_id"],
+                    motivo=datos["motivo"],
+                )
+            except ValidationError as error:
+                marcar_rechazo()
+                form.add_error(None, error)
+            except IntegrityError:
+                marcar_rechazo()
+                form.add_error(None, "La entrega ya fue registrada o los datos cambiaron. Revise el historial antes de reintentar.")
+            else:
+                messages.success(request, f"Entrega registrada correctamente. Movimiento #{movimiento.pk}.")
+                return redirect("farmacia:historial")
+    else:
+        inicial = {}
+        origen_id = request.GET.get("origen")
+        if origen_id:
+            inicial["origen"] = origen_id
+        else:
+            origen_disponible = Anexo.objects.filter(
+                activo=True, stocks_lotes__cantidad__gt=0,
+            ).order_by("pk").first()
+            if origen_disponible:
+                inicial["origen"] = origen_disponible.pk
+        form = SalidaFarmaciaForm(initial=inicial)
+
+    stocks_salida = []
+    stocks = StockLote.objects.filter(
+        cantidad__gt=0,
+        lote__activo=True,
+        lote__fecha_vencimiento__gte=timezone.localdate(),
+        lote__medicamento__activo=True,
+        lote__medicamento__articulo__activo=True,
+        anexo__activo=True,
+    ).select_related("lote__medicamento__articulo", "anexo").order_by(
+        "anexo__nombre", "lote__medicamento__articulo__nombre",
+        "lote__fecha_vencimiento", "lote__numero_lote",
+    )
+    for stock in stocks:
+        medicamento = stock.lote.medicamento
+        stocks_salida.append({
+            "lote_id": stock.lote_id,
+            "origen_id": stock.anexo_id,
+            "cantidad": stock.cantidad,
+            "etiqueta": (
+                f"{medicamento.articulo.nombre} · {medicamento.concentracion} · "
+                f"Lote {stock.lote.numero_lote} · Vence {stock.lote.fecha_vencimiento:%d/%m/%Y} · "
+                f"Stock: {stock.cantidad} {medicamento.unidad_medida}"
+            ),
+        })
+    marcar_formulario(form)
+    return render(request, "farmacia/registrar_salida.html", {
+        "form": form, "titulo": "Registrar entrega a paciente",
+        "stocks_salida": stocks_salida,
+    })
+
 
 
 

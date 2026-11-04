@@ -102,11 +102,11 @@ class MovimientoFarmaciaAdmin(admin.ModelAdmin):
         "anexo_destino",
         "usuario",
         "motivo",
-        "proveedor", "documento_recepcion", "fecha_recepcion", "importacion", "fila_importacion", "clave_recepcion", "documento_traslado", "clave_traslado",
+        "proveedor", "documento_recepcion", "fecha_recepcion", "importacion", "fila_importacion", "clave_recepcion", "documento_traslado", "clave_traslado", "documento_entrega", "destinatario", "clave_salida",
         "fecha",
     )
 
-    search_fields = ("proveedor", "documento_recepcion", "documento_traslado", "importacion__nombre_archivo", "detalles__lote__numero_lote")
+    search_fields = ("proveedor", "documento_recepcion", "documento_traslado", "documento_entrega", "destinatario", "importacion__nombre_archivo", "detalles__lote__numero_lote")
 
     inlines = [DetalleMovimientoInline]
 

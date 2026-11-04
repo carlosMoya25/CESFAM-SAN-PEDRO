@@ -1,4 +1,6 @@
 
+import uuid
+
 from django.utils import timezone
 
 from django.core.exceptions import ValidationError
@@ -244,6 +246,111 @@ def registrar_traslado_bodega(*, lote, destino, cantidad, usuario, documento_tra
         movimiento=movimiento, lote=lote, cantidad=cantidad,
         numero_lote_registrado=lote.numero_lote, vencimiento_registrado=lote.fecha_vencimiento,
         unidad_registrada=medicamento.unidad_medida, codigo_registrado=medicamento.articulo.codigo or "",
+        nombre_registrado=medicamento.articulo.nombre,
+    )
+    return movimiento
+
+
+@transaction.atomic
+def registrar_salida_farmacia(*, lote, origen, cantidad, usuario,
+                              documento_entrega, solicitud_id, motivo="", destinatario=""):
+    """Registrar una entrega a paciente desde una ubicación."""
+    if not puede_gestionar_farmacia(usuario):
+        raise ValidationError("No tienes permisos para gestionar Farmacia.")
+    if not isinstance(cantidad, int) or isinstance(cantidad, bool) or not 0 < cantidad <= 2147483647:
+        raise ValidationError("La cantidad debe ser un entero positivo dentro del máximo permitido.")
+    if not origen:
+        raise ValidationError("Seleccione la ubicación de origen.")
+    try:
+        solicitud_id = uuid.UUID(str(solicitud_id))
+    except (ValueError, TypeError, AttributeError):
+        raise ValidationError("La solicitud de salida no es válida. Actualice el formulario.")
+
+    documento_entrega = str(documento_entrega).strip()
+    if not documento_entrega or len(documento_entrega) > 100:
+        raise ValidationError("Indique un folio o documento de entrega de hasta 100 caracteres.")
+    destinatario = str(destinatario).strip()
+    if len(destinatario) > 150:
+        raise ValidationError("El destinatario supera el largo permitido.")
+    motivo = str(motivo).strip()
+
+    def salida_previa():
+        previo = MovimientoFarmacia.objects.filter(clave_salida=solicitud_id).first()
+        if previo:
+            detalle = previo.detalles.first()
+            if (
+                previo.usuario_id != usuario.pk
+                or previo.tipo != "ENTREGA"
+                or previo.anexo_origen_id != origen.pk
+                or previo.anexo_destino_id is not None
+                or previo.documento_entrega != documento_entrega
+                or previo.destinatario != destinatario
+                or previo.motivo != motivo
+                or not detalle
+                or detalle.lote_id != lote.pk
+                or detalle.cantidad != cantidad
+            ):
+                raise ValidationError("Esta solicitud ya fue utilizada con otros datos. Revise el historial y abra un formulario nuevo.")
+        return previo
+
+    previo = salida_previa()
+    if previo:
+        return previo
+
+    try:
+        medicamento = Medicamento.objects.select_for_update().select_related("articulo").get(
+            pk=lote.medicamento_id, activo=True, articulo__activo=True,
+        )
+    except Medicamento.DoesNotExist:
+        raise ValidationError("El medicamento no está activo.")
+    previo = salida_previa()
+    if previo:
+        return previo
+    if not medicamento.unidad_medida:
+        raise ValidationError("El medicamento debe tener una unidad de stock definida.")
+
+    lote = LoteMedicamento.objects.select_for_update().filter(
+        pk=lote.pk, medicamento=medicamento, activo=True,
+        fecha_vencimiento__gte=timezone.localdate(),
+    ).first()
+    if not lote:
+        raise ValidationError("No se pueden entregar lotes inactivos o vencidos.")
+    ubicaciones = [origen.pk]
+    ubicaciones_activas = set(
+        Anexo.objects.select_for_update()
+        .filter(pk__in=ubicaciones, activo=True)
+        .order_by("pk")
+        .values_list("pk", flat=True)
+    )
+    if origen.pk not in ubicaciones_activas:
+        raise ValidationError("La ubicación de origen no está activa.")
+    stocks = list(
+        StockLote.objects.select_for_update()
+        .filter(lote=lote, anexo_id__in=ubicaciones)
+        .order_by("anexo_id", "pk")
+    )
+    stock_origen = next((stock for stock in stocks if stock.anexo_id == origen.pk), None)
+    if not stock_origen or stock_origen.cantidad < cantidad:
+        raise ValidationError("Stock insuficiente en el origen. Revise las existencias antes de registrar la entrega.")
+
+    StockLote.objects.filter(pk=stock_origen.pk).update(cantidad=F("cantidad") - cantidad)
+    movimiento = MovimientoFarmacia.objects.create(
+        tipo="ENTREGA",
+        anexo_origen=origen,
+        usuario=usuario,
+        motivo=motivo,
+        documento_entrega=documento_entrega,
+        destinatario=destinatario,
+        clave_salida=solicitud_id,
+    )
+    DetalleMovimientoFarmacia.objects.create(
+        movimiento=movimiento,
+        lote=lote,
+        cantidad=cantidad,
+        numero_lote_registrado=lote.numero_lote,
+        vencimiento_registrado=lote.fecha_vencimiento,
+        unidad_registrada=medicamento.unidad_medida,
+        codigo_registrado=medicamento.articulo.codigo or "",
         nombre_registrado=medicamento.articulo.nombre,
     )
     return movimiento

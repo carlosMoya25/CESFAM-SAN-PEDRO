@@ -187,6 +187,9 @@ class MovimientoFarmacia(models.Model):
 
     documento_traslado = models.CharField(max_length=100, blank=True)
     clave_traslado = models.UUIDField(null=True, blank=True, unique=True)
+    documento_entrega = models.CharField(max_length=100, blank=True)
+    destinatario = models.CharField(max_length=150, blank=True)
+    clave_salida = models.UUIDField(null=True, blank=True, unique=True)
 
     fecha = models.DateTimeField(auto_now_add=True)
 

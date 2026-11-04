@@ -12,7 +12,7 @@
     <div class="inventory-dropdown-menu"><a href="{% url 'farmacia:lista_medicamentos' %}{% if navegacion_query %}?{{ navegacion_query }}{% endif %}">Catálogo de medicamentos</a><a href="{% url 'farmacia:crear_medicamento' %}">Registrar medicamento</a><a href="{% url 'farmacia:importar_csv' %}">Importar CSV</a></div>
 </details>
 {% endblock %}
-{% block inventory_actions %}<div class="inventory-actions"><a class="inventory-button inventory-primary" href="{% url 'farmacia:registrar_entrada' %}"><span aria-hidden="true">＋</span> Registrar entrada</a><a class="inventory-button" href="{% url 'farmacia:trasladar_a_anexo' %}">⇄ Trasladar a anexo</a></div>{% endblock %}
+{% block inventory_actions %}<div class="inventory-actions"><a class="inventory-button inventory-primary" href="{% url 'farmacia:registrar_entrada' %}"><span aria-hidden="true">＋</span> Registrar entrada</a><a class="inventory-button" href="{% url 'farmacia:registrar_salida' %}">Registrar entrega a paciente</a><a class="inventory-button" href="{% url 'farmacia:trasladar_a_anexo' %}">⇄ Trasladar a anexo</a></div>{% endblock %}
 {% block inventory_navigation %}
 <nav class="inventory-tabs" aria-label="Secciones de farmacia">
     <a href="{% url 'farmacia:dashboard' %}{% if navegacion_query %}?{{ navegacion_query }}{% endif %}"{% if request.resolver_match.url_name == 'dashboard' %} aria-current="page"{% endif %}>Existencias</a>

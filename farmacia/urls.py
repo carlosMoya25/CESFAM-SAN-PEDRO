@@ -11,6 +11,7 @@ urlpatterns = [
     path("importar/<uuid:pk>/reporte/", importacion_views.reporte_importacion, name="reporte_importacion"),
     path("importar/<uuid:pk>/", importacion_views.revisar_importacion, name="revisar_importacion"),
     path("traslados/nuevo/", traslados.trasladar_a_anexo, name="trasladar_a_anexo"),
+    path("salidas/nueva/", views.registrar_salida, name="registrar_salida"),
     path("historial/", views.historial, name="historial"),
     path(
         "",

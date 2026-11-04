@@ -1,11 +1,104 @@
 
+import uuid
+
 from django.utils import timezone
 
 from django import forms
+from django.db.models import IntegerField, OuterRef, Subquery
+from django.db.models.functions import Coalesce
 
 from organizacion.models import Anexo
-from .models import Medicamento, LoteMedicamento
+from .models import Medicamento, LoteMedicamento, StockLote
 from .bodega import ubicaciones_recepcion, exigir_bodega_central
+
+
+class SalidaFarmaciaForm(forms.Form):
+    origen = forms.ModelChoiceField(
+        queryset=Anexo.objects.none(),
+        label="Anexo o ubicación de origen",
+        empty_label="Seleccione una ubicación",
+    )
+    lote = forms.ModelChoiceField(
+        queryset=LoteMedicamento.objects.none(),
+        label="Medicamento y lote",
+        empty_label="Seleccione un lote con stock disponible",
+    )
+    cantidad = forms.IntegerField(
+        label="Cantidad entregada",
+        min_value=1,
+        max_value=2147483647,
+    )
+    documento_entrega = forms.CharField(
+        label="Folio o documento de entrega",
+        max_length=100,
+        help_text="Use el folio de atención o documento que respalda el movimiento.",
+    )
+    destinatario = forms.CharField(
+        label="Destinatario (opcional)",
+        max_length=150,
+        required=False,
+        help_text="Registre solo el dato mínimo necesario según el protocolo del CESFAM.",
+    )
+    motivo = forms.CharField(
+        label="Observaciones",
+        required=False,
+        widget=forms.Textarea(attrs={"rows": 3}),
+    )
+    solicitud_id = forms.UUIDField(
+        widget=forms.HiddenInput,
+        initial=uuid.uuid4,
+    )
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        ubicaciones = Anexo.objects.filter(activo=True)
+        self.fields["origen"].queryset = ubicaciones
+
+        origen_id = self.data.get("origen") if self.is_bound else self.initial.get("origen")
+        try:
+            origen_id = int(origen_id)
+            if not 0 < origen_id <= 9223372036854775807:
+                origen_id = None
+        except (TypeError, ValueError):
+            origen_id = None
+        if origen_id:
+            lotes_con_stock = StockLote.objects.filter(
+                anexo_id=origen_id,
+                cantidad__gt=0,
+                lote__activo=True,
+                lote__fecha_vencimiento__gte=timezone.localdate(),
+                lote__medicamento__activo=True,
+                lote__medicamento__articulo__activo=True,
+            ).values("lote_id")
+            stock_actual = StockLote.objects.filter(
+                lote_id=OuterRef("pk"), anexo_id=origen_id,
+            ).values("cantidad")[:1]
+            self.fields["lote"].queryset = (
+                LoteMedicamento.objects.filter(pk__in=Subquery(lotes_con_stock))
+                .select_related("medicamento__articulo")
+                .annotate(stock_disponible=Coalesce(Subquery(stock_actual), 0, output_field=IntegerField()))
+                .order_by("medicamento__articulo__nombre", "fecha_vencimiento", "numero_lote", "pk")
+            )
+            self.fields["lote"].label_from_instance = lambda lote: (
+                f"{lote.medicamento.articulo.nombre} · {lote.medicamento.concentracion} · "
+                f"Lote {lote.numero_lote} · Vence {lote.fecha_vencimiento:%d/%m/%Y} · "
+                f"Stock: {lote.stock_disponible} {lote.medicamento.unidad_medida}"
+            )
+            if not self.is_bound and self.fields["lote"].queryset.count() == 1:
+                self.initial["lote"] = self.fields["lote"].queryset.values_list("pk", flat=True).first()
+
+    def clean_documento_entrega(self):
+        return self.cleaned_data["documento_entrega"].strip()
+
+    def clean_destinatario(self):
+        return self.cleaned_data["destinatario"].strip()
+
+    def clean(self):
+        datos = super().clean()
+        medicamento = getattr(datos.get("lote"), "medicamento", None)
+        if medicamento and not medicamento.unidad_medida:
+            self.add_error("lote", "El medicamento debe tener una unidad de stock definida.")
+        return datos
 
 
 class IngresoMedicamentoForm(forms.Form):

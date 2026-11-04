@@ -1,4 +1,6 @@
+import uuid
 from datetime import timedelta
+from unittest.mock import patch
 
 from django.contrib.auth import get_user_model
 from django.contrib.auth.models import AnonymousUser, Group
@@ -10,8 +12,8 @@ from django.utils import timezone
 from inventario.models import Articulo, CategoriaArticulo
 from organizacion.models import Anexo
 from usuarios.utils import puede_gestionar_farmacia
-from .models import Medicamento, MovimientoFarmacia, StockLote
-from .services import registrar_entrada_medicamento
+from .models import Medicamento, LoteMedicamento, MovimientoFarmacia, StockLote
+from .services import registrar_entrada_medicamento, registrar_salida_farmacia
 from .bodega import exigir_bodega_central
 
 
@@ -38,6 +40,7 @@ class PermisosFarmaciaTests(TestCase):
         return [
             ("dashboard", {}), ("lista_medicamentos", {}), ("historial", {}),
             ("crear_medicamento", {}), ("registrar_entrada", {}), ("trasladar_a_anexo", {}),
+            ("registrar_salida", {}),
             ("detalle_medicamento", {"pk": self.medicamento.pk}),
             ("editar_medicamento", {"pk": self.medicamento.pk}),
         ]
@@ -405,3 +408,111 @@ class EntradaLotesExistentesTests(TestCase):
         self.assertEqual(int(form["lote"].value()), segundo.pk)
         self.assertEqual(response.context["stocks_entrada"][0]["cantidad"], 20)
         self.assertContains(response, 'id="farmacia-entrada-saldo"')
+
+
+class SalidasFarmaciaTests(TestCase):
+    @classmethod
+    def setUpTestData(cls):
+        cls.usuario = get_user_model().objects.create_superuser(email="salidas@example.com")
+        cls.origen = exigir_bodega_central()
+        cls.destino = Anexo.objects.create(nombre="Anexo para entregas")
+        categoria = CategoriaArticulo.objects.create(nombre="Medicamentos para salidas")
+        articulo = Articulo.objects.create(nombre="Medicamento para entrega", categoria=categoria)
+        cls.medicamento = Medicamento.objects.create(
+            articulo=articulo,
+            principio_activo="Prueba",
+            concentracion="500 mg",
+            forma_farmaceutica="Comprimido",
+            unidad_medida="comprimido",
+        )
+        cls.lote = LoteMedicamento.objects.create(
+            medicamento=cls.medicamento,
+            numero_lote="SAL-001",
+            fecha_vencimiento=timezone.localdate() + timedelta(days=90),
+        )
+        StockLote.objects.create(lote=cls.lote, anexo=cls.origen, cantidad=20)
+        StockLote.objects.create(lote=cls.lote, anexo=cls.destino, cantidad=4)
+
+    def setUp(self):
+        self.client.force_login(self.usuario)
+
+    def salida(self, **cambios):
+        datos = {
+            "lote": self.lote,
+            "origen": self.origen,
+            "cantidad": 5,
+            "usuario": self.usuario,
+            "documento_entrega": "FOLIO-ATENCION-01",
+            "solicitud_id": uuid.uuid4(),
+            "destinatario": "",
+        }
+        return registrar_salida_farmacia(**(datos | cambios))
+
+    def test_entrega_a_paciente_descuenta_stock_y_guarda_folio_y_destinatario_opcional(self):
+        movimiento = self.salida()
+        self.assertEqual(StockLote.objects.get(lote=self.lote, anexo=self.origen).cantidad, 15)
+        self.assertEqual(movimiento.tipo, "ENTREGA")
+        self.assertEqual(movimiento.anexo_origen_id, self.origen.pk)
+        self.assertIsNone(movimiento.anexo_destino_id)
+        self.assertEqual(movimiento.documento_entrega, "FOLIO-ATENCION-01")
+        self.assertEqual(movimiento.destinatario, "")
+        self.assertEqual(movimiento.usuario_id, self.usuario.pk)
+        self.assertEqual(movimiento.detalles.get().cantidad, 5)
+        response = self.client.get(reverse("farmacia:historial"), {"tipo": "ENTREGA"})
+        self.assertContains(response, "FOLIO-ATENCION-01")
+        self.assertContains(response, "Paciente")
+        self.assertEqual(response.context["pagina"].paginator.count, 1)
+
+    def test_cantidad_cero_negativa_o_superior_al_stock_no_modifica_saldos(self):
+        for cantidad in (0, -1, 21):
+            with self.subTest(cantidad=cantidad):
+                with self.assertRaises(ValidationError):
+                    self.salida(cantidad=cantidad)
+        self.assertEqual(StockLote.objects.get(lote=self.lote, anexo=self.origen).cantidad, 20)
+        self.assertEqual(StockLote.objects.get(lote=self.lote, anexo=self.destino).cantidad, 4)
+        self.assertFalse(MovimientoFarmacia.objects.exists())
+
+    def test_error_al_crear_detalle_revierte_stock_y_movimiento(self):
+        with patch("farmacia.services.DetalleMovimientoFarmacia.objects.create", side_effect=RuntimeError("fallo simulado")):
+            with self.assertRaisesMessage(RuntimeError, "fallo simulado"):
+                self.salida()
+        self.assertEqual(StockLote.objects.get(lote=self.lote, anexo=self.origen).cantidad, 20)
+        self.assertEqual(StockLote.objects.get(lote=self.lote, anexo=self.destino).cantidad, 4)
+        self.assertFalse(MovimientoFarmacia.objects.exists())
+
+    def test_reintento_con_misma_solicitud_no_descuenta_dos_veces(self):
+        solicitud_id = uuid.uuid4()
+        primero = self.salida(solicitud_id=solicitud_id)
+        segundo = self.salida(solicitud_id=solicitud_id)
+        self.assertEqual(primero.pk, segundo.pk)
+        self.assertEqual(StockLote.objects.get(lote=self.lote, anexo=self.origen).cantidad, 15)
+        self.assertEqual(MovimientoFarmacia.objects.count(), 1)
+        with self.assertRaisesMessage(ValidationError, "ya fue utilizada"):
+            self.salida(solicitud_id=solicitud_id, cantidad=4)
+        with self.assertRaisesMessage(ValidationError, "ya fue utilizada"):
+            self.salida(solicitud_id=solicitud_id, destinatario="Otra referencia")
+
+    def test_formulario_paciente_muestra_destinatario_opcional(self):
+        response = self.client.get(reverse("farmacia:registrar_salida"))
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.context["titulo"], "Registrar entrega a paciente")
+        self.assertContains(response, "Para mover existencias entre ubicaciones")
+        self.assertContains(response, "Registrar entrega a paciente")
+        self.assertContains(response, "Destinatario (opcional)")
+        self.assertContains(response, 'id="stocks-salida"')
+        self.assertNotIn("destino", response.context["form"].fields)
+        self.assertNotIn("tipo_destinatario", response.context["form"].fields)
+        solicitud_id = response.context["form"]["solicitud_id"].value()
+        response = self.client.post(reverse("farmacia:registrar_salida"), {
+            "origen": self.origen.pk,
+            "lote": self.lote.pk,
+            "cantidad": 2,
+            "documento_entrega": "RECETA-02",
+            "destinatario": "Código interno 123",
+            "motivo": "Entrega registrada",
+            "solicitud_id": solicitud_id,
+        })
+        self.assertRedirects(response, reverse("farmacia:historial"))
+        self.assertEqual(StockLote.objects.get(lote=self.lote, anexo=self.origen).cantidad, 18)
+        self.assertEqual(MovimientoFarmacia.objects.get().documento_entrega, "RECETA-02")
+        self.assertEqual(MovimientoFarmacia.objects.get().destinatario, "Código interno 123")
