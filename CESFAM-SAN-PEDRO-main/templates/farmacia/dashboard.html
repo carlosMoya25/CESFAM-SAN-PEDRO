@@ -1,0 +1,14 @@
+{% extends "farmacia/_base.html" %}
+{% block inventory_summary %}
+<div class="inventory-stats" aria-label="Resumen de farmacia">
+    <a href="{% url 'farmacia:lista_medicamentos' %}{% if navegacion_query %}?{{ navegacion_query }}{% endif %}"><strong>{{ total_medicamentos_activos }}</strong><span>Medicamentos activos</span></a>
+    <div><strong>{{ unidades_utilizables }}</strong><span>Unidades utilizables</span></div>
+    <a class="inventory-stat-warning" href="?{% if vencimiento_query %}{{ vencimiento_query }}&amp;{% endif %}vencimiento=proximo"><strong>{{ total_proximos }}</strong><span>Lotes próximos a vencer</span></a>
+    <a class="inventory-stat-danger" href="?{% if vencimiento_query %}{{ vencimiento_query }}&amp;{% endif %}vencimiento=vencido"><strong>{{ lotes_vencidos }}</strong><span>Lotes vencidos</span></a>
+</div>
+{% endblock %}
+{% block inventory_body %}
+{% include "farmacia/_filtros.html" %}
+{% include "farmacia/_stocks.html" %}
+<p class="inventory-footnote">Las unidades utilizables excluyen lotes vencidos o inactivos, medicamentos inactivos y ubicaciones inactivas. Los indicadores corresponden a los filtros seleccionados.</p>
+{% endblock %}

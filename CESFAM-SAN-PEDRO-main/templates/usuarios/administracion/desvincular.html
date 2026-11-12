@@ -1,0 +1,12 @@
+{% extends "base.html" %}
+{% block title %}Desactivar usuario | SIGRI{% endblock %}
+{% block content %}
+<div class="page-header"><h1>Desactivar cuenta</h1><p>{{ usuario_detalle.nombres }} {{ usuario_detalle.apellido_paterno }} · {{ usuario_detalle.email }}</p></div>
+<div class="card">
+    <p>Se bloqueará el acceso y se revocarán las sesiones existentes. Se conservarán solicitudes, soluciones, movimientos y su autoría histórica.</p>
+    <h2>Solicitudes que requieren continuidad ({{ pendientes|length }})</h2>
+    <ul>{% for req in pendientes %}<li>#{{ req.pk }} · {{ req.titulo }} · {{ req.estado.nombre }}</li>{% empty %}<li>No hay solicitudes pendientes asignadas.</li>{% endfor %}</ul>
+    <p>Las solicitudes cerradas o canceladas conservan su responsable. Las demás pasarán al reemplazo sin cambiar su estado ni solución.</p>
+    <form method="post">{% csrf_token %}{{ form.as_p }}<button class="btn btn-danger" type="submit">Desactivar y revocar accesos</button> <a class="btn btn-secondary" href="{% url 'usuarios:detalle_usuario' usuario_detalle.pk %}">Cancelar</a></form>
+</div>
+{% endblock %}

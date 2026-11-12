@@ -1,0 +1,39 @@
+{% load static %}<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>{% block pdf_titulo %}Informe SIGRI{% endblock %}</title>
+    <link rel="stylesheet" href="{% static 'css/pdf_reportes.css' %}">
+</head>
+<body>
+
+<div id="footer_content">
+    Página <pdf:pagenumber /> de <pdf:pagecount /> &middot; SIGRI &middot; CESFAM San Pedro &middot;
+    Generado el {{ generado_en|date:"d/m/Y" }} a las {{ generado_en|date:"H:i" }}
+</div>
+
+<table class="pdf-encabezado">
+    <tr>
+        <td class="pdf-encabezado-logo">
+            <img src="{% static 'img/logo.jpg' %}" alt="Municipalidad San Pedro">
+        </td>
+        <td class="pdf-encabezado-texto">
+            <div class="pdf-institucion">Municipalidad de San Pedro &middot; Departamento de Salud</div>
+            <div class="pdf-sistema">CESFAM San Pedro &middot; Sistema de Gestión SIGRI</div>
+            <h1>{% block pdf_encabezado_titulo %}Informe{% endblock %}</h1>
+        </td>
+    </tr>
+</table>
+
+<table class="pdf-periodo">
+    <tr>
+        <td><strong>Período:</strong> {{ desde|date:"d/m/Y" }} al {{ hasta|date:"d/m/Y" }}</td>
+        <td><strong>Ubicación:</strong> {% if ubicacion %}{{ ubicacion.nombre }}{% else %}Todas las ubicaciones{% endif %}</td>
+        <td><strong>Generado por:</strong> {{ usuario.nombres }} {{ usuario.apellido_paterno }}</td>
+    </tr>
+</table>
+
+{% block pdf_body %}{% endblock %}
+
+</body>
+</html>

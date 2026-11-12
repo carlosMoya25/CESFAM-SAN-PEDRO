@@ -1,0 +1,600 @@
+{% extends "base.html" %}
+
+{% block title %}
+Requerimiento #{{ requerimiento.id }} | CESFAM San Pedro
+{% endblock %}
+
+
+{% block content %}
+
+<!-- ======================================================
+     ENCABEZADO
+     ====================================================== -->
+
+<div class="page-header">
+
+    <div style="
+        display:flex;
+        justify-content:space-between;
+        align-items:flex-start;
+        gap:20px;
+    ">
+
+        <div>
+
+            <p style="
+                margin:0 0 6px;
+                color:#087ea4;
+                font-size:12px;
+                font-weight:700;
+                text-transform:uppercase;
+                letter-spacing:1px;
+            ">
+                Mis requerimientos
+            </p>
+
+            <h1 style="margin-bottom:6px;">
+                Requerimiento #{{ requerimiento.id }}
+            </h1>
+
+            <p>
+                Consulta el estado y seguimiento de tu solicitud.
+            </p>
+
+        </div>
+
+
+        <!-- PRIORIDAD -->
+
+        <div>
+
+            {% if requerimiento.prioridad.nombre == "Crítica" %}
+
+            <span class="priority priority-critica">
+                ● Crítica
+            </span>
+
+            {% elif requerimiento.prioridad.nombre == "Alta" %}
+
+            <span class="priority priority-alta">
+                ● Alta
+            </span>
+
+            {% elif requerimiento.prioridad.nombre == "Media" %}
+
+            <span class="priority priority-media">
+                ● Media
+            </span>
+
+            {% else %}
+
+            <span class="priority priority-baja">
+                ● {{ requerimiento.prioridad.nombre }}
+            </span>
+
+            {% endif %}
+
+        </div>
+
+    </div>
+
+</div>
+
+
+<!-- ======================================================
+     CONTENIDO
+     ====================================================== -->
+
+<div class="detail-grid">
+
+
+    <!-- ==================================================
+         INFORMACIÓN PRINCIPAL
+         ================================================== -->
+
+    <div>
+
+        <div class="card">
+
+            <div class="requirement-header">
+
+                <div>
+
+                    <div class="requirement-id">
+                        REQUERIMIENTO #{{ requerimiento.id }}
+                    </div>
+
+                    <h2 style="margin:0;">
+                        {{ requerimiento.titulo }}
+                    </h2>
+
+                </div>
+
+
+                <!-- ESTADO -->
+
+                <div>
+
+                    {% if requerimiento.estado.nombre == "Pendiente" %}
+
+                    <span class="badge badge-warning">
+                        ● Pendiente
+                    </span>
+
+                    {% elif requerimiento.estado.nombre == "Asignado" %}
+
+                    <span class="badge badge-info">
+                        ● Asignado
+                    </span>
+
+                    {% elif requerimiento.estado.nombre == "En proceso" %}
+
+                    <span class="badge badge-warning">
+                        ● En proceso
+                    </span>
+
+                    {% elif requerimiento.estado.nombre == "Resuelto" %}
+
+                    <span class="badge badge-success">
+                        ● Resuelto
+                    </span>
+
+                    {% elif requerimiento.estado.nombre == "Cerrado" %}
+
+                    <span class="badge">
+                        ● Cerrado
+                    </span>
+
+                    {% elif requerimiento.estado.nombre == "Cancelado" %}
+
+                    <span class="badge badge-danger">
+                        ● Cancelado
+                    </span>
+
+                    {% else %}
+
+                    <span class="badge">
+                        {{ requerimiento.estado.nombre }}
+                    </span>
+
+                    {% endif %}
+
+                </div>
+
+            </div>
+
+
+            <!-- INFORMACIÓN -->
+
+            <div class="requirement-meta">
+
+                <div>
+
+                    <span class="meta-label">
+                        Tipo
+                    </span>
+
+                    <span class="meta-value">
+                        {{ requerimiento.tipo_requerimiento }}
+                    </span>
+
+                </div>
+
+
+                <div>
+
+                    <span class="meta-label">
+                        Fecha solicitud
+                    </span>
+
+                    <span class="meta-value">
+                        {{ requerimiento.fecha_solicitud|date:"d/m/Y H:i" }}
+                    </span>
+
+                </div>
+
+
+                <div>
+
+                    <span class="meta-label">
+                        Anexo
+                    </span>
+
+                    <span class="meta-value">
+                        {{ requerimiento.anexo }}
+                    </span>
+
+                </div>
+
+
+                <div>
+
+                    <span class="meta-label">
+                        Departamento
+                    </span>
+
+                    <span class="meta-value">
+                        {{ requerimiento.departamento|default:"No especificado" }}
+                    </span>
+
+                </div>
+
+
+                <div>
+
+                    <span class="meta-label">
+                        Responsable
+                    </span>
+
+                    <span class="meta-value">
+
+                        {% if requerimiento.responsable %}
+
+                        {{ requerimiento.responsable.nombres }}
+                        {{ requerimiento.responsable.apellido_paterno }}
+
+                        {% else %}
+
+                        <span style="color:#94a3b8;">
+                            Sin asignar
+                        </span>
+
+                        {% endif %}
+
+                    </span>
+
+                </div>
+
+
+                <div>
+
+                    <span class="meta-label">
+                        Prioridad
+                    </span>
+
+                    <span class="meta-value">
+                        {{ requerimiento.prioridad }}
+                    </span>
+
+                </div>
+
+            </div>
+
+
+            <!-- DESCRIPCIÓN -->
+
+            <div class="detail-section" style="margin-top:25px;">
+
+                <div class="detail-section-title">
+                    Descripción del requerimiento
+                </div>
+
+                <div class="problem-box">
+                    {{ requerimiento.descripcion|linebreaksbr }}
+                </div>
+
+            </div>
+
+
+            <!-- SOLUCIÓN -->
+
+            {% if requerimiento.solucion %}
+
+            <div class="detail-section">
+
+                <div class="detail-section-title">
+                    Solución aplicada
+                </div>
+
+                <div class="solution-box">
+
+                    <div class="solution-icon">
+                        ✓
+                    </div>
+
+                    <div>
+
+                        <strong>
+                            Solución registrada
+                        </strong>
+
+                        <div style="margin-top:6px;">
+                            {{ requerimiento.solucion|linebreaksbr }}
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+            {% endif %}
+
+        </div>
+
+
+        <!-- INFORMACIÓN DEL ESTADO -->
+
+        <div class="card">
+
+            <h2>
+                Estado de tu solicitud
+            </h2>
+
+
+            {% if requerimiento.estado.nombre == "Pendiente" %}
+
+            <div class="status-information status-pending">
+
+                <div class="status-information-icon">
+                    ◷
+                </div>
+
+                <div>
+
+                    <strong>
+                        Tu solicitud está pendiente
+                    </strong>
+
+                    <p>
+                        El requerimiento fue registrado correctamente
+                        y está esperando que un técnico lo tome.
+                    </p>
+
+                </div>
+
+            </div>
+
+
+            {% elif requerimiento.estado.nombre == "Asignado" %}
+
+            <div class="status-information status-info">
+
+                <div class="status-information-icon">
+                    ⚙
+                </div>
+
+                <div>
+
+                    <strong>
+                        Técnico asignado
+                    </strong>
+
+                    <p>
+                        El requerimiento ya tiene un técnico responsable
+                        y se encuentra a la espera de iniciar su atención.
+                    </p>
+
+                </div>
+
+            </div>
+
+
+            {% elif requerimiento.estado.nombre == "En proceso" %}
+
+            <div class="status-information status-processing">
+
+                <div class="status-information-icon">
+                    ⚙
+                </div>
+
+                <div>
+
+                    <strong>
+                        Requerimiento en proceso
+                    </strong>
+
+                    <p>
+                        El técnico responsable se encuentra trabajando
+                        en tu solicitud.
+                    </p>
+
+                </div>
+
+            </div>
+
+
+            {% elif requerimiento.estado.nombre == "Resuelto" %}
+
+            <div class="status-information status-success">
+
+                <div class="status-information-icon">
+                    ✓
+                </div>
+
+                <div>
+
+                    <strong>
+                        Requerimiento resuelto
+                    </strong>
+
+                    <p>
+                        El técnico registró una solución para
+                        este requerimiento.
+                    </p>
+
+                </div>
+
+            </div>
+
+
+            {% elif requerimiento.estado.nombre == "Cerrado" %}
+
+            <div class="status-information status-success">
+
+                <div class="status-information-icon">
+                    ✓
+                </div>
+
+                <div>
+
+                    <strong>
+                        Requerimiento finalizado
+                    </strong>
+
+                    <p>
+                        Esta solicitud fue atendida y posteriormente
+                        cerrada.
+                    </p>
+
+                </div>
+
+            </div>
+
+            {% endif %}
+
+        </div>
+
+    </div>
+
+
+    <!-- ==================================================
+         HISTORIAL
+         ================================================== -->
+
+    <div>
+
+        <div class="card">
+
+            <div class="detail-section-title">
+                Seguimiento
+            </div>
+
+            <h2>
+                Historial
+            </h2>
+
+            <p style="
+                color:#64748b;
+                font-size:13px;
+                margin-bottom:25px;
+            ">
+                Revisa las actualizaciones realizadas en tu requerimiento.
+            </p>
+
+
+            <div class="timeline">
+
+                {% for registro in historial %}
+
+                <div class="timeline-item">
+
+                    <span class="timeline-dot"></span>
+
+
+                    <!-- FECHA -->
+
+                    <div class="timeline-date">
+                        {{ registro.fecha|date:"d/m/Y H:i" }}
+                    </div>
+
+
+                    <!-- ACCIÓN -->
+
+                    <div class="timeline-title">
+                        {{ registro.accion }}
+                    </div>
+
+
+                    <!-- CAMBIO ESTADO -->
+
+                    {% if registro.estado_anterior and registro.estado_nuevo %}
+
+                    <div class="timeline-status">
+
+                        {{ registro.estado_anterior }}
+
+                        <span>
+                            →
+                        </span>
+
+                        {{ registro.estado_nuevo }}
+
+                    </div>
+
+                    {% elif registro.estado_nuevo %}
+
+                    <div class="timeline-status">
+
+                        Estado:
+                        {{ registro.estado_nuevo }}
+
+                    </div>
+
+                    {% endif %}
+
+
+                    <!-- USUARIO -->
+
+                    {% if registro.usuario %}
+
+                    <div class="timeline-description">
+
+                        Realizado por
+
+                        <strong>
+                            {{ registro.usuario.nombres }}
+                            {{ registro.usuario.apellido_paterno }}
+                        </strong>
+
+                    </div>
+
+                    {% endif %}
+
+
+                    <!-- OBSERVACIÓN -->
+
+                    {% if registro.observacion %}
+
+                    <div class="timeline-observation">
+                        {{ registro.observacion|linebreaksbr }}
+                    </div>
+
+                    {% endif %}
+
+                </div>
+
+
+                {% empty %}
+
+                <div class="empty-state">
+
+                    <div class="empty-icon">
+                        ◷
+                    </div>
+
+                    <strong>
+                        Sin actualizaciones
+                    </strong>
+
+                    <p>
+                        Aún no existen actualizaciones para este
+                        requerimiento.
+                    </p>
+
+                </div>
+
+                {% endfor %}
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+
+<!-- ======================================================
+     VOLVER
+     ====================================================== -->
+
+<div style="margin-top:10px;">
+
+    <a href="{% url 'mis_requerimientos' %}" class="btn btn-secondary">
+        ← Volver a mis requerimientos
+    </a>
+
+</div>
+
+{% endblock %}

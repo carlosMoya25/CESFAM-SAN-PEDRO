@@ -1,0 +1,665 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}
+Dashboard | CESFAM San Pedro
+{% endblock %}
+
+
+{% block content %}
+
+<!-- =========================================================
+     ENCABEZADO
+     ========================================================= -->
+
+<div class="page-header">
+
+    <p style="
+        text-transform: uppercase;
+        letter-spacing: 3px;
+        font-size: 12px;
+        color: #087ea4;
+        font-weight: bold;
+        margin-bottom: 8px;
+    ">
+        Bienvenido
+    </p>
+
+    <h1>
+        CESFAM San Pedro
+    </h1>
+
+    <p>
+        Sistema de Gestión de Requerimientos e Inventarios
+    </p>
+
+</div>
+
+
+<!-- =========================================================
+     FILTRO (fecha y ubicación)
+     ========================================================= -->
+
+{% include "core/_filtro_reportes.html" %}
+
+
+<!-- =========================================================
+     RESUMEN DE REQUERIMIENTOS
+     ========================================================= -->
+
+<div style="
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 15px;
+">
+
+    <span style="font-size: 22px;">
+        ☷
+    </span>
+
+    <h2 style="margin: 0;">
+        Resumen de Requerimientos
+    </h2>
+
+</div>
+
+
+<div class="dashboard-grid">
+
+
+    <!-- =====================================================
+         PENDIENTES
+         ===================================================== -->
+
+    {% if "Técnico TI" in grupos or "Administrador" in grupos %}
+
+    <a href="{% url 'panel_tecnico' %}" class="stat-card stat-danger dashboard-link-card">
+
+        {% else %}
+
+        <a href="{% url 'mis_requerimientos' %}" class="stat-card stat-danger dashboard-link-card">
+
+            {% endif %}
+
+            <div class="stat-icon">
+                ◷
+            </div>
+
+            <div class="stat-card-content">
+
+                <div class="stat-label">
+                    Pendientes
+                </div>
+
+                <div class="stat-number">
+                    {{ ti.pendientes }}
+                </div>
+
+                <div class="stat-label">
+                    Solicitudes sin asignar
+                </div>
+
+            </div>
+
+            <span class="stat-card-arrow">
+                ›
+            </span>
+
+        </a>
+
+
+
+        <!-- =====================================================
+         EN PROCESO
+         ===================================================== -->
+
+        {% if "Técnico TI" in grupos or "Administrador" in grupos %}
+
+        <a href="{% url 'panel_tecnico' %}" class="stat-card stat-warning dashboard-link-card">
+
+            {% else %}
+
+            <a href="{% url 'mis_requerimientos' %}" class="stat-card stat-warning dashboard-link-card">
+
+                {% endif %}
+
+                <div class="stat-icon">
+                    ⚙
+                </div>
+
+                <div class="stat-card-content">
+
+                    <div class="stat-label">
+                        En proceso
+                    </div>
+
+                    <div class="stat-number">
+                        {{ ti.en_proceso }}
+                    </div>
+
+                    <div class="stat-label">
+                        En atención
+                    </div>
+
+                </div>
+
+                <span class="stat-card-arrow">
+                    ›
+                </span>
+
+            </a>
+
+
+
+            <!-- =====================================================
+         RESUELTOS
+         ===================================================== -->
+
+            {% if "Técnico TI" in grupos or "Administrador" in grupos %}
+
+            <a href="{% url 'panel_tecnico' %}" class="stat-card stat-success dashboard-link-card">
+
+                {% else %}
+
+                <a href="{% url 'mis_requerimientos' %}" class="stat-card stat-success dashboard-link-card">
+
+                    {% endif %}
+
+                    <div class="stat-icon">
+                        ✓
+                    </div>
+
+                    <div class="stat-card-content">
+
+                        <div class="stat-label">
+                            Resueltos
+                        </div>
+
+                        <div class="stat-number">
+                            {{ ti.resueltos }}
+                        </div>
+
+                        <div class="stat-label">
+                            Requerimientos resueltos
+                        </div>
+
+                    </div>
+
+                    <span class="stat-card-arrow">
+                        ›
+                    </span>
+
+                </a>
+
+
+
+                <!-- =====================================================
+         TOTAL REQUERIMIENTOS
+         ===================================================== -->
+
+                {% if "Técnico TI" in grupos or "Administrador" in grupos %}
+
+                <a href="{% url 'panel_tecnico' %}" class="stat-card stat-info dashboard-link-card">
+
+                    {% else %}
+
+                    <a href="{% url 'mis_requerimientos' %}" class="stat-card stat-info dashboard-link-card">
+
+                        {% endif %}
+
+                        <div class="stat-icon">
+                            ▤
+                        </div>
+
+                        <div class="stat-card-content">
+
+                            <div class="stat-label">
+                                Total
+                            </div>
+
+                            <div class="stat-number">
+                                {{ ti.total }}
+                            </div>
+
+                            <div class="stat-label">
+                                Requerimientos del período
+                            </div>
+
+                        </div>
+
+                        <span class="stat-card-arrow">
+                            ›
+                        </span>
+
+                    </a>
+
+</div>
+
+
+<!-- Gráficos de solicitudes -->
+
+{{ ti.por_estado|json_script:"datos-ti-estado" }}
+
+<div class="reportes-chart-grid">
+    <div class="reportes-chart-card">
+        <h3>Solicitudes por estado</h3>
+        {% if ti.total %}<canvas id="grafico-ti-estado"></canvas>{% else %}<p>Sin datos para los filtros seleccionados.</p>{% endif %}
+    </div>
+    <div class="reportes-chart-card">
+        <h3>Solicitudes por semana</h3>
+        {% include "core/_actividad_semanal.html" with serie=ti.serie_semanal total=ti.total unidad="solicitudes" only %}
+    </div>
+</div>
+
+
+
+<!-- =========================================================
+     INVENTARIO
+     ========================================================= -->
+
+<div style="
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 15px;
+">
+
+    <span style="font-size: 22px;">
+        □
+    </span>
+
+    <h2 style="margin: 0;">
+        Inventario
+    </h2>
+
+</div>
+
+
+<div class="dashboard-grid">
+
+
+    <!-- =====================================================
+         ARTÍCULOS REGISTRADOS
+         ===================================================== -->
+
+    {% if "Encargado de Inventario" in grupos or "Administrador" in grupos %}
+
+    <a href="{% url 'inventario:panel' %}" class="stat-card stat-info dashboard-link-card">
+
+        <div class="stat-icon">
+            ▣
+        </div>
+
+        <div class="stat-card-content">
+
+            <div class="stat-label">
+                Artículos registrados
+            </div>
+
+            <div class="stat-number">
+                {{ insumos.total_articulos }}
+            </div>
+
+            <div class="stat-label">
+                Insumos y equipamiento
+            </div>
+
+        </div>
+
+        <span class="stat-card-arrow">
+            ›
+        </span>
+
+    </a>
+
+    {% else %}
+
+    <div class="stat-card stat-info">
+
+        <div class="stat-icon">
+            ▣
+        </div>
+
+        <div>
+
+            <div class="stat-label">
+                Artículos registrados
+            </div>
+
+            <div class="stat-number">
+                {{ insumos.total_articulos }}
+            </div>
+
+            <div class="stat-label">
+                Insumos y equipamiento
+            </div>
+
+        </div>
+
+    </div>
+
+    {% endif %}
+
+
+
+    <!-- =====================================================
+         STOCK BAJO
+         ===================================================== -->
+
+    {% if "Encargado de Inventario" in grupos or "Administrador" in grupos %}
+
+    <a href="{% url 'inventario:panel' %}" class="stat-card stat-danger dashboard-link-card">
+
+        <div class="stat-icon">
+            ⚠
+        </div>
+
+        <div class="stat-card-content">
+
+            <div class="stat-label">
+                Stock bajo
+            </div>
+
+            <div class="stat-number">
+                {{ insumos.total_stock_bajo }}
+            </div>
+
+            <div class="stat-label">
+                Requieren reposición
+            </div>
+
+        </div>
+
+        <span class="stat-card-arrow">
+            ›
+        </span>
+
+    </a>
+
+    {% else %}
+
+    <div class="stat-card stat-danger">
+
+        <div class="stat-icon">
+            ⚠
+        </div>
+
+        <div>
+
+            <div class="stat-label">
+                Stock bajo
+            </div>
+
+            <div class="stat-number">
+                {{ insumos.total_stock_bajo }}
+            </div>
+
+            <div class="stat-label">
+                Requieren reposición
+            </div>
+
+        </div>
+
+    </div>
+
+    {% endif %}
+
+</div>
+
+<div class="reportes-chart-card" style="margin-bottom: 24px;">
+    <h3>Artículos que necesitan re-stock</h3>
+    {% if insumos.stock_bajo %}
+    <ul class="reportes-mini-lista">
+        {% for fila in insumos.stock_bajo|slice:":6" %}
+        <li>
+            <span class="reportes-mini-etiqueta">
+                {{ fila.articulo.nombre }}
+                <span class="reportes-mini-sub">{{ fila.anexo.nombre }}</span>
+            </span>
+            <span class="pdf-badge media" style="background:var(--warning); color:#422006;">
+                {{ fila.cantidad }} / mín. {{ fila.articulo.stock_minimo }}
+            </span>
+        </li>
+        {% endfor %}
+    </ul>
+    {% else %}
+    <p class="reportes-mini-vacio">No hay artículos bajo su stock mínimo.</p>
+    {% endif %}
+</div>
+
+
+
+{% if farmacia %}
+<h2>Farmacia</h2>
+<div class="dashboard-grid">
+    <a href="{% url 'farmacia:lista_medicamentos' %}" class="stat-card stat-info dashboard-link-card">
+        <div class="stat-card-content">
+            <div class="stat-label">Medicamentos activos</div>
+            <div class="stat-number">{{ farmacia.total_medicamentos }}</div>
+        </div>
+    </a>
+    <div class="stat-card stat-success">
+        <div>
+            <div class="stat-label">Unidades utilizables</div>
+            <div class="stat-number">{{ farmacia.unidades_utilizables }}</div>
+            <div class="stat-label">Lotes activos y sin vencer</div>
+        </div>
+    </div>
+    <div class="stat-card stat-danger">
+        <div>
+            <div class="stat-label">Lotes vencidos con existencias</div>
+            <div class="stat-number">{{ farmacia.total_vencidos }}</div>
+        </div>
+    </div>
+</div>
+
+<div class="reportes-chart-card" style="margin-bottom: 16px;">
+    <h3>Lotes que requieren revisión (próximos {{ farmacia.dias_alerta }} días)</h3>
+    {% if farmacia.lotes_por_vencer %}
+    <ul class="reportes-mini-lista">
+        {% for fila in farmacia.lotes_por_vencer|slice:":6" %}
+        <li>
+            <span class="reportes-mini-etiqueta">
+                {{ fila.lote.medicamento.articulo.nombre }}
+                <span class="reportes-mini-sub">Lote {{ fila.lote.numero_lote }} · {{ fila.anexo.nombre }}</span>
+            </span>
+            <span class="pdf-badge media" style="background:var(--warning); color:#422006;">
+                vence {{ fila.lote.fecha_vencimiento|date:"d/m/Y" }}
+            </span>
+        </li>
+        {% endfor %}
+    </ul>
+    {% else %}
+    <p class="reportes-mini-vacio">No hay lotes por vencer en el rango de alerta configurado.</p>
+    {% endif %}
+</div>
+
+{% if stock_medicamentos_sin_lote and user.is_superuser %}
+<div class="card" role="alert">
+    Hay existencias de medicamentos registradas en inventario general sin lote.
+    Deben conciliarse antes de utilizar el stock de farmacia como saldo completo.
+</div>
+{% endif %}
+
+{% endif %}
+
+
+<!-- =========================================================
+     REPORTES (paneles de detalle + PDF institucionales)
+     ========================================================= -->
+
+{% include "core/_acciones_reportes.html" %}
+
+
+<!-- =========================================================
+     ACCESOS RÁPIDOS
+     ========================================================= -->
+
+<div class="card">
+
+    <h2>
+        Accesos rápidos
+    </h2>
+
+    <p style="color: #64748b;">
+        Accede rápidamente a las funciones principales del sistema.
+    </p>
+
+
+    <div class="dashboard-grid">
+
+
+        <!-- NUEVO REQUERIMIENTO -->
+
+        <a href="{% url 'crear_requerimiento' %}" class="stat-card stat-info dashboard-link-card">
+
+            <div class="stat-icon">
+                +
+            </div>
+
+            <div class="stat-card-content">
+
+                <strong>
+                    Nuevo requerimiento
+                </strong>
+
+                <div class="stat-label">
+                    Registrar solicitud TI
+                </div>
+
+            </div>
+
+            <span class="stat-card-arrow">
+                ›
+            </span>
+
+        </a>
+
+
+
+        <!-- MIS REQUERIMIENTOS -->
+
+        <a href="{% url 'mis_requerimientos' %}" class="stat-card stat-info dashboard-link-card">
+
+            <div class="stat-icon">
+                ☷
+            </div>
+
+            <div class="stat-card-content">
+
+                <strong>
+                    Mis requerimientos
+                </strong>
+
+                <div class="stat-label">
+                    Consultar solicitudes
+                </div>
+
+            </div>
+
+            <span class="stat-card-arrow">
+                ›
+            </span>
+
+        </a>
+
+
+
+        <!-- PANEL TÉCNICO -->
+
+        {% if "Técnico TI" in grupos or "Administrador" in grupos %}
+
+        <a href="{% url 'panel_tecnico' %}" class="stat-card stat-warning dashboard-link-card">
+
+            <div class="stat-icon">
+                ⚙
+            </div>
+
+            <div class="stat-card-content">
+
+                <strong>
+                    Panel Técnico
+                </strong>
+
+                <div class="stat-label">
+                    Gestionar requerimientos
+                </div>
+
+            </div>
+
+            <span class="stat-card-arrow">
+                ›
+            </span>
+
+        </a>
+
+        {% endif %}
+
+
+
+        <!-- INVENTARIO -->
+
+        {% if "Encargado de Inventario" in grupos or "Administrador" in grupos %}
+
+        <a href="{% url 'inventario:panel' %}" class="stat-card stat-success dashboard-link-card">
+
+            <div class="stat-icon">
+                ▣
+            </div>
+
+            <div class="stat-card-content">
+
+                <strong>
+                    Inventario
+                </strong>
+
+                <div class="stat-label">
+                    Gestionar existencias
+                </div>
+
+            </div>
+
+            <span class="stat-card-arrow">
+                ›
+            </span>
+
+        </a>
+
+        {% endif %}
+
+        {% if puede_gestionar_farmacia %}
+        <a href="{% url 'farmacia:dashboard' %}" class="stat-card stat-success dashboard-link-card">
+            <div class="stat-icon">✚</div>
+            <div class="stat-card-content">
+                <strong>Farmacia</strong>
+                <div class="stat-label">Medicamentos, lotes y existencias</div>
+            </div>
+            <span class="stat-card-arrow">›</span>
+        </a>
+        <a href="{% url 'farmacia:registrar_entrada' %}" class="stat-card stat-info dashboard-link-card">
+            <div class="stat-icon">+</div>
+            <div class="stat-card-content">
+                <strong>Entrada de farmacia</strong>
+                <div class="stat-label">Registrar medicamentos por lote</div>
+            </div>
+            <span class="stat-card-arrow">›</span>
+        </a>
+        {% endif %}
+
+    </div>
+
+</div>
+
+{% endblock %}
+
+
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
+<script src="{% static 'js/charts_reportes.js' %}"></script>
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        ReportesCharts.donut("grafico-ti-estado", "datos-ti-estado");
+    });
+</script>
+{% endblock %}

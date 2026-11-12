@@ -1,0 +1,14 @@
+{% extends "inventario/_base.html" %}
+{% block inventory_breadcrumb %}<a href="{% url 'inventario:panel' %}">Inventario</a><span aria-hidden="true">/</span><span>Categorías</span>{% endblock %}
+{% block inventory_heading %}Categorías{% endblock %}
+{% block inventory_description %}Organice los artículos del catálogo por tipo de recurso.{% endblock %}
+{% block inventory_actions %}<div class="inventory-actions"><a class="inventory-button inventory-primary" href="{% url 'inventario:crear_categoria' %}"><span aria-hidden="true">＋</span> Nueva categoría</a></div>{% endblock %}
+{% block inventory_body %}
+<div class="inventory-table-shell"><div class="inventory-table-scroll"><table class="inventory-table">
+    <caption class="inventory-sr-only">Categorías del inventario</caption>
+    <thead><tr><th scope="col">Nombre</th><th scope="col">Descripción</th><th scope="col">Estado</th><th scope="col"><span class="inventory-sr-only">Acciones</span></th></tr></thead>
+    <tbody>{% for categoria in categorias %}
+    <tr><td><strong>{{ categoria.nombre }}</strong></td><td class="inventory-description">{{ categoria.descripcion|default:"Sin descripción" }}</td><td>{% if categoria.activo %}<span class="inventory-badge inventory-badge-success">Activa</span>{% else %}<span class="inventory-badge inventory-badge-neutral">Inactiva</span>{% endif %}</td><td class="inventory-row-action"><a class="inventory-text-link" href="{% url 'inventario:editar_categoria' categoria.pk %}">Editar</a></td></tr>
+    {% empty %}<tr><td colspan="4" class="inventory-empty"><strong>No hay categorías registradas</strong><p>Cree una categoría para empezar a organizar sus artículos.</p></td></tr>{% endfor %}</tbody>
+</table></div><div class="inventory-pagination">{{ categorias|length }} categoría{{ categorias|length|pluralize:"s" }}.</div></div>
+{% endblock %}

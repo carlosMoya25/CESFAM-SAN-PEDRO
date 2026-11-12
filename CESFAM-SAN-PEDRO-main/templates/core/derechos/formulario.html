@@ -1,0 +1,18 @@
+{% extends "core/derechos/base.html" %}
+{% block rights_content %}
+<section class="privacy-card" aria-labelledby="draft-form-title">
+    <div class="privacy-section-heading"><div><p class="privacy-label">{% if solicitud %}{{ solicitud.folio }}{% else %}Nuevo borrador{% endif %}</p><h2 id="draft-form-title">{% if solicitud %}Editar borrador{% else %}Prepara tu solicitud{% endif %}</h2></div><span class="privacy-badge">Sin enviar</span></div>
+    <p class="privacy-section-description">Asociado a tu cuenta: {{ request.user.email }}. No ingreses contraseñas, tokens, diagnósticos ni datos de pacientes o de otras personas.</p>
+    <form method="post" class="privacy-assignment-form privacy-draft-form">
+        {% csrf_token %}
+        {% if form.errors %}<div class="privacy-error" role="alert">Revisa los campos indicados antes de guardar.{{ form.non_field_errors }}</div>{% endif %}
+        {% for field in form %}
+            {% if field.is_hidden %}{{ field }}{{ field.errors }}{% else %}
+            <div class="privacy-field">{{ field.label_tag }}{{ field }}{% if field.help_text %}<p class="privacy-help" id="{{ field.auto_id }}_helptext">{{ field.help_text }}</p>{% endif %}{{ field.errors }}</div>
+            {% endif %}
+        {% endfor %}
+        <div class="privacy-form-actions"><button type="submit" class="privacy-button privacy-button-primary">Guardar borrador</button><a class="privacy-button privacy-button-secondary" href="{% if solicitud %}{% url 'detalle_derecho' solicitud.identificador %}{% else %}{% url 'mis_derechos' %}{% endif %}">Cancelar</a></div>
+        <p class="privacy-help">El contenido queda guardado para que puedas revisarlo. No inicia una revisión institucional ni cambia los datos de tu cuenta.</p>
+    </form>
+</section>
+{% endblock %}

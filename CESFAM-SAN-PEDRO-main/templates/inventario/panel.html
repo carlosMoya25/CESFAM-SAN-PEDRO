@@ -1,0 +1,64 @@
+
+{% extends "inventario/_layout.html" %}
+
+{% block inventory_summary %}
+
+<div class="inventory-stats" aria-label="Resumen del inventario">
+
+    <a href="{% url 'inventario:articulos' %}{% if catalogo_query %}?{{ catalogo_query }}{% endif %}">
+        <strong>{{ total_articulos|default:0 }}</strong>
+        <span>Artículos</span>
+    </a>
+
+    <div>
+        <strong>{{ total_unidades|default:0 }}</strong>
+        <span>Unidades disponibles</span>
+    </div>
+
+    <a class="inventory-stat-warning"
+       href="{% url 'inventario:panel' %}?{% if filtros_estado_query %}{{ filtros_estado_query }}&amp;{% endif %}estado=bajo">
+        <strong>{{ total_stock_bajo|default:0 }}</strong>
+        <span>Stock bajo</span>
+    </a>
+
+    <a class="inventory-stat-danger"
+       href="{% url 'inventario:panel' %}?{% if filtros_estado_query %}{{ filtros_estado_query }}&amp;{% endif %}estado=agotado">
+        <strong>{{ total_agotados|default:0 }}</strong>
+        <span>Agotados</span>
+    </a>
+
+</div>
+
+{% if total_stock_bajo %}
+
+<div class="inventario-aviso-stock" role="alert">
+
+    <div>
+        <strong>
+            Atención: hay artículos con stock bajo o agotado.
+        </strong>
+
+        <p>
+            Se registran {{ total_stock_bajo }}
+            existencias en o bajo su stock mínimo.
+        </p>
+    </div>
+
+    <a href="{% url 'inventario:consultar_stock' %}">
+        Revisar existencias
+    </a>
+
+</div>
+
+{% endif %}
+
+{% endblock %}
+
+
+{% block inventory_body %}
+
+    {% include "inventario/_busqueda_compacta.html" %}
+
+    {% include "inventario/_stock.html" %}
+
+{% endblock %}

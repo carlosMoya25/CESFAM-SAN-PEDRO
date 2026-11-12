@@ -1,0 +1,25 @@
+{% if total %}
+<table class="reportes-semanas">
+    <caption>{{ total }} {{ unidad }} en el período seleccionado</caption>
+    <thead>
+        <tr><th scope="col">Semana</th><th scope="col">Cantidad</th></tr>
+    </thead>
+    <tbody>
+        {% for semana in serie %}
+        <tr>
+            <th scope="row">
+                {{ semana.desde|date:"d/m" }}{% if semana.desde != semana.hasta %}–{{ semana.hasta|date:"d/m" }}{% endif %}
+            </th>
+            <td>
+                <div class="reportes-semana-total">
+                    <strong>{{ semana.total }}</strong>
+                    <meter min="0" max="{{ total }}" value="{{ semana.total }}" aria-hidden="true"></meter>
+                </div>
+            </td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% else %}
+<p>No se registraron {{ unidad }} con los filtros actuales. Prueba ampliando las fechas o eligiendo todas las ubicaciones.</p>
+{% endif %}

@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+{% load static %}
+{% block title %}Mis datos y derechos · CESFAM San Pedro{% endblock %}
+{% block extra_css %}<link rel="stylesheet" href="{% static 'css/privacidad.css' %}">{% endblock %}
+{% block content %}
+<article class="privacy-page" aria-labelledby="rights-title">
+    <a class="privacy-back-link" href="{% url 'aviso_privacidad' %}">← Volver a Ley 21.719 · Privacidad</a>
+    <header class="privacy-hero privacy-rights-hero">
+        <p class="privacy-eyebrow">Privacidad / Espacio personal</p>
+        <h1 id="rights-title">Mis datos y derechos</h1>
+        <p class="privacy-intro">Prepara una solicitud de acceso a tus datos o de rectificación y conserva su historial en tu cuenta.</p>
+        <span class="privacy-version-pill">{% if canal_disponible %}Recepción institucional habilitada{% else %}Nuevos envíos no habilitados{% endif %}</span>
+    </header>
+    <div class="privacy-notice privacy-rights-notice"><span aria-hidden="true">ⓘ</span><div>
+        {% if canal_disponible %}<strong>Puedes preparar y enviar tu solicitud.</strong><p>Entidad responsable: {{ cfg_canal.entidad }}. Contacto: {{ cfg_canal.contacto }}. Guardar un borrador no lo envía: revisa su contenido y confirma el envío desde el detalle.</p>
+        {% else %}<strong>La recepción de nuevas solicitudes no está habilitada.</strong><p>Puedes guardar borradores. Si ya enviaste una solicitud, conserva su seguimiento y respuesta en tu cuenta. Si necesitas ejercer un derecho ahora, utiliza los canales oficiales vigentes del CESFAM.</p>{% endif %}
+    </div></div>
+    {% block rights_content %}{% endblock %}
+    <footer class="privacy-footer"><span>Tus borradores son personales. Al enviarlos, las personas autorizadas por la institución podrán atenderlos.</span><a href="{% url 'mis_derechos' %}">Mis solicitudes →</a></footer>
+</article>
+{% endblock %}

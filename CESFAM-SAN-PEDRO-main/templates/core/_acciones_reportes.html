@@ -1,0 +1,55 @@
+<div class="card reportes-acciones">
+
+    <h2>Reportes</h2>
+    <p style="color: #64748b;">
+        Consulta el detalle por área o descarga el informe institucional en PDF
+        para el período y la ubicación seleccionados arriba.
+    </p>
+
+    <div class="dashboard-grid">
+
+        {% if puede_ti and request.resolver_match.view_name != "panel_reportes_ti" %}
+        <a href="{% url 'panel_reportes_ti' %}?{{ request.GET.urlencode }}" class="stat-card stat-info dashboard-link-card">
+            <div class="stat-icon">☷</div>
+            <div class="stat-card-content">
+                <strong>Soporte TI</strong>
+                <div class="stat-label">Pendientes, en atención y resueltas</div>
+            </div>
+            <span class="stat-card-arrow">›</span>
+        </a>
+        {% endif %}
+
+        {% if puede_gestionar_inventario and request.resolver_match.view_name != "inventario:reportes" %}
+        <a href="{% url 'inventario:reportes' %}?{{ request.GET.urlencode }}" class="stat-card stat-success dashboard-link-card">
+            <div class="stat-icon">▣</div>
+            <div class="stat-card-content">
+                <strong>Insumos</strong>
+                <div class="stat-label">Stock bajo y movimiento del período</div>
+            </div>
+            <span class="stat-card-arrow">›</span>
+        </a>
+        {% endif %}
+
+        {% if puede_gestionar_farmacia and request.resolver_match.view_name != "farmacia:reportes" %}
+        <a href="{% url 'farmacia:reportes' %}?{{ request.GET.urlencode }}" class="stat-card stat-success dashboard-link-card">
+            <div class="stat-icon">✚</div>
+            <div class="stat-card-content">
+                <strong>Farmacia</strong>
+                <div class="stat-label">Lotes por vencer y vencidos</div>
+            </div>
+            <span class="stat-card-arrow">›</span>
+        </a>
+        {% endif %}
+
+    </div>
+
+    <div class="reportes-pdf-acciones">
+        <a href="{% url 'reporte_pdf_resumen' %}?{{ request.GET.urlencode }}" class="btn" target="_blank" rel="noopener">
+            ⬇ Informe resumen (PDF)
+        </a>
+        <a href="{% url 'reporte_pdf_detallado' %}?{{ request.GET.urlencode }}" class="btn btn-secondary" target="_blank" rel="noopener">
+            ⬇ Informe detallado (PDF)
+        </a>
+    </div>
+
+</div>

@@ -1,0 +1,12 @@
+{% extends "base.html" %}
+{% load static %}
+{% block title %}Auditoría · CESFAM San Pedro{% endblock %}
+{% block body_class %}audit-view{% endblock %}
+{% block extra_css %}<link rel="stylesheet" href="{% static 'css/inventario.css' %}"><link rel="stylesheet" href="{% static 'css/auditoria.css' %}">{% endblock %}
+{% block content %}
+<section class="inventory-page">
+<nav class="inventory-breadcrumb" aria-label="Ruta de navegación"><a href="{% url 'dashboard' %}">Inicio</a><span aria-hidden="true">/</span><a href="{% url 'panel_auditoria' %}">Auditoría</a></nav>
+<header class="inventory-heading"><div><h1>{% block audit_heading %}Auditoría del sistema{% endblock %}</h1><p>Actividad registrada para Administración y Técnico TI. Consulta de solo lectura.</p></div></header>
+{% block audit_content %}{% endblock %}
+</section>
+{% endblock %}

@@ -1,0 +1,185 @@
+{% extends "core/pdf/reporte_base.html" %}
+
+{% block pdf_titulo %}{% if apartado %}Reporte de {{ apartado }} · detallado{% else %}Informe detallado SIGRI{% endif %}{% endblock %}
+{% block pdf_encabezado_titulo %}{% if apartado %}Reporte de {{ apartado }}{% else %}Informe detallado de gestión{% endif %}{% endblock %}
+
+{% block pdf_body %}
+{% include "core/pdf/_secciones_resumen.html" %}
+
+{% if puede_ti %}
+<div class="pdf-seccion">
+    <h2>Detalle de solicitudes TI</h2>
+    {% if ti.listado %}
+    <table class="pdf-tabla">
+        <thead>
+            <tr>
+                <th>Fecha</th>
+                <th>Ubicación</th>
+                <th>{% if apartado %}Técnico asignado{% else %}Tipo{% endif %}</th>
+                <th>Prioridad</th>
+                <th>Estado</th>
+                <th>{% if apartado %}Folio y asunto{% else %}Descripción{% endif %}</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for req in ti.listado %}
+            <tr{% if forloop.counter|divisibleby:2 %} class="fila-alterna"{% endif %}>
+                <td>{{ req.fecha_solicitud|date:"d/m/Y" }}</td>
+                <td>{{ req.anexo.nombre|default:"—" }}</td>
+                <td>{% if apartado %}{{ req.responsable|default:"—" }}{% else %}{{ req.tipo_requerimiento.nombre|default:"—" }}{% endif %}</td>
+                <td>{{ req.prioridad.nombre|default:"—" }}</td>
+                <td>
+                    <span class="pdf-badge
+                        {% if req.estado.nombre == 'Pendiente' %}media
+                        {% elif req.estado.nombre == 'Resuelto' or req.estado.nombre == 'Cerrado' %}ok
+                        {% elif req.estado.nombre == 'Cancelado' %}alerta
+                        {% else %}info{% endif %}">{{ req.estado.nombre }}</span>
+                </td>
+                <td>{% if apartado %}#{{ req.pk }} · {{ req.titulo }}{% else %}{{ req.descripcion|truncatechars:60 }}{% endif %}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% else %}
+    <p class="pdf-vacio">No hay solicitudes para el período y la ubicación seleccionados.</p>
+    {% endif %}
+</div>
+{% endif %}
+
+{% if puede_insumos %}
+<div class="pdf-seccion">
+    <h2>Artículos que requieren re-stock</h2>
+    {% if insumos.stock_bajo %}
+    <table class="pdf-tabla">
+        <thead>
+            <tr>
+                <th>Artículo</th>
+                <th>Ubicación</th>
+                <th>Stock actual</th>
+                <th>Stock mínimo</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for fila in insumos.stock_bajo %}
+            <tr{% if forloop.counter|divisibleby:2 %} class="fila-alterna"{% endif %}>
+                <td>{% if apartado %}{{ fila.articulo.codigo }} · {% endif %}{{ fila.articulo.nombre }}</td>
+                <td>{{ fila.anexo.nombre }}</td>
+                <td><span class="pdf-badge media">{{ fila.cantidad }}</span></td>
+                <td>{{ fila.articulo.stock_minimo }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% else %}
+    <p class="pdf-vacio">No hay artículos bajo su stock mínimo.</p>
+    {% endif %}
+
+    {% if insumos.sin_stock %}
+    <h3>Artículos sin stock disponible</h3>
+    <table class="pdf-tabla">
+        <thead>
+            <tr>
+                <th>Artículo</th>
+                <th>Ubicación</th>
+                {% if apartado %}<th>Stock mínimo</th>{% endif %}
+            </tr>
+        </thead>
+        <tbody>
+            {% for fila in insumos.sin_stock %}
+            <tr{% if forloop.counter|divisibleby:2 %} class="fila-alterna"{% endif %}>
+                <td>{% if apartado %}{{ fila.articulo.codigo }} · {% endif %}{{ fila.articulo.nombre }}</td>
+                <td>{{ fila.anexo.nombre }}</td>
+                {% if apartado %}<td>{{ fila.articulo.stock_minimo }}</td>{% endif %}
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% endif %}
+    {% if apartado %}
+    <h3>Movimientos del período</h3>
+    {% if insumos.detalle_movimientos %}
+    <table class="pdf-tabla" repeat="1">
+        <thead>
+            <tr><th>Fecha</th><th>Artículo</th><th>Tipo</th><th>Cantidad</th></tr>
+        </thead>
+        <tbody>
+            {% for fila in insumos.detalle_movimientos %}
+            <tr>
+                <td>{{ fila.movimiento.fecha|date:"d/m/Y" }}</td>
+                <td>{{ fila.articulo.codigo }} · {{ fila.articulo.nombre }}</td>
+                <td>{{ fila.movimiento.tipo_movimiento.nombre }}</td>
+                <td>{{ fila.cantidad }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% else %}
+    <p class="pdf-vacio">No hay movimientos para el período y la ubicación seleccionados.</p>
+    {% endif %}
+    {% endif %}
+</div>
+{% endif %}
+
+{% if puede_farmacia %}
+<div class="pdf-seccion">
+    <h2>Lotes de farmacia que requieren revisión</h2>
+
+    <h3>Por vencer (próximos {{ farmacia.dias_alerta }} días)</h3>
+    {% if farmacia.lotes_por_vencer %}
+    <table class="pdf-tabla">
+        <thead>
+            <tr>
+                <th>Medicamento</th>
+                <th>Lote</th>
+                <th>Ubicación</th>
+                <th>Cantidad</th>
+                <th>Vence</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for fila in farmacia.lotes_por_vencer %}
+            <tr{% if forloop.counter|divisibleby:2 %} class="fila-alterna"{% endif %}>
+                <td>{{ fila.lote.medicamento.articulo.nombre }}</td>
+                <td>{{ fila.lote.numero_lote }}</td>
+                <td>{{ fila.anexo.nombre }}</td>
+                <td>{{ fila.cantidad }}</td>
+                <td><span class="pdf-badge media">{{ fila.lote.fecha_vencimiento|date:"d/m/Y" }}</span></td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% else %}
+    <p class="pdf-vacio">No hay lotes por vencer en el rango de alerta configurado.</p>
+    {% endif %}
+
+    <h3>Vencidos</h3>
+    {% if farmacia.lotes_vencidos %}
+    <table class="pdf-tabla">
+        <thead>
+            <tr>
+                <th>Medicamento</th>
+                <th>Lote</th>
+                <th>Ubicación</th>
+                <th>Cantidad</th>
+                <th>Venció</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for fila in farmacia.lotes_vencidos %}
+            <tr{% if forloop.counter|divisibleby:2 %} class="fila-alterna"{% endif %}>
+                <td>{{ fila.lote.medicamento.articulo.nombre }}</td>
+                <td>{{ fila.lote.numero_lote }}</td>
+                <td>{{ fila.anexo.nombre }}</td>
+                <td>{{ fila.cantidad }}</td>
+                <td><span class="pdf-badge alerta">{{ fila.lote.fecha_vencimiento|date:"d/m/Y" }}</span></td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% else %}
+    <p class="pdf-vacio">No hay lotes vencidos con stock disponible.</p>
+    {% endif %}
+</div>
+{% endif %}
+
+{% endblock %}

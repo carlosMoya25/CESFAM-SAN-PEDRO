@@ -1,0 +1,18 @@
+{% extends "core/derechos/base.html" %}
+{% block rights_content %}
+<section class="privacy-card" aria-labelledby="draft-detail-title">
+    <div class="privacy-section-heading"><div><p class="privacy-label">{{ solicitud.folio }}</p><h2 id="draft-detail-title">{{ solicitud.get_tipo_display }}</h2></div><span class="privacy-badge">{{ solicitud.get_estado_display }}</span></div>
+    <dl class="privacy-draft-meta"><div><dt>Creación</dt><dd>{{ solicitud.creada_at|date:"d/m/Y H:i" }}</dd></div><div><dt>Última actualización</dt><dd>{{ solicitud.actualizada_at|date:"d/m/Y H:i" }}</dd></div><div><dt>Versión del registro</dt><dd>{{ solicitud.revision }}</dd></div></dl>
+    <p class="privacy-help">Fechas en hora de Chile continental.{% if solicitud.estado == 'BORRADOR' %} Este folio identifica un borrador; no acredita recepción institucional.{% endif %}</p>
+    {% if solicitud.enviada_at %}<div class="privacy-notice"><div><strong>Acuse de recepción · {{ solicitud.folio }}</strong><p>Solicitud recibida el {{ solicitud.enviada_at|date:"d/m/Y H:i" }}. Fecha límite inicial de respuesta: {{ solicitud.fecha_limite|date:"d/m/Y" }}.</p><p>Entidad: {{ solicitud.recepcion.entidad }} · Contacto al recibir: {{ solicitud.recepcion.contacto }}.</p><p>Medio de respuesta elegido: tu cuenta personal en este sistema.</p></div></div>{% endif %}
+    <div class="privacy-draft-content"><h3>Descripción de tu solicitud</h3><div>{{ solicitud.detalle|linebreaks }}</div>
+        {% if solicitud.tipo == "RECTIFICACION" %}<h3>Dato que deseas corregir</h3><p>{{ solicitud.campo_rectificar }}</p><h3>Valor propuesto</h3><p>{{ solicitud.valor_solicitado }}</p>{% endif %}
+    </div>
+    <div class="privacy-form-actions">{% if solicitud.estado == "BORRADOR" %}<a class="privacy-button privacy-button-secondary" href="{% url 'editar_derecho' solicitud.identificador %}">Editar borrador</a>{% endif %}<a class="privacy-button privacy-button-secondary" href="{% url 'mis_derechos' %}">Volver a mis solicitudes</a></div>
+    {% if solicitud.estado == "BORRADOR" and canal_disponible %}
+    <form class="privacy-assignment-form privacy-card" method="post" action="{% url 'enviar_derecho' solicitud.identificador %}">{% csrf_token %}<h3>Enviar a atención institucional</h3><p>El contenido quedará fijo al enviarlo y se compartirá con las personas autorizadas para responder.</p>{{ form_envio.as_p }}<button class="privacy-button privacy-button-primary" type="submit">Enviar solicitud</button></form>
+    {% endif %}
+    {% if solicitud.estado == "RESPONDIDA" %}<section class="privacy-card"><p class="privacy-label">Respuesta institucional</p><h3>Respuesta disponible</h3><p>{{ solicitud.respondida_at|date:"d/m/Y H:i" }} · {{ solicitud.respondida_por }}</p><div class="privacy-draft-content">{{ solicitud.respuesta|linebreaks }}</div></section>{% endif %}
+</section>
+<section class="privacy-card" aria-labelledby="draft-history-title"><p class="privacy-label">Seguimiento personal</p><h2 id="draft-history-title">Historial de la solicitud</h2><ol class="privacy-timeline privacy-draft-timeline">{% for evento in solicitud.historial.all %}<li><time>{{ evento.fecha|date:"d/m/Y H:i" }} · Chile continental</time><strong>{{ evento.get_accion_display }}</strong><p>Versión {{ evento.revision }} · {% if evento.realizado_por %}Realizado por {{ evento.realizado_por }}.{% else %}Acción realizada desde tu cuenta.{% endif %}</p></li>{% endfor %}</ol></section>
+{% endblock %}

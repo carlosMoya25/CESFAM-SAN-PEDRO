@@ -1,0 +1,47 @@
+<section class="backup-card backup-policy" id="politica-respaldos" aria-labelledby="policy-title">
+    <div class="backup-policy-heading"><div><span class="backup-tag">Organización del respaldo</span><h2 id="policy-title">Política de respaldos</h2><p class="backup-description">Define cómo se organizarán las copias y quién cuidará su recuperación.</p></div><span class="privacy-badge {% if pendientes_politica %}privacy-badge-warning{% endif %}">{% if not politica.revision %}Sin definir{% elif pendientes_politica %}Definición parcial{% else %}Definición registrada{% endif %}</span></div>
+    <div class="backup-policy-summary">
+        <div><span>Frecuencia prevista</span><strong>{{ politica.get_frecuencia_display }}{% if politica.hora %} · {{ politica.hora|time:"H:i" }}{% endif %}</strong>{% if politica.frecuencia == 'SEMANAL' %}<small>{{ dia_previsto }}</small>{% elif politica.frecuencia == 'DOCE_HORAS' %}<small>Primera hora prevista; se repite 12 horas después</small>{% elif politica.frecuencia == 'DIARIA' %}<small>Todos los días</small>{% endif %}</div>
+        <div><span>Conservación de copias</span><strong>{{ politica.copias_diarias|default_if_none:"—" }} diarias · {{ politica.copias_semanales|default_if_none:"—" }} semanales · {{ politica.copias_mensuales|default_if_none:"—" }} mensuales</strong><small>— Sin definir · 0 No conservar esa categoría</small></div>
+        <div><span>Prueba de recuperación</span><strong>{% if politica.prueba_cada_dias %}Cada {{ politica.prueba_cada_dias }} días{% else %}Sin definir{% endif %}</strong></div>
+        <div><span>Custodio principal de la clave</span><strong>{{ politica.custodio|default:"Sin designar" }}</strong>{% if politica.custodio and not politica.custodio.is_active %}<small class="backup-text-warning">Cuenta inactiva: requiere reemplazo</small>{% endif %}</div>
+        <div><span>Suplente de custodia</span><strong>{{ politica.suplente|default:"Sin designar" }}</strong>{% if politica.suplente and not politica.suplente.is_active %}<small class="backup-text-warning">Cuenta inactiva: requiere reemplazo</small>{% endif %}</div>
+        <div><span>Ubicación del destino Windows</span><strong>{{ politica.get_ubicacion_display }}</strong></div>
+    </div>
+    <div class="backup-status backup-status-neutral"><div><strong>{% if programacion.activa %}Editar la política suspenderá la programación{% else %}Programación automática no activada{% endif %}</strong><p>Guardar registra las decisiones del CESFAM; no genera copias ni elimina archivos. La generación automática se controla en «Respaldos automáticos». El traslado a Windows y las pruebas de recuperación siguen siendo tareas de mantenimiento.</p></div></div>
+    {% if pendientes_politica %}<details class="backup-checks privacy-history-details"><summary>Ver {{ pendientes_politica|length }} definiciones pendientes</summary><ul class="backup-pending">{% for pendiente in pendientes_politica %}<li>{{ pendiente }}</li>{% endfor %}</ul></details>{% endif %}
+    {% if politica.procedimiento_clave or politica.proteccion_adicional %}<details class="backup-checks privacy-history-details"><summary>Ver procedimientos registrados</summary>{% if politica.procedimiento_clave %}<h3>Custodia de la clave</h3><p class="backup-procedure">{{ politica.procedimiento_clave }}</p>{% endif %}{% if politica.proteccion_adicional %}<h3>Protección ante pérdida de la ubicación</h3><p class="backup-procedure">{{ politica.proteccion_adicional }}</p>{% endif %}</details>{% endif %}
+    <details class="backup-policy-editor" {% if form_abierto %}open{% endif %}><summary>{% if politica.revision %}Editar política de respaldos{% else %}Definir política de respaldos{% endif %}</summary>
+        <form method="post" action="{% url 'panel_respaldos' %}#politica-respaldos" class="backup-policy-form">
+            {% csrf_token %}{{ form_politica.revision }}
+            {% if form_politica.non_field_errors %}<div class="privacy-error" role="alert">{{ form_politica.non_field_errors }}</div>{% endif %}
+            {% if form_politica.errors %}<p class="privacy-error" role="alert">No se guardaron los cambios. Revisa los campos indicados y vuelve a intentarlo.</p>{% endif %}
+            <div class="backup-policy-fields">
+                <fieldset><legend>1. Frecuencia y comprobaciones</legend><p>Horarios previstos en Chile continental. No se activa una tarea automática.</p>
+                    {% include "core/respaldos/campo_politica.html" with field=form_politica.frecuencia %}
+                    {% include "core/respaldos/campo_politica.html" with field=form_politica.hora %}
+                    {% include "core/respaldos/campo_politica.html" with field=form_politica.dia_semana %}
+                    {% include "core/respaldos/campo_politica.html" with field=form_politica.prueba_cada_dias %}
+                </fieldset>
+                <fieldset><legend>2. Conservación de copias</legend><p>Indica cuántas copias guardar en cada categoría. Deja vacío lo pendiente o usa 0 para no conservar esa categoría. Estos valores no son plazos legales ni autorizan borrar solicitudes.</p>
+                    {% include "core/respaldos/campo_politica.html" with field=form_politica.copias_diarias %}
+                    {% include "core/respaldos/campo_politica.html" with field=form_politica.copias_semanales %}
+                    {% include "core/respaldos/campo_politica.html" with field=form_politica.copias_mensuales %}
+                </fieldset>
+                <fieldset><legend>3. Custodia de la clave y suplencia</legend><p>Selecciona dos personas distintas con cuenta activa. Esta designación no les concede permisos adicionales. No ingreses claves ni contraseñas.</p>
+                    {% include "core/respaldos/campo_politica.html" with field=form_politica.custodio %}
+                    {% include "core/respaldos/campo_politica.html" with field=form_politica.suplente %}
+                    {% include "core/respaldos/campo_politica.html" with field=form_politica.procedimiento_clave %}
+                </fieldset>
+                <fieldset><legend>4. Protección de la ubicación</legend><p>El equipo Windows es distinto del de la aplicación. Confirma si ambos están en el mismo lugar físico y documenta la protección prevista.</p>
+                    {% include "core/respaldos/campo_politica.html" with field=form_politica.ubicacion %}
+                    {% include "core/respaldos/campo_politica.html" with field=form_politica.proteccion_adicional %}
+                </fieldset>
+            </div>
+            {% include "core/respaldos/campo_politica.html" with field=form_politica.motivo %}
+            <div class="backup-policy-actions"><button class="privacy-button backup-download" type="submit">Guardar política</button><p>Quedará registrado quién realizó el cambio y cuándo.</p></div>
+        </form>
+    </details>
+    <details class="privacy-history-details backup-checks"><summary>Historial de la política · Últimos 10 cambios</summary><ol class="privacy-timeline">{% for cambio in cambios_politica %}<li><time>{{ cambio.fecha|date:"d/m/Y H:i" }}</time><strong>{{ cambio.realizado_por }} · Revisión {{ cambio.despues.revision }}</strong><p>{{ cambio.motivo }}</p><ul class="backup-policy-diff">{% for etiqueta, antes, despues in cambio.diferencias %}<li><strong>{{ etiqueta }}</strong><span>Antes: {{ antes }}</span><span>Después: {{ despues }}</span></li>{% empty %}<li>Se dejó constancia de revisión sin cambios en los valores.</li>{% endfor %}</ul></li>{% empty %}<li>Todavía no hay cambios registrados.</li>{% endfor %}</ol></details>
+    {% if politica.revision %}<p class="backup-help">Última actualización: {{ politica.actualizada_at|date:"d/m/Y H:i" }} · Revisión {{ politica.revision }}</p>{% endif %}
+</section>

@@ -1,0 +1,8 @@
+{% extends "core/pdf/reporte_base.html" %}
+
+{% block pdf_titulo %}{% if apartado %}Reporte de {{ apartado }} · resumen{% else %}Informe resumen SIGRI{% endif %}{% endblock %}
+{% block pdf_encabezado_titulo %}{% if apartado %}Reporte de {{ apartado }}{% else %}Informe resumen de gestión{% endif %}{% endblock %}
+
+{% block pdf_body %}
+{% include "core/pdf/_secciones_resumen.html" %}
+{% endblock %}

@@ -1,0 +1,22 @@
+{% extends "core/auditoria/base.html" %}
+{% block audit_heading %}Evento #{{ evento.pk }}{% endblock %}
+{% block audit_content %}
+<p><a href="{% url 'panel_auditoria' %}?solicitud_id={{ evento.solicitud_id }}">Ver actividad con la misma referencia</a></p>
+<dl class="audit-details">
+<dt>Fecha en Chile</dt><dd>{{ evento.fecha|date:"d/m/Y H:i:s" }}</dd>
+<dt>Responsable</dt><dd>{% if evento.usuario %}{{ evento.usuario.email }} · usuario #{{ evento.usuario_id }}{% elif evento.origen == "COMANDO" %}Comando sin usuario identificado{% elif evento.origen == "SISTEMA" %}Proceso del sistema{% else %}Sesión no iniciada{% endif %}</dd>
+<dt>Origen</dt><dd>{{ evento.get_origen_display }}</dd>
+<dt>Acción y resultado</dt><dd>{{ evento.modulo }} · {{ evento.accion }} · {{ evento.get_resultado_display }}</dd>
+<dt>Registro relacionado</dt><dd>{{ evento.modelo|default:"—" }} {% if evento.objeto_id %}#{{ evento.objeto_id }}{% endif %}</dd>
+<dt>Pantalla y método</dt><dd>{{ evento.vista|default:"—" }} · {{ evento.metodo|default:"—" }}</dd>
+<dt>Ruta normalizada</dt><dd>{{ evento.ruta|default:"—" }}</dd>
+<dt>Estado HTTP / duración</dt><dd>{{ evento.estado_http|default_if_none:"—" }} / {{ evento.duracion_ms|default_if_none:"—" }} ms</dd>
+<dt>Referencia de seguimiento</dt><dd>{{ evento.solicitud_id }}</dd>
+</dl>
+<h2>Campos registrados</h2>
+<div class="inventory-table-shell"><div class="inventory-table-scroll"><table class="inventory-table">
+<caption class="inventory-sr-only">Valores operativos anteriores y posteriores, con contenido personal omitido</caption>
+<thead><tr><th scope="col">Campo</th><th scope="col">Antes</th><th scope="col">Después</th></tr></thead>
+<tbody>{% for campo, antes, despues, visible in campos %}<tr><th scope="row">{{ campo }}</th>{% if visible %}<td>{{ antes|default_if_none:"—" }}</td><td>{{ despues|default_if_none:"—" }}</td>{% else %}<td colspan="2">Se registra el cambio del campo; su contenido no se copia.</td>{% endif %}</tr>{% empty %}<tr><td colspan="3">Este evento no contiene cambios de campos.</td></tr>{% endfor %}</tbody>
+</table></div></div>
+{% endblock %}

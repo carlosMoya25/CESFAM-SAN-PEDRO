@@ -1,0 +1,19 @@
+{% extends "inventario/_base.html" %}
+{% block inventory_breadcrumb %}<a href="{% url 'inventario:panel' %}">Inventario</a><span aria-hidden="true">/</span><span>Artículos</span>{% endblock %}
+{% block inventory_heading %}Artículos{% endblock %}
+{% block inventory_description %}Catálogo del inventario general. Los medicamentos se administran desde Farmacia.{% endblock %}
+{% block inventory_actions %}<div class="inventory-actions"><a class="inventory-button inventory-primary" href="{% url 'inventario:crear_articulo' %}"><span aria-hidden="true">＋</span> Nuevo artículo</a></div>{% endblock %}
+{% block inventory_body %}
+{% include "inventario/_filtros.html" %}
+<div class="inventory-table-shell">
+    <div class="inventory-table-scroll"><table class="inventory-table">
+        <caption class="inventory-sr-only">Catálogo de artículos</caption>
+        <thead><tr><th scope="col">Artículo / código</th><th scope="col">Categoría</th><th scope="col" class="inventory-number">Stock mínimo</th><th scope="col">Estado</th><th scope="col"><span class="inventory-sr-only">Acciones</span></th></tr></thead>
+        <tbody>{% for articulo in articulos %}
+        <tr><td><strong>{{ articulo.nombre }}</strong><small>{{ articulo.codigo|default:"Sin código" }}</small>{% if articulo.descripcion %}<small class="inventory-description">{{ articulo.descripcion }}</small>{% endif %}</td><td>{{ articulo.categoria.nombre }}</td><td class="inventory-number">{{ articulo.stock_minimo }}</td><td>{% if articulo.activo %}<span class="inventory-badge inventory-badge-success">Activo</span>{% else %}<span class="inventory-badge inventory-badge-neutral">Inactivo</span>{% endif %}</td>
+            <td class="inventory-row-action"><details class="inventory-dropdown inventory-row-dropdown"><summary aria-label="Acciones para {{ articulo.nombre }}">Acciones <span aria-hidden="true">⌄</span></summary><div class="inventory-dropdown-menu"><a href="{% url 'inventario:editar_articulo' articulo.pk %}">Editar artículo</a>{% if articulo.activo %}<a href="{% url 'inventario:entrada' %}?articulo={{ articulo.pk }}">Registrar entrada</a>{% endif %}</div></details></td></tr>
+        {% empty %}<tr><td colspan="5" class="inventory-empty"><strong>No se encontraron artículos</strong><p>Pruebe otra búsqueda o registre un artículo nuevo.</p></td></tr>{% endfor %}</tbody>
+    </table></div>
+    {% include "inventario/_paginacion.html" %}
+</div>
+{% endblock %}

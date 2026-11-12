@@ -1,0 +1,28 @@
+{% extends "farmacia/_form_base.html" %}
+{% load static %}
+{% block inventory_description %}Registre medicamentos entregados a pacientes. Para mover existencias entre ubicaciones, utilice “Trasladar a anexo”.{% endblock %}
+{% block inventory_body %}
+<a class="inventory-back-link" href="{% url 'farmacia:dashboard' %}">‹ Volver a existencias</a>
+<p class="inventory-footnote">La entrega descuenta unidades de la ubicación seleccionada. Se conserva el responsable, la fecha, el lote y el folio indicado. El dato del destinatario es opcional; registre solo lo necesario.</p>
+<form method="post" class="inventory-form" id="salida-farmacia-form">
+    {% csrf_token %}{% for hidden in form.hidden_fields %}{{ hidden }}{{ hidden.errors }}{% endfor %}
+    {% if form.non_field_errors %}<div class="inventory-form-errors" role="alert">{{ form.non_field_errors }}</div>{% endif %}
+    <div class="inventory-form-fields">
+        {% for field in form.visible_fields %}
+        <div class="inventory-field{% if field.name == 'motivo' %} inventory-field-wide{% endif %}">
+            {{ field.label_tag }}{{ field }}
+            {% if field.help_text %}<p class="inventory-field-help" id="{{ field.auto_id }}_helptext">{{ field.help_text }}</p>{% endif %}
+            {% if field.errors %}<div id="{{ field.auto_id }}_error">{% for error in field.errors %}<p class="inv-error" role="alert">{{ error }}</p>{% endfor %}</div>{% endif %}
+        </div>
+        {% endfor %}
+    </div>
+    <div class="inventory-preview" aria-live="polite">
+        <strong>Stock disponible para la salida</strong>
+        <p id="stock-salida-preview">Seleccione ubicación y lote para consultar existencias.</p>
+        <small>El saldo es orientativo y se valida nuevamente al guardar. No se puede entregar más de lo disponible.</small>
+    </div>
+    <div class="inventory-form-actions"><button class="inventory-button inventory-primary" type="submit" id="registrar-salida">Registrar entrega</button><a class="inventory-button" href="{% url 'farmacia:dashboard' %}">Cancelar</a></div>
+</form>
+{{ stocks_salida|json_script:"stocks-salida" }}
+{% endblock %}
+{% block inventory_scripts %}<script src="{% static 'js/salida_farmacia.js' %}" defer></script>{% endblock %}

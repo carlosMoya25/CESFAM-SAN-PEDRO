@@ -1,0 +1,216 @@
+/* Estilos para los informes PDF (SIGRI - CESFAM San Pedro).
+   xhtml2pdf solo soporta un subconjunto de CSS 2.1: no hay flexbox ni grid,
+   por lo que el layout se arma con tablas y bloques simples. */
+
+@page {
+    size: A4;
+    margin: 2.4cm 1.6cm 2.1cm 1.6cm;
+
+    @frame footer_frame {
+        -pdf-frame-content: footer_content;
+        bottom: 0.9cm;
+        margin-left: 1.6cm;
+        margin-right: 1.6cm;
+        height: 1cm;
+    }
+}
+
+body {
+    font-family: Helvetica, Arial, sans-serif;
+    font-size: 9.5pt;
+    color: #172033;
+}
+
+h1, h2, h3 {
+    font-family: Helvetica, Arial, sans-serif;
+    color: #075985;
+    margin: 0 0 4px 0;
+}
+
+h1 { font-size: 16pt; }
+h2 { font-size: 12.5pt; margin-top: 16px; }
+h3 { font-size: 10.5pt; color: #087ea4; }
+
+p { margin: 2px 0; }
+
+/* ----- Encabezado institucional ----- */
+table.pdf-encabezado {
+    width: 100%;
+    border-bottom: 2px solid #087ea4;
+    padding-bottom: 8px;
+    margin-bottom: 10px;
+}
+
+td.pdf-encabezado-logo {
+    width: 70px;
+    vertical-align: middle;
+}
+
+td.pdf-encabezado-logo img {
+    width: 60px;
+}
+
+td.pdf-encabezado-texto {
+    vertical-align: middle;
+    padding-left: 10px;
+}
+
+.pdf-institucion {
+    font-size: 8.5pt;
+    color: #64748b;
+    text-transform: uppercase;
+}
+
+.pdf-sistema {
+    font-size: 9pt;
+    color: #087ea4;
+    font-weight: bold;
+    margin-bottom: 2px;
+}
+
+/* ----- Franja de período / filtros ----- */
+table.pdf-periodo {
+    width: 100%;
+    background-color: #e8f6fa;
+    border-radius: 0;
+    margin-bottom: 14px;
+}
+
+table.pdf-periodo td {
+    padding: 6px 8px;
+    font-size: 8.5pt;
+    color: #075985;
+}
+
+/* ----- Tarjetas de indicadores (KPI) ----- */
+table.pdf-kpis {
+    width: 100%;
+    margin-bottom: 6px;
+}
+
+table.pdf-kpis td {
+    width: 25%;
+    border: 1px solid #e2e8f0;
+    padding: 8px;
+    text-align: center;
+}
+
+.pdf-kpi-numero {
+    font-size: 17pt;
+    font-weight: bold;
+    color: #087ea4;
+}
+
+.pdf-kpi-numero.alerta { color: #e11d48; }
+.pdf-kpi-numero.media { color: #f59e0b; }
+.pdf-kpi-numero.ok { color: #16a34a; }
+
+.pdf-kpi-etiqueta {
+    font-size: 8pt;
+    color: #64748b;
+    text-transform: uppercase;
+}
+
+/* ----- Secciones ----- */
+.pdf-seccion {
+    margin-top: 10px;
+    margin-bottom: 4px;
+    page-break-inside: avoid;
+}
+
+/* ----- Mini barras horizontales (sustituto de gráfico en PDF) ----- */
+table.pdf-barras {
+    width: 100%;
+    margin-bottom: 10px;
+}
+
+table.pdf-barras td {
+    padding: 2px 0;
+    font-size: 8.5pt;
+}
+
+td.pdf-barra-etiqueta {
+    width: 32%;
+    color: #172033;
+}
+
+td.pdf-barra-valor {
+    width: 8%;
+    text-align: right;
+    color: #075985;
+    font-weight: bold;
+}
+
+td.pdf-barra-pista {
+    width: 60%;
+}
+
+.pdf-barra-fondo {
+    background-color: #e2e8f0;
+    height: 9px;
+    width: 100%;
+}
+
+.pdf-barra-relleno {
+    background-color: #087ea4;
+    height: 9px;
+}
+
+.pdf-barra-relleno.alerta { background-color: #e11d48; }
+.pdf-barra-relleno.media { background-color: #f59e0b; }
+.pdf-barra-relleno.ok { background-color: #16a34a; }
+.pdf-barra-relleno.secundario { background-color: #14a6a0; }
+
+/* ----- Tablas de detalle ----- */
+table.pdf-tabla {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 12px;
+}
+
+table.pdf-tabla th {
+    background-color: #087ea4;
+    color: #ffffff;
+    font-size: 8pt;
+    text-align: left;
+    padding: 5px 6px;
+}
+
+table.pdf-tabla td {
+    border-bottom: 1px solid #e2e8f0;
+    font-size: 8pt;
+    padding: 4px 6px;
+}
+
+table.pdf-tabla tr.fila-alterna {
+    background-color: #f4f8fb;
+}
+
+.pdf-badge {
+    padding: 1px 6px;
+    border-radius: 8px;
+    font-size: 7.5pt;
+    color: #ffffff;
+    background-color: #64748b;
+}
+
+.pdf-badge.alerta { background-color: #e11d48; }
+.pdf-badge.media { background-color: #f59e0b; }
+.pdf-badge.ok { background-color: #16a34a; }
+.pdf-badge.info { background-color: #2563eb; }
+
+.pdf-vacio {
+    color: #64748b;
+    font-style: italic;
+    font-size: 8.5pt;
+    padding: 6px 0;
+}
+
+/* ----- Pie de página ----- */
+#footer_content {
+    font-size: 7.5pt;
+    color: #64748b;
+    text-align: center;
+    border-top: 1px solid #e2e8f0;
+    padding-top: 4px;
+}

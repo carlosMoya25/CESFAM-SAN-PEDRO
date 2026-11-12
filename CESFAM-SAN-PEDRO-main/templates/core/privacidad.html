@@ -1,0 +1,165 @@
+{% extends base_privacidad %}
+{% load static %}
+{% block title %}Privacidad y Ley 21.719 · CESFAM San Pedro{% endblock %}
+{% block extra_css %}<link rel="stylesheet" href="{% static 'css/privacidad.css' %}">{% endblock %}
+{% block content %}
+<article class="privacy-page" aria-labelledby="privacy-title">
+    <header class="privacy-hero">
+        <div class="privacy-hero-content">
+            <p class="privacy-eyebrow">CESFAM San Pedro / Privacidad</p>
+            <h1 id="privacy-title">{{ aviso.TITULO }}</h1>
+            <p class="privacy-intro">{{ aviso.INTRODUCCION }}</p>
+            <span class="privacy-version-pill">Aviso · Versión {{ aviso.VERSION }}</span>
+        </div>
+        {% if puede_ver_constancias or puede_ver_panel or puede_atender_derechos %}
+        <div class="privacy-header-actions">
+            {% if puede_ver_constancias %}<a class="privacy-button privacy-button-light" href="#constancias-usuarios">Ver constancias de usuarios <span aria-hidden="true">↗</span></a>{% endif %}
+            {% if puede_asignar_responsable %}<a class="privacy-button privacy-button-outline" href="#responsable-privacidad">Asignar responsable <span aria-hidden="true">↓</span></a>{% endif %}
+            {% if puede_ver_panel %}<a class="privacy-button privacy-button-outline" href="{% url 'panel_institucional' %}">Panel institucional →</a>{% endif %}
+            {% if puede_asignar_responsable %}<a class="privacy-button privacy-button-outline" href="{% url 'panel_conservacion' %}">Conservación de datos →</a>{% endif %}
+            {% if puede_ver_constancias %}<a class="privacy-button privacy-button-outline" href="{% url 'panel_respaldos' %}">Respaldos y recuperación →</a>{% endif %}
+            {% if puede_atender_derechos %}<a class="privacy-button privacy-button-outline" href="{% url 'bandeja_derechos' %}">Atender solicitudes →</a>{% endif %}
+        </div>
+        {% endif %}
+    </header>
+
+    <nav class="privacy-jump-nav" aria-label="Secciones de privacidad">
+        <a href="#informacion-privacidad"><span class="privacy-nav-number">01</span><span><strong>Conoce el aviso</strong><small>Datos, usos y derechos</small></span><span aria-hidden="true">↓</span></a>
+        <a href="#mi-constancia"><span class="privacy-nav-number">02</span><span><strong>Tu constancia</strong><small>Consulta o confirma tu lectura</small></span><span aria-hidden="true">↓</span></a>
+        {% if user.is_authenticated %}<a href="{% url 'mis_derechos' %}"><span class="privacy-nav-number">03</span><span><strong>Mis datos y derechos</strong><small>Prepara y sigue tus solicitudes</small></span><span aria-hidden="true">→</span></a>{% endif %}
+        {% if puede_ver_constancias %}<a href="#gestion-privacidad"><span class="privacy-nav-number">04</span><span><strong>Gestión de privacidad</strong><small>Consultas{% if puede_asignar_responsable %} y administración{% endif %}</small></span><span aria-hidden="true">↓</span></a>{% endif %}
+    </nav>
+
+    {% if user.is_authenticated %}
+    <div class="privacy-overview">
+        <div class="privacy-card privacy-status-card">
+            <p class="privacy-label">Tu estado de lectura</p>
+            {% if constancia %}
+                <span class="privacy-badge privacy-badge-success">Lectura registrada</span>
+                <p>Confirmaste esta versión el {{ constancia.fecha|date:"d/m/Y" }}.</p>
+            {% else %}
+                <span class="privacy-badge">Sin constancia de esta versión</span>
+                <p>Confirmar la lectura es voluntario. Puedes consultar el aviso cuando lo necesites.</p>
+            {% endif %}
+            <a href="#mi-constancia">Ver mi constancia <span aria-hidden="true">→</span></a>
+        </div>
+        <div class="privacy-card privacy-contact-card">
+            <p class="privacy-label">Atención de privacidad</p>
+            {% if configuracion_privacidad.responsable %}
+                <h2>{{ configuracion_privacidad.responsable.nombres }} {{ configuracion_privacidad.responsable.apellido_paterno }}</h2>
+                <p class="privacy-contact-email">{{ configuracion_privacidad.responsable.email }}</p>
+                {% if not configuracion_privacidad.responsable.is_active %}<span class="privacy-badge privacy-badge-warning">Cuenta inactiva: requiere reemplazo</span>{% endif %}
+                <p>Persona asignada para coordinar la atención de solicitudes de privacidad.</p>
+            {% else %}
+                <h2>Sin responsable asignado</h2>
+                <p>Todavía no se ha asignado una persona responsable.</p>
+            {% endif %}
+            {% if puede_asignar_responsable %}<a href="#responsable-privacidad">Administrar asignación <span aria-hidden="true">→</span></a>{% endif %}
+        </div>
+    </div>
+    {% endif %}
+
+    <section id="informacion-privacidad" class="privacy-card privacy-reading" aria-labelledby="reading-title">
+        <div class="privacy-section-heading">
+            <div><p class="privacy-label">Información para todos</p><h2 id="reading-title">Conoce cómo se utilizan tus datos</h2><p>Revisa cada tema a tu ritmo. Selecciona un título para leer su contenido.</p></div>
+        </div>
+        <div class="privacy-notice"><span aria-hidden="true">ⓘ</span><p>Este es un aviso informativo. Confirmar su lectura no equivale a autorizar todos los usos de tus datos.</p></div>
+        <div class="privacy-topics">
+            {% for titulo, texto in aviso.SECCIONES %}
+            <details class="privacy-topic"{% if forloop.first %} open{% endif %}>
+                <summary><span class="privacy-topic-number">{{ forloop.counter|stringformat:"02d" }}</span><span>{{ titulo }}</span><span class="privacy-chevron" aria-hidden="true"></span></summary>
+                <div class="privacy-topic-body"><p>{{ texto }}</p></div>
+            </details>
+            {% endfor %}
+        </div>
+        <div class="privacy-source"><span>¿Quieres revisar la normativa completa?</span><a href="{{ aviso.FUENTE }}" target="_blank" rel="noopener noreferrer">Consultar el texto oficial en la Biblioteca del Congreso Nacional <span aria-hidden="true">↗</span><span class="privacy-sr-only"> (abre otra pestaña)</span></a></div>
+    </section>
+
+    <section id="mi-constancia" class="privacy-card privacy-confirmation" aria-labelledby="confirmation-title">
+        <div class="privacy-section-heading"><div><p class="privacy-label">Tu registro personal</p><h2 id="confirmation-title">Constancia de lectura</h2></div><span class="privacy-badge">Voluntaria</span></div>
+        {% if error %}<p class="privacy-error" role="alert">{{ error }}</p>{% endif %}
+        {% if constancia %}
+            <div class="privacy-receipt" role="status"><span class="privacy-receipt-icon" aria-hidden="true">✓</span><div><strong>Lectura confirmada</strong><p>Lectura confirmada el {{ constancia.fecha|date:"d/m/Y" }} a las {{ constancia.fecha|date:"H:i" }} (hora de Chile continental).</p><p class="privacy-muted">Versión registrada: {{ constancia.version }}. Puedes volver a consultar este aviso cuando lo necesites.</p></div></div>
+        {% elif user.is_authenticated %}
+            <p>Después de leer el aviso, puedes dejar una constancia asociada a tu cuenta.</p>
+            <form method="post" action="{% url 'confirmar_privacidad' %}">
+                {% csrf_token %}
+                <input type="hidden" name="version" value="{{ aviso.VERSION }}">
+                <input type="hidden" name="huella" value="{{ aviso.HUELLA }}">
+                <label class="privacy-checkbox"><input type="checkbox" name="lectura" value="si" required> <span>{{ aviso.DECLARACION }}</span></label>
+                <div class="privacy-form-actions"><button type="submit" class="privacy-button privacy-button-primary">Confirmar lectura</button><p>Puedes seguir utilizando el sistema sin confirmar.</p></div>
+            </form>
+        {% else %}
+            <p>Puedes leer este aviso sin iniciar sesión. Para guardar una constancia debes identificarte.</p>
+            <a class="privacy-button privacy-button-primary" href="{% url 'login' %}?next={% url 'aviso_privacidad' %}">Iniciar sesión</a>
+        {% endif %}
+    </section>
+
+    {% if puede_ver_constancias %}
+    <div id="gestion-privacidad" class="privacy-management-heading"><p class="privacy-label">Espacio de gestión</p><h2>Gestión de privacidad</h2><p>Herramientas disponibles según los permisos de tu cuenta.</p></div>
+    {% endif %}
+
+    {% if puede_asignar_responsable %}
+    <section id="responsable-privacidad" class="privacy-card" aria-labelledby="responsable-title">
+        <div class="privacy-section-heading"><div><p class="privacy-label">Administración</p><h2 id="responsable-title">Responsable de atención de privacidad</h2></div><span class="privacy-badge">Solo administradores</span></div>
+        <p class="privacy-section-description">Esta asignación no cambia la entidad responsable legal del tratamiento ni concede permisos administrativos.</p>
+        <div class="privacy-management-grid">
+            <div class="privacy-assignment-panel">
+                <h3>{% if configuracion_privacidad.responsable %}Cambiar responsable{% else %}Asignar una persona{% endif %}</h3>
+                <p class="privacy-muted">Selecciona una cuenta activa y explica el motivo. Cambiarla suspende nuevas solicitudes hasta revalidar y habilitar el canal.</p>
+                <form method="post" action="{% url 'cambiar_responsable_privacidad' %}" class="privacy-assignment-form">
+                    {% csrf_token %}
+                    {% if form_responsable.errors %}<div class="privacy-error" role="alert">Revisa los campos indicados antes de guardar.{{ form_responsable.non_field_errors }}</div>{% endif %}
+                    {% for field in form_responsable %}
+                        {% if field.is_hidden %}{{ field }}{{ field.errors }}{% else %}
+                        <div class="privacy-field">{{ field.label_tag }}{{ field }}{% if field.help_text %}<p class="privacy-help" id="{{ field.auto_id }}_helptext">{{ field.help_text }}</p>{% endif %}{{ field.errors }}</div>
+                        {% endif %}
+                    {% endfor %}
+                    <button type="submit" class="privacy-button privacy-button-primary">Guardar responsable</button>
+                </form>
+            </div>
+            <aside class="privacy-history-panel" aria-labelledby="assignment-history-title">
+                <h3 id="assignment-history-title">Historial de asignaciones</h3><p class="privacy-muted">Últimos 10 cambios registrados.</p>
+                <details class="privacy-history-details"><summary>Ver cambios anteriores</summary>
+                    <ol class="privacy-timeline">{% for cambio in historial_responsable %}<li><time>{{ cambio.fecha|date:"d/m/Y H:i" }}</time><strong>{{ cambio.nuevo }}</strong><p>Anterior: {{ cambio.anterior|default:"Sin asignación" }}</p><p>Realizado por {{ cambio.administrador }}.</p><p>Motivo: {{ cambio.motivo }}</p></li>{% empty %}<li>No hay cambios registrados.</li>{% endfor %}</ol>
+                </details>
+                <p class="privacy-history-note">Cada cambio conserva la persona anterior, la nueva asignación, el motivo y quién lo realizó.</p>
+            </aside>
+        </div>
+    </section>
+    {% endif %}
+
+    {% if puede_ver_constancias %}
+    <section id="constancias-usuarios" class="privacy-card privacy-records" aria-labelledby="constancias-title">
+        <div class="privacy-section-heading"><div><p class="privacy-label">Consulta de registros</p><h2 id="constancias-title">Constancias de lectura de usuarios</h2><p>Acceso para administradores y técnicos TI.</p></div><span class="privacy-count">{{ constancias.paginator.count }} <small>constancias</small></span></div>
+        <p class="privacy-section-description">Se incluyen las versiones anteriores. Cada registro acredita una declaración de lectura.</p>
+        <div class="privacy-table-wrapper" role="region" aria-label="Constancias registradas" tabindex="0">
+            <table class="privacy-table">
+                <caption class="privacy-sr-only">Usuarios que confirmaron la lectura del aviso</caption>
+                <thead><tr><th scope="col">Usuario</th><th scope="col">Correo</th><th scope="col">Versión</th><th scope="col">Fecha y hora<br><span>Chile continental</span></th></tr></thead>
+                <tbody>
+                {% for registro in constancias %}
+                    <tr>
+                        <td><strong>{{ registro.usuario.nombres }} {{ registro.usuario.apellido_paterno }} {{ registro.usuario.apellido_materno }}</strong>{% if not registro.usuario.is_active %}<small class="privacy-muted">(cuenta inactiva)</small>{% endif %}</td>
+                        <td>{{ registro.usuario.email }}</td>
+                        <td><span class="privacy-table-version">{{ registro.version }}</span><small class="privacy-muted">{% if registro.version == aviso.VERSION and registro.huella == aviso.HUELLA %}Aviso actual{% else %}Aviso anterior{% endif %}</small></td>
+                        <td>{{ registro.fecha|date:"d/m/Y" }}<small class="privacy-muted">{{ registro.fecha|date:"H:i" }} h</small></td>
+                    </tr>
+                {% empty %}
+                    <tr><td colspan="4"><div class="privacy-empty"><span aria-hidden="true">☷</span><strong>Todavía no hay constancias de lectura registradas.</strong><p>Las confirmaciones de los usuarios aparecerán en este apartado.</p></div></td></tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% if constancias.has_other_pages %}
+        <nav class="privacy-pagination" aria-label="Páginas de constancias">
+            {% if constancias.has_previous %}<a class="privacy-button privacy-button-secondary" href="?pagina_constancias={{ constancias.previous_page_number }}#constancias-usuarios">Anterior</a>{% endif %}
+            <span>Página {{ constancias.number }} de {{ constancias.paginator.num_pages }}</span>
+            {% if constancias.has_next %}<a class="privacy-button privacy-button-secondary" href="?pagina_constancias={{ constancias.next_page_number }}#constancias-usuarios">Siguiente</a>{% endif %}
+        </nav>
+        {% endif %}
+    </section>
+    {% endif %}
+    <footer class="privacy-footer"><span>CESFAM San Pedro · Información de privacidad</span>{% if user.is_authenticated %}<a href="{% url 'dashboard' %}">Volver al inicio <span aria-hidden="true">→</span></a>{% endif %}</footer>
+</article>
+{% endblock %}

@@ -1,0 +1,146 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}
+Reportes Soporte TI | CESFAM San Pedro
+{% endblock %}
+
+
+{% block content %}
+
+<div class="page-header">
+
+    <p style="
+        margin:0 0 6px;
+        color:#087ea4;
+        font-size:12px;
+        font-weight:700;
+        text-transform:uppercase;
+        letter-spacing:1px;
+    ">
+        Soporte TI
+    </p>
+
+    <h1>Reportes de Soporte TI</h1>
+
+    <p>
+        Vista general de solicitudes: pendientes, en atención y resueltas.
+        <a href="{% url 'panel_tecnico' %}">Ir al Panel Técnico →</a>
+    </p>
+
+</div>
+
+{% include "core/_filtro_reportes.html" with exportar_apartado=True %}
+
+<div class="dashboard-grid">
+
+    <div class="stat-card stat-info">
+        <div class="stat-icon">▤</div>
+        <div class="stat-card-content">
+            <div class="stat-label">Total solicitudes</div>
+            <div class="stat-number">{{ datos.total }}</div>
+            <div class="stat-label">En el período seleccionado</div>
+        </div>
+    </div>
+
+    <div class="stat-card stat-danger">
+        <div class="stat-icon">◷</div>
+        <div class="stat-card-content">
+            <div class="stat-label">Pendientes</div>
+            <div class="stat-number">{{ datos.pendientes }}</div>
+            <div class="stat-label">Sin asignar</div>
+        </div>
+    </div>
+
+    <div class="stat-card stat-warning">
+        <div class="stat-icon">⚙</div>
+        <div class="stat-card-content">
+            <div class="stat-label">En atención</div>
+            <div class="stat-number">{{ datos.en_atencion }}</div>
+            <div class="stat-label">Asignadas o en proceso</div>
+        </div>
+    </div>
+
+    <div class="stat-card stat-success">
+        <div class="stat-icon">✓</div>
+        <div class="stat-card-content">
+            <div class="stat-label">Resueltas</div>
+            <div class="stat-number">{{ datos.finalizados }}</div>
+            <div class="stat-label">Resueltas o cerradas</div>
+        </div>
+    </div>
+
+</div>
+
+{{ datos.por_estado|json_script:"datos-estado" }}
+{{ datos.top_tipos|json_script:"datos-tipos" }}
+
+<div class="reportes-chart-grid">
+    <div class="reportes-chart-card">
+        <h3>Solicitudes por estado</h3>
+        {% if datos.total %}<canvas id="grafico-estado"></canvas>{% else %}<p>Sin datos para los filtros seleccionados.</p>{% endif %}
+    </div>
+    <div class="reportes-chart-card">
+        <h3>Solicitudes por semana</h3>
+        {% include "core/_actividad_semanal.html" with serie=datos.serie_semanal total=datos.total unidad="solicitudes" only %}
+    </div>
+    <div class="reportes-chart-card">
+        <h3>Tipos de requerimiento más frecuentes</h3>
+        {% if datos.total %}<canvas id="grafico-tipos"></canvas>{% else %}<p>Sin datos para los filtros seleccionados.</p>{% endif %}
+    </div>
+</div>
+
+<div class="card">
+    <h2>Detalle de solicitudes</h2>
+    {% if datos.listado %}
+    <div class="table-container">
+        <table>
+            <thead>
+                <tr>
+                    <th>Fecha</th>
+                    <th>Título</th>
+                    <th>Ubicación</th>
+                    <th>Tipo</th>
+                    <th>Prioridad</th>
+                    <th>Estado</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for req in datos.listado %}
+                <tr>
+                    <td>{{ req.fecha_solicitud|date:"d/m/Y H:i" }}</td>
+                    <td><a href="{% url 'detalle_tecnico' req.pk %}">{{ req.titulo }}</a></td>
+                    <td>{{ req.anexo.nombre }}</td>
+                    <td>{{ req.tipo_requerimiento.nombre }}</td>
+                    <td>{{ req.prioridad.nombre }}</td>
+                    <td>{{ req.estado.nombre }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    <p style="color:#64748b; font-size:13px;">
+        Se muestran hasta {{ limite_listado }} solicitudes más recientes del período filtrado.
+        Para el listado completo y la gestión de cada solicitud, utiliza el
+        <a href="{% url 'panel_tecnico' %}">Panel Técnico</a>.
+    </p>
+    {% else %}
+    <p class="reportes-mini-vacio">No hay solicitudes para el período y la ubicación seleccionados.</p>
+    {% endif %}
+</div>
+
+{% include "core/_acciones_reportes.html" %}
+
+{% endblock %}
+
+
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
+<script src="{% static 'js/charts_reportes.js' %}"></script>
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        ReportesCharts.donut("grafico-estado", "datos-estado");
+        ReportesCharts.barrasHorizontales("grafico-tipos", "datos-tipos", "tipo_requerimiento__nombre", "total");
+    });
+</script>
+{% endblock %}

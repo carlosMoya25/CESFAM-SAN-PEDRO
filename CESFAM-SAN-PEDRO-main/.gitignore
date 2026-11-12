@@ -1,0 +1,64 @@
+# Entornos virtuales
+venv/
+.venv/
+
+# Python: archivos compilados y cachés
+__pycache__/
+*.py[cod]
+*$py.class
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.hypothesis/
+.tox/
+.nox/
+
+# Resultados generados de pruebas y cobertura (conservar el código de pruebas)
+.coverage
+.coverage.*
+htmlcov/
+coverage.xml
+/test-results/
+/junit.xml
+
+# Paquetes y distribuciones generados
+/build/
+/dist/
+*.egg-info/
+
+# Django: configuración privada, registros y datos generados
+*.log
+local_settings.py
+/db.sqlite3
+/db.sqlite3-*
+/media/
+/staticfiles/
+
+# Variables de entorno / secretos (conservar las plantillas de configuración)
+.env
+.env.*
+!.env.example
+!.env.*.example
+
+# Respaldos locales de mantenimiento (contienen datos de inventario)
+/respaldos_locales/
+/.secrets/
+
+# Notas de trabajo locales y datos auxiliares
+/CONTINUAR.md
+/datos.txt
+
+# macOS
+.DS_Store
+.AppleDouble
+
+# Configuración local de editores
+.vscode/
+.idea/
+
+# Archivos temporales y copias del editor
+*.tmp
+*.bak
+*.swp
+*.swo
+*~

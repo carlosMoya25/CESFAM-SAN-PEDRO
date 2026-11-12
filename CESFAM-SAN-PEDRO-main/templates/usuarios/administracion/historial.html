@@ -1,0 +1,118 @@
+{% extends "base.html" %}
+
+{% block title %}
+Historial administrativo | SIGRI
+{% endblock %}
+
+{% block content %}
+
+<div class="page-header">
+
+    <p class="admin-eyebrow">
+        Administración
+    </p>
+
+    <h1>
+        Historial administrativo
+    </h1>
+
+    <p>
+        Registro de las acciones realizadas sobre las cuentas
+        y permisos de los usuarios.
+    </p>
+
+</div>
+
+
+<div class="card">
+
+    <div class="admin-section-header">
+
+        <div>
+            <h2>Actividad administrativa</h2>
+
+            <p>
+                Últimas acciones realizadas por los administradores.
+            </p>
+        </div>
+
+        <a href="{% url 'usuarios:administracion' %}" class="btn btn-secondary">
+            ← Administración
+        </a>
+
+    </div>
+
+
+    <div class="table-wrapper">
+
+        <table>
+
+            <thead>
+                <tr>
+                    <th>Fecha</th>
+                    <th>Administrador</th>
+                    <th>Acción</th>
+                    <th>Usuario afectado</th>
+                    <th>Detalle</th>
+                </tr>
+            </thead>
+
+            <tbody>
+
+                {% for evento in historial %}
+
+                <tr>
+
+                    <td>
+                        {{ evento.fecha|date:"d/m/Y H:i" }}
+                    </td>
+
+                    <td>
+                        {% if evento.administrador %}
+                        {{ evento.administrador.nombres }}
+                        {{ evento.administrador.apellido_paterno }}
+                        {% else %}
+                        Sistema
+                        {% endif %}
+                    </td>
+
+                    <td>
+                        <strong>
+                            {{ evento.get_accion_display }}
+                        </strong>
+                    </td>
+
+                    <td>
+                        {% if evento.usuario_afectado %}
+                        {{ evento.usuario_afectado.nombres }}
+                        {{ evento.usuario_afectado.apellido_paterno }}
+                        {% else %}
+                        Usuario no disponible
+                        {% endif %}
+                    </td>
+
+                    <td>
+                        {{ evento.descripcion }}
+                    </td>
+
+                </tr>
+
+                {% empty %}
+
+                <tr>
+                    <td colspan="5" class="admin-empty">
+                        Todavía no existen acciones administrativas registradas.
+                    </td>
+                </tr>
+
+                {% endfor %}
+
+            </tbody>
+
+        </table>
+
+    </div>
+
+</div>
+
+{% endblock %}

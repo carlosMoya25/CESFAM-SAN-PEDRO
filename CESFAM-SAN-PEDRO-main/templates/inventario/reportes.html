@@ -1,0 +1,116 @@
+{% extends "inventario/_base.html" %}
+{% load static %}
+
+{% block inventory_breadcrumb %}
+<a href="{% url 'inventario:panel' %}">Inventario</a><span aria-hidden="true">/</span><span>Reportes</span>
+{% endblock %}
+
+{% block inventory_heading %}Reportes de Insumos{% endblock %}
+{% block inventory_description %}Artículos que necesitan re-stock y movimiento del período, por ubicación.{% endblock %}
+
+{% block inventory_body %}
+
+{% include "core/_filtro_reportes.html" with exportar_apartado=True %}
+
+<div class="dashboard-grid">
+    <div class="stat-card stat-info">
+        <div class="stat-icon">▣</div>
+        <div class="stat-card-content">
+            <div class="stat-label">Artículos con stock</div>
+            <div class="stat-number">{{ datos.total_articulos }}</div>
+        </div>
+    </div>
+    <div class="stat-card stat-warning">
+        <div class="stat-icon">⚠</div>
+        <div class="stat-card-content">
+            <div class="stat-label">Con stock bajo</div>
+            <div class="stat-number">{{ datos.total_stock_bajo }}</div>
+            <div class="stat-label">Requieren re-stock</div>
+        </div>
+    </div>
+    <div class="stat-card stat-danger">
+        <div class="stat-icon">⛔</div>
+        <div class="stat-card-content">
+            <div class="stat-label">Sin stock</div>
+            <div class="stat-number">{{ datos.total_sin_stock }}</div>
+        </div>
+    </div>
+    <div class="stat-card stat-success">
+        <div class="stat-icon">↻</div>
+        <div class="stat-card-content">
+            <div class="stat-label">Movimientos del período</div>
+            <div class="stat-number">{{ datos.movimientos_total }}</div>
+        </div>
+    </div>
+</div>
+
+{{ datos.por_tipo_movimiento|json_script:"datos-tipo-mov" }}
+
+<div class="reportes-chart-grid">
+    <div class="reportes-chart-card">
+        <h3>Movimientos por semana</h3>
+        {% include "core/_actividad_semanal.html" with serie=datos.serie_semanal total=datos.movimientos_total unidad="movimientos" only %}
+    </div>
+    <div class="reportes-chart-card">
+        <h3>Movimientos por tipo</h3>
+        {% if datos.movimientos_total %}<canvas id="grafico-tipo-mov"></canvas>{% else %}<p>Sin datos para los filtros seleccionados.</p>{% endif %}
+    </div>
+</div>
+
+<div class="card">
+    <h2>Artículos que requieren re-stock</h2>
+    {% if datos.stock_bajo %}
+    <div class="table-container">
+        <table>
+            <thead>
+                <tr><th>Artículo</th><th>Ubicación</th><th>Stock actual</th><th>Stock mínimo</th></tr>
+            </thead>
+            <tbody>
+                {% for fila in datos.stock_bajo %}
+                <tr>
+                    <td>{{ fila.articulo.nombre }}</td>
+                    <td>{{ fila.anexo.nombre }}</td>
+                    <td>{{ fila.cantidad }}</td>
+                    <td>{{ fila.articulo.stock_minimo }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    <p style="color:#64748b; font-size:13px;">Se muestran hasta {{ limite_listado }} artículos.</p>
+    {% else %}
+    <p class="reportes-mini-vacio">No hay artículos bajo su stock mínimo.</p>
+    {% endif %}
+</div>
+
+<div class="card">
+    <h2>Artículos sin stock disponible</h2>
+    {% if datos.sin_stock %}
+    <div class="table-container">
+        <table>
+            <thead><tr><th>Artículo</th><th>Ubicación</th></tr></thead>
+            <tbody>
+                {% for fila in datos.sin_stock %}
+                <tr><td>{{ fila.articulo.nombre }}</td><td>{{ fila.anexo.nombre }}</td></tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% else %}
+    <p class="reportes-mini-vacio">No hay artículos sin stock.</p>
+    {% endif %}
+</div>
+
+{% include "core/_acciones_reportes.html" %}
+
+{% endblock %}
+
+{% block inventory_scripts %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
+<script src="{% static 'js/charts_reportes.js' %}"></script>
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        ReportesCharts.barrasHorizontales("grafico-tipo-mov", "datos-tipo-mov", "tipo_movimiento__nombre", "total");
+    });
+</script>
+{% endblock %}

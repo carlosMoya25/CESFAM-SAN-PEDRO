@@ -1,0 +1,10 @@
+{% extends "inventario/_form_base.html" %}
+{% block inventory_description %}Defina un nombre y una descripción para identificar esta categoría.{% endblock %}
+{% block inventory_body %}
+<a class="inventory-back-link" href="{% url 'inventario:categorias' %}">‹ Volver a categorías</a>
+<form method="post" class="inventory-form">
+    {% csrf_token %}
+    {% include "inventario/_form_fields.html" %}
+    <div class="inventory-form-actions"><button type="submit" class="inventory-button inventory-primary">Guardar categoría</button><a href="{% url 'inventario:categorias' %}" class="inventory-button">Cancelar</a></div>
+</form>
+{% endblock %}

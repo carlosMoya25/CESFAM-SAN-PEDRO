@@ -1,0 +1,17 @@
+{
+  "schemaVersion": 1,
+  "receiptId": "1cf73132-650b-4537-ba04-170b6d65f2be",
+  "status": "current",
+  "command": "deliver",
+  "type": "architecture",
+  "input": "/Users/carlosmoyariquelme/Developer/cesfam_san_pedro/.archify/architecture-cesfam-san-pedro-20261026-211547/candidate.json",
+  "output": "/Users/carlosmoyariquelme/Developer/cesfam_san_pedro/.archify/architecture-cesfam-san-pedro-20261026-211547/cesfam-arquitectura.html",
+  "specification": {
+    "sha256": "b55cebd749b82eeff51326bb78af242c7566a54faaff344ea466383752f8363d",
+    "bytes": 8076
+  },
+  "artifact": {
+    "sha256": "c3c7847f0db3a66e2f68946fcebf0617a4bc4f841f64a427ab329137c4e05af2",
+    "bytes": 850534
+  }
+}

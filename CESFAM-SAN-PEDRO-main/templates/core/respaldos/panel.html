@@ -1,0 +1,64 @@
+{% extends "core/derechos/interno_base.html" %}
+{% load static %}
+{% block title %}Respaldos y recuperación · CESFAM San Pedro{% endblock %}
+{% block extra_css %}{{ block.super }}<link rel="stylesheet" href="{% static 'css/respaldos.css' %}?v=20261025-3">{% endblock %}
+{% block institution_content %}
+<div class="backup-page">
+    <header class="backup-heading">
+        <div><p class="backup-eyebrow">Ley 21.719 / Continuidad</p><h1>Respaldos y recuperación</h1><p class="backup-subtitle">Descarga una copia segura y revisa su historial.</p></div>
+        <div class="backup-heading-actions"><a class="privacy-button backup-outline" href="#politica-respaldos">Configurar respaldos</a><a class="privacy-button backup-outline" href="{% url 'historial_descargas_respaldos' %}"><span aria-hidden="true">↺</span> Ver historial</a></div>
+    </header>
+
+    <div class="backup-summary" aria-label="Resumen de respaldos">
+        <div class="backup-summary-card"><span class="backup-icon" aria-hidden="true">▦</span><div><p>Última copia</p><strong>{% if ultima %}{{ ultima.creado_at|date:"d M Y · H:i" }}{% else %}Sin copias registradas{% endif %}</strong></div></div>
+        <div class="backup-summary-card"><span class="backup-icon backup-icon-{{ ultima.estado_clase|default:'neutral' }}" aria-hidden="true">{% if ultima.verificacion.estado == 'OK' %}✓{% else %}◷{% endif %}</span><div><p>Prueba de recuperación</p><strong class="backup-text-{{ ultima.estado_clase|default:'neutral' }}">{{ ultima.estado_texto|default:"Sin registrar" }}</strong></div></div>
+        <div class="backup-summary-card"><span class="backup-icon" aria-hidden="true">▤</span><div><p>Destino previsto</p><strong>Servidor Windows · CESFAM</strong><span class="backup-small-badge">Traslado manual</span></div></div>
+    </div>
+
+    <div class="backup-main-grid">
+        <section class="backup-card backup-latest" aria-labelledby="latest-title">
+            <span class="backup-tag">Copia más reciente</span>
+            <h2 id="latest-title">Respaldo de la base de datos</h2>
+            {% if ultima %}
+            <p class="backup-description">Incluye la información almacenada en la base de datos del sistema.</p>
+            <ul class="backup-file-meta" aria-label="Datos de la copia"><li>SQL cifrado</li><li>{{ ultima.tamano|filesizeformat }}</li><li>{{ ultima.creado_at|date:"d M Y" }}</li></ul>
+            {% if ultima.archivo_disponible %}
+            <form method="post" action="{% url 'descargar_respaldo' ultima.pk %}">{% csrf_token %}<button type="submit" class="privacy-button backup-download"><span aria-hidden="true">↓</span> Descargar copia cifrada</button></form>
+            <p class="backup-help">ZIP con copia y manifiesto. La clave se custodia por separado.</p>
+            {% else %}
+            <div class="backup-status backup-status-warning"><strong>Archivo no disponible en este servidor</strong><p>Consulta al Técnico TI para localizar la copia. El registro por sí solo no permite descargarla.</p></div>
+            {% endif %}
+            <div class="backup-status backup-status-{{ ultima.estado_clase }}"><span aria-hidden="true">{% if ultima.verificacion.estado == 'OK' %}✓{% else %}◷{% endif %}</span><div>{% if ultima.verificacion.estado == 'OK' %}<strong>Recuperación comprobada · {{ ultima.verificacion.tablas }} tablas y {{ ultima.verificacion.filas }} registros</strong>{% elif ultima.verificacion.estado == 'FALLIDA' %}<strong>Prueba no completada</strong><p>El Técnico TI debe revisar el resultado antes de considerar comprobada la copia.</p>{% else %}<strong>Restauración pendiente</strong><p>La copia fue creada, pero su recuperación todavía no se ha comprobado.</p>{% endif %}</div></div>
+            {% include "core/respaldos/comprobaciones.html" with copia=ultima %}
+            {% else %}
+            <div class="privacy-empty"><strong>Todavía no hay copias registradas.</strong><p>El Técnico TI debe generar una copia cifrada y comprobar su recuperación. Cuando esté disponible, podrás descargarla aquí.</p></div>
+            {% endif %}
+        </section>
+        <aside class="backup-card backup-guide" aria-labelledby="guide-title">
+            <h2 id="guide-title">¿Qué hago después?</h2>
+            <ol class="backup-steps">
+                <li><span aria-hidden="true">1</span><div><h3>Descarga el ZIP</h3><p>Obtén el archivo con la copia cifrada y su manifiesto.</p></div></li>
+                <li><span aria-hidden="true">2</span><div><h3>Guárdalo en el servidor del CESFAM</h3><p>Trasládalo al equipo Windows, según el procedimiento interno del establecimiento.</p></div></li>
+                <li><span aria-hidden="true">3</span><div><h3>Conserva la clave por separado</h3><p>La clave de descifrado debe tener custodia independiente y acceso restringido.</p></div></li>
+            </ol>
+            <p class="backup-owner">Responsable operativo: <strong>Técnico TI</strong></p>
+        </aside>
+    </div>
+
+    {% include "core/respaldos/politica.html" %}
+    {% include "core/respaldos/programacion.html" %}
+
+    <section class="backup-card backup-previous" aria-labelledby="previous-title">
+        <h2 id="previous-title">Copias anteriores</h2>
+        {% if copias %}
+        <div class="privacy-table-wrapper"><table class="privacy-table backup-table"><caption class="privacy-sr-only">Copias anteriores y sus comprobaciones de recuperación</caption><thead><tr><th scope="col">Fecha</th><th scope="col">Tamaño</th><th scope="col">Comprobación</th><th scope="col">Acción</th></tr></thead><tbody>
+        {% for copia in copias %}<tr><td>{{ copia.creado_at|date:"d M Y" }}<small>{{ copia.creado_at|date:"H:i" }} · Chile continental</small></td><td>{{ copia.tamano|filesizeformat }}</td><td><span class="backup-state backup-text-{{ copia.estado_clase }}">{{ copia.estado_texto }}</span>{% include "core/respaldos/comprobaciones.html" %}</td><td>{% if copia.archivo_disponible %}<form method="post" action="{% url 'descargar_respaldo' copia.pk %}">{% csrf_token %}<button class="backup-link" type="submit" aria-label="Descargar copia del {{ copia.creado_at|date:'d M Y H:i' }}">↓ Descargar</button></form>{% else %}<span class="privacy-muted">Archivo no disponible</span>{% endif %}</td></tr>{% endfor %}
+        </tbody></table></div>
+        {% else %}<p class="backup-description">Todavía no hay copias anteriores.</p>{% endif %}
+        {% if copias.has_other_pages %}<nav class="privacy-pagination" aria-label="Páginas de copias anteriores">{% if copias.has_previous %}<a href="?pagina={{ copias.previous_page_number }}#previous-title">Anterior</a>{% endif %}<span>Página {{ copias.number }} de {{ copias.paginator.num_pages }}</span>{% if copias.has_next %}<a href="?pagina={{ copias.next_page_number }}#previous-title">Siguiente</a>{% endif %}</nav>{% endif %}
+    </section>
+
+    <aside class="backup-info"><strong>Importante</strong><ul><li>Descargar no genera una copia nueva ni confirma que se guardó en Windows.</li><li>Este respaldo cubre la base de datos. Archivos adjuntos y configuración requieren protección adicional.</li></ul></aside>
+    <details class="backup-card backup-technical"><summary>Alcance de las pruebas y pendientes de configuración</summary><p>Las pruebas recuperan la copia en una base temporal aislada y comparan tablas y cantidades de registros, sin reemplazar la base operativa. No sustituyen una prueba funcional de la aplicación.</p><p>El destino previsto es un servidor Windows del CESFAM, distinto del equipo de la aplicación. La frecuencia, conservación, custodia de la clave y suplencia se documentan en la política de esta página. Si ambos equipos comparten ubicación, se debe prever una copia protegida frente a la pérdida de ese lugar.</p></details>
+</div>
+{% endblock %}

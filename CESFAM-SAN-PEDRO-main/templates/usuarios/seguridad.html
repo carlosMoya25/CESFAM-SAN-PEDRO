@@ -1,0 +1,452 @@
+{% extends "base.html" %}
+
+{% block title %}
+Seguridad | CESFAM San Pedro
+{% endblock %}
+
+
+{% block content %}
+
+<div class="page-header">
+
+    <div>
+        <p class="page-eyebrow">
+            Administración
+        </p>
+
+        <h1>
+            Seguridad de acceso
+        </h1>
+
+        <p>
+            Supervisa los intentos fallidos de inicio de sesión
+            y administra los usuarios bloqueados.
+        </p>
+    </div>
+
+</div>
+
+
+<!-- =====================================================
+     RESUMEN
+     ===================================================== -->
+
+<div class="dashboard-grid">
+
+    <div class="stat-card">
+
+        <div class="stat-icon">
+            🔐
+        </div>
+
+        <div>
+            <span class="stat-label">
+                Usuarios con incidencias
+            </span>
+
+            <strong class="stat-value">
+                {{ total_incidencias }}
+            </strong>
+        </div>
+
+    </div>
+
+
+    <div class="stat-card">
+
+        <div class="stat-icon">
+            🔒
+        </div>
+
+        <div>
+            <span class="stat-label">
+                Usuarios bloqueados
+            </span>
+
+            <strong class="stat-value">
+                {{ total_bloqueados }}
+            </strong>
+        </div>
+
+    </div>
+
+</div>
+
+
+<!-- =====================================================
+     TABLA DE SEGURIDAD
+     ===================================================== -->
+
+<div class="card">
+
+    <div class="security-card-header">
+
+        <div>
+
+            <h2>
+                Incidencias de acceso
+            </h2>
+
+            <p>
+                Usuarios que presentan intentos fallidos
+                registrados por el sistema de seguridad.
+            </p>
+
+        </div>
+
+    </div>
+
+
+    {% if incidencias %}
+
+    <div class="table-responsive">
+
+        <table class="security-table">
+
+            <thead>
+
+                <tr>
+                    <th>Usuario</th>
+                    <th>Correo</th>
+                    <th>Intentos</th>
+                    <th>Último intento</th>
+                    <th>Estado</th>
+                    <th>Acción</th>
+                </tr>
+
+            </thead>
+
+
+            <tbody>
+
+                {% for item in incidencias %}
+
+                <tr>
+
+                    <!-- USUARIO -->
+
+                    <td>
+
+                        {% if item.usuario %}
+
+                        <div class="security-user">
+
+                            <div class="security-avatar">
+
+                                {{ item.usuario.nombres|first|upper }}
+
+                            </div>
+
+                            <div>
+
+                                <strong>
+                                    {{ item.usuario.nombres }}
+                                    {{ item.usuario.apellido_paterno }}
+                                </strong>
+
+                            </div>
+
+                        </div>
+
+                        {% else %}
+
+                        <span class="text-muted">
+                            Usuario no registrado
+                        </span>
+
+                        {% endif %}
+
+                    </td>
+
+
+                    <!-- EMAIL -->
+
+                    <td>
+
+                        <span class="security-email">
+                            {{ item.username }}
+                        </span>
+
+                    </td>
+
+
+                    <!-- INTENTOS -->
+
+                    <td>
+
+                        <strong class="
+                            security-attempts
+                            {% if item.bloqueado %}
+                                security-attempts-danger
+                            {% endif %}
+                        ">
+
+                            {{ item.intentos }}
+
+                        </strong>
+
+                    </td>
+
+
+                    <!-- ÚLTIMO INTENTO -->
+
+                    <td>
+
+                        {% if item.ultimo_intento %}
+
+                        {{ item.ultimo_intento|date:"d/m/Y H:i" }}
+
+                        {% else %}
+
+                        —
+
+                        {% endif %}
+
+                    </td>
+
+
+                    <!-- ESTADO -->
+
+                    <td>
+
+                        {% if item.bloqueado %}
+
+                        <span class="badge badge-danger">
+                            ● Bloqueado
+                        </span>
+
+                        {% else %}
+
+                        <span class="badge badge-warning">
+                            ● Advertencia
+                        </span>
+
+                        {% endif %}
+
+                    </td>
+
+
+                    <!-- ACCIÓN -->
+
+                    <td>
+
+                        {% if item.usuario %}
+
+                        <form method="post" action="{% url 'usuarios:desbloquear_usuario' item.usuario.pk %}"
+                            onsubmit="return confirm('¿Deseas desbloquear este usuario y reiniciar sus intentos fallidos?');">
+
+                            {% csrf_token %}
+
+                            <button type="submit" class="btn btn-small security-unlock-button">
+
+                                🔓
+
+                                {% if item.bloqueado %}
+                                Desbloquear
+                                {% else %}
+                                Reiniciar intentos
+                                {% endif %}
+
+                            </button>
+
+                        </form>
+
+                        {% else %}
+
+                        <span class="text-muted">
+                            Sin acción
+                        </span>
+
+                        {% endif %}
+
+                    </td>
+
+                </tr>
+
+                {% endfor %}
+
+            </tbody>
+
+        </table>
+
+    </div>
+
+
+    {% else %}
+
+    <div class="security-empty">
+
+        <div class="security-empty-icon">
+            ✓
+        </div>
+
+        <h3>
+            Sin incidencias de seguridad
+        </h3>
+
+        <p>
+            Actualmente no existen usuarios con intentos
+            fallidos de inicio de sesión registrados.
+        </p>
+
+    </div>
+
+    {% endif %}
+
+
+
+</div>
+
+<!-- =====================================================
+     HISTORIAL DE SEGURIDAD
+     ===================================================== -->
+
+<div class="card security-history-card">
+
+    <div class="security-card-header">
+
+        <div>
+
+            <h2>
+                Historial de seguridad
+            </h2>
+
+            <p>
+                Registro de acciones administrativas relacionadas
+                con la seguridad de acceso.
+            </p>
+
+        </div>
+
+    </div>
+
+
+    {% if historial %}
+
+    <div class="security-timeline">
+
+        {% for evento in historial %}
+
+        <div class="security-history-item">
+
+
+            <!-- ICONO -->
+
+            <div class="
+                security-history-icon
+
+                {% if evento.tipo_accion == 'DESBLOQUEO_USUARIO' %}
+                    security-history-success
+                {% elif evento.tipo_accion == 'REINICIO_INTENTOS' %}
+                    security-history-warning
+                {% elif evento.tipo_accion == 'BLOQUEO_USUARIO' %}
+                    security-history-danger
+                {% endif %}
+            ">
+
+                {% if evento.tipo_accion == "DESBLOQUEO_USUARIO" %}
+
+                🔓
+
+                {% elif evento.tipo_accion == "REINICIO_INTENTOS" %}
+
+                ↻
+
+                {% elif evento.tipo_accion == "BLOQUEO_USUARIO" %}
+
+                🔒
+
+                {% else %}
+
+                🔐
+
+                {% endif %}
+
+            </div>
+
+
+            <!-- INFORMACIÓN -->
+
+            <div class="security-history-content">
+
+                <div class="security-history-header">
+
+                    <div>
+
+                        <strong>
+                            {{ evento.get_tipo_accion_display }}
+                        </strong>
+
+                        <span class="security-history-email">
+                            {{ evento.email_afectado }}
+                        </span>
+
+                    </div>
+
+
+                    <time>
+                        {{ evento.fecha|date:"d/m/Y H:i" }}
+                    </time>
+
+                </div>
+
+
+                <p>
+                    {{ evento.descripcion }}
+                </p>
+
+
+                <div class="security-history-admin">
+
+                    Realizado por:
+
+                    {% if evento.realizado_por %}
+
+                    <strong>
+                        {{ evento.realizado_por.nombres }}
+                        {{ evento.realizado_por.apellido_paterno }}
+                    </strong>
+
+                    {% else %}
+
+                    <strong>
+                        Usuario no disponible
+                    </strong>
+
+                    {% endif %}
+
+                </div>
+
+            </div>
+
+        </div>
+
+        {% endfor %}
+
+    </div>
+
+
+    {% else %}
+
+    <div class="security-empty">
+
+        <div class="security-empty-icon">
+            🔐
+        </div>
+
+        <h3>
+            Sin acciones registradas
+        </h3>
+
+        <p>
+            Todavía no existen acciones administrativas
+            en el historial de seguridad.
+        </p>
+
+    </div>
+
+    {% endif %}
+
+</div>
+
+{% endblock %}

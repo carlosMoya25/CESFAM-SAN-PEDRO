@@ -1,0 +1,84 @@
+{% extends "base_login.html" %}
+{% load static %}
+
+{% block title %}
+Cuenta desactivada | SIGRI
+{% endblock %}
+
+
+{% block content %}
+
+<div class="login-page">
+
+    <div class="login-card">
+
+        <div class="login-brand">
+
+            <div class="login-logo">
+                <img src="{% static 'img/logo.jpg' %}" alt="CESFAM San Pedro" class="login-logo-image">
+            </div>
+
+            <h1>SIGRI</h1>
+
+            <p>
+                Sistema de Gestión de Requerimientos e Inventarios
+            </p>
+
+        </div>
+
+
+        <div class="inactive-account-icon">
+            !
+        </div>
+
+
+        <div class="inactive-account-content">
+
+            <h2>
+                Cuenta desactivada
+            </h2>
+
+            <p>
+                Tu cuenta se encuentra actualmente deshabilitada
+                para acceder al sistema.
+            </p>
+
+            <div class="inactive-account-alert">
+
+                <strong>
+                    Acceso no autorizado
+                </strong>
+
+                <span>
+                    Si consideras que esto es un error o necesitas
+                    recuperar el acceso, comunícate con el
+                    administrador del sistema.
+                </span>
+
+            </div>
+
+        </div>
+
+
+        <a href="{% url 'login' %}" class="inactive-login-button">
+            Volver al inicio de sesión
+        </a>
+
+
+        <div class="login-footer">
+
+            <span>
+                CESFAM San Pedro
+            </span>
+
+            <span>
+                Acceso institucional
+            </span>
+
+        </div>
+
+    </div>
+
+</div>
+
+{% endblock %}

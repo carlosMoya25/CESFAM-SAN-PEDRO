@@ -1,0 +1,42 @@
+<form method="get" class="reportes-filtros" novalidate>
+
+    <div class="reportes-filtro-campo">
+        <label for="{{ form.desde.id_for_label }}">{{ form.desde.label }}</label>
+        {{ form.desde }}
+    </div>
+
+    <div class="reportes-filtro-campo">
+        <label for="{{ form.hasta.id_for_label }}">{{ form.hasta.label }}</label>
+        {{ form.hasta }}
+    </div>
+
+    <div class="reportes-filtro-campo reportes-filtro-campo-ancho">
+        <label for="{{ form.ubicacion.id_for_label }}">{{ form.ubicacion.label }}</label>
+        {{ form.ubicacion }}
+    </div>
+
+    <div class="reportes-filtro-acciones">
+        <button type="submit" class="btn">Filtrar</button>
+        <a href="{{ request.path }}" class="btn btn-secondary">Limpiar</a>
+        {% if exportar_apartado %}
+        <button type="submit" name="pdf" value="resumen" class="btn btn-secondary">PDF resumen</button>
+        <button type="submit" name="pdf" value="detallado" class="btn btn-secondary">PDF detallado</button>
+        {% endif %}
+    </div>
+
+    {% if form.errors %}
+    <div class="reportes-filtro-errores">
+        {% for field in form %}
+            {% for error in field.errors %}
+            <span>{{ error }}</span>
+            {% endfor %}
+        {% endfor %}
+    </div>
+    {% endif %}
+
+</form>
+
+<p class="reportes-rango-activo">
+    Mostrando datos del <strong>{{ desde|date:"d/m/Y" }}</strong> al <strong>{{ hasta|date:"d/m/Y" }}</strong>
+    {% if ubicacion %}en <strong>{{ ubicacion.nombre }}</strong>{% else %}en todas las ubicaciones{% endif %}.
+</p>

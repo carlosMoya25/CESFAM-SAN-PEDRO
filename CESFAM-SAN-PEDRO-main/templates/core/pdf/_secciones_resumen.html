@@ -1,0 +1,115 @@
+{% if puede_ti %}
+<div class="pdf-seccion">
+    <h2>Soporte TI &middot; Requerimientos</h2>
+
+    <table class="pdf-kpis">
+        <tr>
+            <td>
+                <div class="pdf-kpi-numero">{{ ti.total }}</div>
+                <div class="pdf-kpi-etiqueta">Total solicitudes</div>
+            </td>
+            <td>
+                <div class="pdf-kpi-numero media">{{ ti.pendientes }}</div>
+                <div class="pdf-kpi-etiqueta">Pendientes</div>
+            </td>
+            <td>
+                <div class="pdf-kpi-numero">{{ ti.en_atencion }}</div>
+                <div class="pdf-kpi-etiqueta">En atención</div>
+            </td>
+            <td>
+                <div class="pdf-kpi-numero ok">{{ ti.finalizados }}</div>
+                <div class="pdf-kpi-etiqueta">Resueltas</div>
+            </td>
+        </tr>
+    </table>
+
+    {% if apartado and ti.por_prioridad %}
+    <h3>Solicitudes por prioridad</h3>
+    <p>{% for prioridad, total in ti.por_prioridad.items %}{{ prioridad }}: {{ total }}{% if not forloop.last %} · {% endif %}{% endfor %}</p>
+    {% endif %}
+    {% if ti.total %}
+    <h3>Solicitudes por estado</h3>
+    <table class="pdf-barras">
+        {% for estado, total_estado in ti.por_estado.items %}
+        <tr>
+            <td class="pdf-barra-etiqueta">{{ estado }}</td>
+            <td class="pdf-barra-valor">{{ total_estado }}</td>
+            <td class="pdf-barra-pista">
+                <div class="pdf-barra-fondo">
+                    <div class="pdf-barra-relleno" style="width:{% widthratio total_estado ti.total 100 %}%;"></div>
+                </div>
+            </td>
+        </tr>
+        {% endfor %}
+    </table>
+    {% else %}
+    <p class="pdf-vacio">No se registraron solicitudes en el período seleccionado.</p>
+    {% endif %}
+</div>
+{% endif %}
+
+{% if puede_insumos %}
+<div class="pdf-seccion">
+    <h2>Insumos &middot; Inventario general</h2>
+
+    <table class="pdf-kpis">
+        <tr>
+            <td>
+                <div class="pdf-kpi-numero">{{ insumos.total_articulos }}</div>
+                <div class="pdf-kpi-etiqueta">Artículos con stock</div>
+            </td>
+            <td>
+                <div class="pdf-kpi-numero media">{{ insumos.total_stock_bajo }}</div>
+                <div class="pdf-kpi-etiqueta">Con stock bajo</div>
+            </td>
+            <td>
+                <div class="pdf-kpi-numero alerta">{{ insumos.total_sin_stock }}</div>
+                <div class="pdf-kpi-etiqueta">Sin stock</div>
+            </td>
+            <td>
+                <div class="pdf-kpi-numero">{{ insumos.movimientos_total }}</div>
+                <div class="pdf-kpi-etiqueta">Movimientos período</div>
+            </td>
+        </tr>
+    </table>
+    <p style="font-size:8pt; color:#64748b;">
+        Se consideran artículos que requieren re-stock los que están bajo su stock mínimo configurado;
+        el detalle completo está disponible en el informe detallado y en el panel de Insumos.
+    </p>
+</div>
+{% endif %}
+
+{% if puede_farmacia %}
+<div class="pdf-seccion">
+    <h2>Farmacia</h2>
+
+    <table class="pdf-kpis">
+        <tr>
+            <td>
+                <div class="pdf-kpi-numero">{% if apartado %}{{ farmacia.unidades_utilizables }}{% else %}{{ farmacia.total_medicamentos }}{% endif %}</div>
+                <div class="pdf-kpi-etiqueta">{% if apartado %}Unidades utilizables{% else %}Medicamentos con stock{% endif %}</div>
+            </td>
+            <td>
+                <div class="pdf-kpi-numero media">{{ farmacia.total_por_vencer }}</div>
+                <div class="pdf-kpi-etiqueta">Lotes por vencer ({{ farmacia.dias_alerta }} días)</div>
+            </td>
+            <td>
+                <div class="pdf-kpi-numero alerta">{{ farmacia.total_vencidos }}</div>
+                <div class="pdf-kpi-etiqueta">Lotes vencidos</div>
+            </td>
+            <td>
+                <div class="pdf-kpi-numero">{{ farmacia.movimientos_total }}</div>
+                <div class="pdf-kpi-etiqueta">Movimientos período</div>
+            </td>
+        </tr>
+    </table>
+    <p style="font-size:8pt; color:#64748b;">
+        Los lotes por vencer y vencidos requieren revisión; el detalle completo está disponible
+        en el informe detallado y en el panel de Farmacia.
+    </p>
+</div>
+{% endif %}
+
+{% if not puede_ti and not puede_insumos and not puede_farmacia %}
+<p class="pdf-vacio">Tu perfil no tiene acceso a ninguna de las secciones de este informe.</p>
+{% endif %}

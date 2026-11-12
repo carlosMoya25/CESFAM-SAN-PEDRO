@@ -1,0 +1,11 @@
+{% extends "core/derechos/interno_base.html" %}
+{% block title %}Simulación de conservación · CESFAM San Pedro{% endblock %}
+{% block institution_content %}
+<header class="privacy-hero"><p class="privacy-eyebrow">Conservación / Simulación #{{ informe.pk }}</p><h1>Informe de revisión</h1><p class="privacy-intro">{{ informe.fecha|date:"d/m/Y H:i" }} · Chile continental. Generado por {{ informe.realizado_por }}.</p><span class="privacy-version-pill">No se eliminó ni modificó ningún registro evaluado</span></header>
+<div class="privacy-notice privacy-rights-notice"><span aria-hidden="true">ⓘ</span><div><strong>Antigüedad no significa autorización para eliminar.</strong><p>Este informe cuenta registros según las propuestas vigentes al generarlo. No evalúa obligaciones legales, litigios, medidas de preservación, todos los vínculos ni copias de respaldo. Cualquier depuración futura requerirá esas verificaciones.</p></div></div>
+{% for fila in informe.resultado.filas %}
+<section class="privacy-card"><div class="privacy-section-heading"><div><p class="privacy-label">{{ fila.categoria }}</p><h2>{{ fila.nombre }}</h2></div>{% if fila.evaluada %}<span class="privacy-badge">Propuesta: {{ fila.dias }} días · revisión {{ fila.revision }}</span>{% else %}<span class="privacy-badge">Sin plazo definido</span>{% endif %}</div><p class="privacy-section-description">{{ fila.criterio }}</p>
+{% if fila.evaluada %}<dl class="privacy-draft-meta"><div><dt>Total en esta fuente</dt><dd>{{ fila.total }}</dd></div><div><dt>Dentro del alcance por estado</dt><dd>{{ fila.en_alcance }}</dd></div><div><dt>Anteriores al corte propuesto</dt><dd>{{ fila.antiguos }}</dd></div><div><dt>Sin fecha suficiente para evaluar</dt><dd>{{ fila.sin_fecha }}</dd></div></dl><p class="privacy-help">Corte utilizado: {{ fila.fecha_corte }} · Chile continental. Se cuentan fechas anteriores al corte. Los registros fuera del estado indicado no se consideran antiguos en esta categoría.</p>{% else %}<p>No se evaluó esta categoría porque aún no tiene una propuesta de plazo.</p>{% endif %}</section>
+{% endfor %}
+<footer class="privacy-footer"><span>Informe histórico: los cambios posteriores de propuestas no modifican estos resultados.</span><a href="{% url 'panel_conservacion' %}">Volver a conservación →</a></footer>
+{% endblock %}
