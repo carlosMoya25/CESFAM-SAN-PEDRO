@@ -137,6 +137,7 @@ class FiltrosFarmaciaTests(TestCase):
     def setUpTestData(cls):
         from .models import LoteMedicamento
         cls.usuario = get_user_model().objects.create_superuser(email="filtros@example.com")
+        cls.otro_responsable = get_user_model().objects.create_user(email="farmacia.responsable@example.com")
         cls.norte = Anexo.objects.create(nombre="Norte")
         cls.sur = Anexo.objects.create(nombre="Sur")
         cls.categoria = CategoriaArticulo.objects.create(nombre="Medicamentos")
@@ -288,6 +289,38 @@ class FiltrosFarmaciaTests(TestCase):
         response = self.client.get(reverse("farmacia:historial"), {**params, "tipo": "SALIDA"})
         self.assertEqual(response.context["pagina"].paginator.count, 0)
         response = self.client.get(reverse("farmacia:historial"), {**params, "desde": (hoy + timedelta(days=1)).isoformat()})
+        self.assertFalse(response.context["filtros_form"].is_valid())
+        self.assertEqual(response.context["pagina"].paginator.count, 0)
+
+    def test_historial_filtra_por_usuario_responsable(self):
+        from .models import DetalleMovimientoFarmacia
+        movimiento_usuario = MovimientoFarmacia.objects.create(
+            tipo="ENTRADA", anexo_destino=self.norte, usuario=self.usuario,
+        )
+        DetalleMovimientoFarmacia.objects.create(
+            movimiento=movimiento_usuario, lote=self.vigente, cantidad=2,
+        )
+        movimiento_otro = MovimientoFarmacia.objects.create(
+            tipo="ENTREGA", anexo_origen=self.sur, usuario=self.otro_responsable,
+        )
+        DetalleMovimientoFarmacia.objects.create(
+            movimiento=movimiento_otro, lote=self.vigente, cantidad=1,
+        )
+
+        response = self.client.get(reverse("farmacia:historial"), {
+            "responsable": self.otro_responsable.pk,
+        })
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual([mov.pk for mov in response.context["movimientos"]], [movimiento_otro.pk])
+        self.assertEqual(response.context["filtros_form"]["responsable"].value(), str(self.otro_responsable.pk))
+        self.assertContains(response, "Usuario responsable")
+        self.assertEqual(response.context["pagina"].paginator.count, 1)
+
+    def test_responsable_invalido_no_amplia_resultados_del_historial(self):
+        response = self.client.get(reverse("farmacia:historial"), {"responsable": "999999"})
+
+        self.assertEqual(response.status_code, 200)
         self.assertFalse(response.context["filtros_form"].is_valid())
         self.assertEqual(response.context["pagina"].paginator.count, 0)
 

@@ -37,6 +37,8 @@ def movimientos_filtrados(form, medicamentos, stocks):
         movimientos = movimientos.filter(importacion_id=datos["importacion"])
     if datos.get("tipo"):
         movimientos = movimientos.filter(tipo=datos["tipo"])
+    if datos.get("responsable"):
+        movimientos = movimientos.filter(usuario=datos["responsable"])
     if datos.get("desde"):
         movimientos = movimientos.filter(fecha__gte=timezone.make_aware(datetime.combine(datos["desde"], time.min)))
     if datos.get("hasta"):

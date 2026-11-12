@@ -1,6 +1,7 @@
 from datetime import timedelta
 
 from django import forms
+from django.contrib.auth import get_user_model
 from django.db.models import Q
 from django.utils import timezone
 
@@ -32,11 +33,24 @@ class FiltrosFarmaciaForm(forms.Form):
 
 class FiltrosHistorialFarmaciaForm(FiltrosFarmaciaForm):
     importacion = forms.UUIDField(required=False, widget=forms.HiddenInput)
+    responsable = forms.ModelChoiceField(
+        queryset=get_user_model().objects.none(),
+        required=False,
+        label="Usuario responsable",
+        empty_label="Todos los usuarios",
+    )
     tipo = forms.ChoiceField(required=False, label="Tipo de movimiento", choices=[
         ("", "Todos los tipos"), *MovimientoFarmacia.TIPOS_MOVIMIENTO,
     ])
     desde = forms.DateField(required=False, label="Desde", widget=forms.DateInput(attrs={"type": "date"}))
     hasta = forms.DateField(required=False, label="Hasta", widget=forms.DateInput(attrs={"type": "date"}))
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields["responsable"].queryset = (
+            get_user_model().objects.filter(movimientos_farmacia__isnull=False)
+            .distinct().order_by("email")
+        )
 
     def clean(self):
         datos = super().clean()
